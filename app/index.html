@@ -225,19 +225,23 @@
     }
 
     .next-prompt {
-      margin-top: 18px;
+      margin-top: 16px;
       padding: 16px;
-      border-radius: 16px;
-      background: rgba(59,130,246,.12);
-      border: 1px solid rgba(96,165,250,.25);
+      border-radius: 14px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(96,165,250,0.25);
     }
 
     .next-prompt strong {
       color: #93c5fd;
+      display: block;
+      margin-bottom: 6px;
     }
 
     .next-prompt p {
-      margin: 6px 0 0;
+      margin: 0;
+      color: #e5e7eb;
+      line-height: 1.5;
     }
 
     .next-action {
@@ -530,21 +534,28 @@
       const logs = await getLogs();
       const previous = logs[0] || null;
 
+      const current = {
+        problem,
+        approach,
+        reason,
+        nextAction
+      };
+
       const nextVersion = logs.length + 1;
       const changes = previous
-        ? detectChanges(previous, { problem, approach, reason, nextAction })
+        ? detectChanges(previous, current)
         : [];
 
       const { error } = await supabaseClient
         .from("decision_versions")
         .insert({
-          user_id: currentUser.id,
-          version: nextVersion,
-          problem,
-          approach,
-          reason,
-          next_action: nextAction,
-          changes
+        user_id: currentUser.id,
+        version: nextVersion,
+        problem,
+        approach,
+        reason,
+        next_action: nextAction,
+        changes
         });
 
       if (error) {
@@ -555,7 +566,9 @@
 
       clearForm();
       await render();
-      showNextPrompt(changes);
+
+      // 저장 후 다음 기록 질문 표시
+      showNextPrompt(previous, current);
     }
 
     async function loadLast() {
@@ -579,19 +592,29 @@
       document.getElementById("nextAction").value = last.nextAction || "";
     }
 
-    function showNextPrompt(changes) {
+    function showNextPrompt(previous, current) {
       const box = document.getElementById("nextPrompt");
       const text = document.getElementById("nextPromptText");
 
       if (!box || !text) return;
 
-      if (!changes || changes.length === 0) {
-        text.textContent = "다음 버전에서는 실행 결과나 새로 발견한 문제를 기록해보세요.";
+      let message = "";
+
+      if (!previous) {
+        message = "다음에는 실제 실행 결과가 어땠는지 기록해보세요.";
+      } else if ((previous.nextAction || "") !== (current.nextAction || "")) {
+        message = "다음 실행 계획이 바뀌었습니다. 실제 실행 결과는 어땠나요?";
+      } else if ((previous.approach || "") !== (current.approach || "")) {
+        message = "접근 방식이 바뀌었습니다. 이 변화가 문제 해결에 어떤 영향을 주었나요?";
+      } else if ((previous.reason || "") !== (current.reason || "")) {
+        message = "판단 이유가 바뀌었습니다. 생각이 바뀐 핵심 이유는 무엇인가요?";
+      } else if ((previous.problem || "") !== (current.problem || "")) {
+        message = "문제 정의가 바뀌었습니다. 문제를 다르게 보게 된 이유는 무엇인가요?";
       } else {
-        const labels = changes.map(change => change.label).join(", ");
-        text.textContent = `${labels}이 바뀌었습니다. 다음 버전에서는 이 변화가 실제 결과를 어떻게 바꾸었는지 기록해보세요.`;
+        message = "큰 변화가 없습니다. 다음에는 실행 결과나 새로 발견한 변수를 기록해보세요.";
       }
 
+      text.textContent = message;
       box.style.display = "block";
     }
 
