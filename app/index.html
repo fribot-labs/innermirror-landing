@@ -192,21 +192,23 @@
 
   <section class="panel" style="margin: 28px 7% 0;">
     <h2>로그인</h2>
-    <p>이메일로 로그인하면 판단 기록이 Supabase에 저장됩니다.</p>
+    <p>Google 계정으로 바로 시작하거나 이메일 링크로 로그인할 수 있습니다.</p>
+
+    <button onclick="signInWithGoogle()" style="width:100%; margin-top:12px;">
+        Google로 시작하기
+    </button>
+
+    <div style="height:16px;"></div>
 
     <input id="email" placeholder="your@email.com" />
 
-    <button onclick="signInWithGoogle()" style="width:100%; margin-top:16px;">
-    Google로 시작하기
-    </button>
-
     <div class="button-row">
-      <button onclick="signIn()">로그인 링크 받기</button>
-      <button class="secondary" onclick="signOut()">로그아웃</button>
+        <button class="secondary" onclick="signIn()">이메일 로그인 링크 받기</button>
+        <button class="secondary" onclick="signOut()">로그아웃</button>
     </div>
 
     <p id="authStatus" style="color:#93c5fd;font-size:14px;margin-top:14px;">
-      로그인 상태 확인 중...
+        로그인 상태 확인 중...
     </p>
   </section>
 
@@ -325,17 +327,17 @@
     }
 
     async function signInWithGoogle() {
-    const { error } = await supabaseClient.auth.signInWithOAuth({
+      const { error } = await supabaseClient.auth.signInWithOAuth({
         provider: "google",
         options: {
-        redirectTo: "https://innermirror.net/app/"
+          redirectTo: "https://innermirror.net/app/"
         }
-    });
+      });
 
-    if (error) {
+      if (error) {
         console.error("Google signIn error:", error);
         alert(error.message);
-    }
+      }
     }
 
     async function signOut() {
