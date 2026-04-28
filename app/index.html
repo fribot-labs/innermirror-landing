@@ -169,10 +169,25 @@
       text-align: center;
     }
 
+    .auth-actions {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .auth-actions button {
+      width: 100%;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
       font-size: 13px;
+    }
+
+    #logoutButton {
+      display: none;
     }
 
     @media (max-width: 980px) {
@@ -194,21 +209,24 @@
     <h2>로그인</h2>
     <p>Google 계정으로 바로 시작하거나 이메일 링크로 로그인할 수 있습니다.</p>
 
-    <button id="googleLoginButton" onclick="signInWithGoogle()" style="width:100%; margin-top:12px;">
-        Google로 시작하기
-    </button>
-
-    <div style="height:16px;"></div>
-
     <input id="email" placeholder="your@email.com" />
 
-    <div class="button-row">
-        <button id="emailLoginButton" class="secondary" onclick="signIn()">이메일 로그인 링크 받기</button>
-        <button id="logoutButton" class="secondary" onclick="signOut()">로그아웃</button>
+    <div class="auth-actions">
+      <button id="googleLoginButton" onclick="signInWithGoogle()">
+        Google로 시작하기
+      </button>
+
+      <button id="emailLoginButton" class="secondary" onclick="signIn()">
+        이메일 로그인 링크 받기
+      </button>
+
+      <button id="logoutButton" class="secondary" onclick="signOut()">
+        로그아웃하기
+      </button>
     </div>
 
     <p id="authStatus" style="color:#93c5fd;font-size:14px;margin-top:14px;">
-        로그인 상태 확인 중...
+      로그인 상태 확인 중...
     </p>
   </section>
 
@@ -294,12 +312,27 @@
     }
 
     function updateAuthStatus() {
-      const el = document.getElementById("authStatus");
-      if (!el) return;
+      const statusEl = document.getElementById("authStatus");
+      const emailInput = document.getElementById("email");
+      const googleLoginButton = document.getElementById("googleLoginButton");
+      const emailLoginButton = document.getElementById("emailLoginButton");
+      const logoutButton = document.getElementById("logoutButton");
 
-      el.textContent = currentUser
-        ? `로그인됨: ${currentUser.email}`
-        : "로그인되지 않았습니다.";
+      if (currentUser) {
+        statusEl.textContent = `현재 로그인됨: ${currentUser.email}`;
+
+        emailInput.style.display = "none";
+        googleLoginButton.style.display = "none";
+        emailLoginButton.style.display = "none";
+        logoutButton.style.display = "block";
+      } else {
+        statusEl.textContent = "로그인되지 않았습니다.";
+
+        emailInput.style.display = "block";
+        googleLoginButton.style.display = "block";
+        emailLoginButton.style.display = "block";
+        logoutButton.style.display = "none";
+      }
     }
 
     async function signIn() {
