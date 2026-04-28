@@ -192,6 +192,9 @@
         같은 문제를 여러 번 수정하며 기록하세요.
         InnerMirror는 이전 버전과 비교해 판단 변화 신호를 보여줍니다.
       </p>
+      <p style="color:#93c5fd;font-size:14px;">
+        이전 판단을 수정하면서 다음 버전을 만들어보세요
+      </p>
 
       <label>문제 정의</label>
       <textarea id="problem" placeholder="예: 로봇이 직진하지 않고 왼쪽으로 치우친다."></textarea>
@@ -364,41 +367,54 @@
     }
 
     function renderDiff(log) {
-      if (log.version === 1) {
+    if (log.version === 1) {
         return `
-          <div class="diff">
-            <h3>변화 신호</h3>
-            <p class="same">첫 번째 버전입니다. 다음 버전부터 변화가 비교됩니다.</p>
-          </div>
-        `;
-      }
-
-      if (!log.changes || log.changes.length === 0) {
-        return `
-          <div class="diff">
-            <h3>변화 신호</h3>
-            <p class="same">이전 버전과 주요 변경이 없습니다.</p>
-          </div>
-        `;
-      }
-
-      return `
         <div class="diff">
-          <h3>변화 신호</h3>
-          ${log.changes.map(change => `
-            <p>
-              <span class="changed">변경됨:</span>
-              ${change.label}
-            </p>
-          `).join("")}
+            <h3>변화 신호</h3>
+            <p class="same">첫 번째 버전입니다.</p>
         </div>
-      `;
+        `;
+    }
+
+    if (!log.changes || log.changes.length === 0) {
+        return `
+        <div class="diff">
+            <h3>변화 신호</h3>
+            <p class="same">이전과 동일한 판단입니다.</p>
+        </div>
+        `;
+    }
+
+    return `
+        <div class="diff">
+        <h3>판단 변화 비교</h3>
+        ${log.changes.map(change => `
+            <div style="margin-bottom:12px;">
+            <b class="changed">${change.label}</b>
+            <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
+                이전: ${escapeHtml(change.before)}
+            </div>
+            <div style="font-size:13px;color:#93c5fd;">
+                현재: ${escapeHtml(change.after)}
+            </div>
+            </div>
+        `).join("")}
+        </div>
+    `;
     }
 
     function changeSummary(log) {
-      if (log.version === 1) return "첫 판단 생성";
-      if (!log.changes || log.changes.length === 0) return "변화 없음";
-      return `${log.changes.length}개 항목 변화`;
+        if (log.version === 1) return "초기 판단 생성";
+
+        if (!log.changes || log.changes.length === 0) {
+            return "판단 유지";
+        }
+
+        if (log.changes.length === 1) {
+            return `${log.changes[0].label} 수정`;
+        }
+
+        return `${log.changes.length}개 요소 변화`;
     }
 
     function escapeHtml(text) {
