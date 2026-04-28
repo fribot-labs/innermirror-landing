@@ -194,7 +194,7 @@
     <h2>로그인</h2>
     <p>Google 계정으로 바로 시작하거나 이메일 링크로 로그인할 수 있습니다.</p>
 
-    <button onclick="signInWithGoogle()" style="width:100%; margin-top:12px;">
+    <button id="googleLoginButton" onclick="signInWithGoogle()" style="width:100%; margin-top:12px;">
         Google로 시작하기
     </button>
 
@@ -203,8 +203,8 @@
     <input id="email" placeholder="your@email.com" />
 
     <div class="button-row">
-        <button class="secondary" onclick="signIn()">이메일 로그인 링크 받기</button>
-        <button class="secondary" onclick="signOut()">로그아웃</button>
+        <button id="emailLoginButton" class="secondary" onclick="signIn()">이메일 로그인 링크 받기</button>
+        <button id="logoutButton" class="secondary" onclick="signOut()">로그아웃</button>
     </div>
 
     <p id="authStatus" style="color:#93c5fd;font-size:14px;margin-top:14px;">
