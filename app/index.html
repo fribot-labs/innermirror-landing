@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>InnerMirror App</title>
+
   <style>
     * { box-sizing: border-box; }
 
@@ -26,19 +27,19 @@
     .logo { font-size: 22px; font-weight: 900; }
     .status { font-size: 14px; color: #93c5fd; }
 
+    .panel {
+      background: rgba(30,41,59,.65);
+      border: 1px solid rgba(148,163,184,.2);
+      border-radius: 24px;
+      padding: 28px;
+    }
+
     main {
       padding: 46px 7%;
       display: grid;
       grid-template-columns: 0.95fr 1.05fr;
       gap: 28px;
       align-items: start;
-    }
-
-    .panel {
-      background: rgba(30,41,59,.65);
-      border: 1px solid rgba(148,163,184,.2);
-      border-radius: 24px;
-      padding: 28px;
     }
 
     h1, h2 { margin-top: 0; letter-spacing: -0.8px; }
@@ -76,6 +77,8 @@
       font-weight: 900;
       cursor: pointer;
     }
+
+    button:hover { opacity: 0.92; }
 
     .button-row {
       display: grid;
@@ -177,13 +180,31 @@
       .button-row { grid-template-columns: 1fr; }
     }
   </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <header>
     <div class="logo">InnerMirror</div>
-    <div class="status">Version Compare · Evolution View</div>
+    <div class="status">Supabase Auth · Decision Evolution</div>
   </header>
+
+  <section class="panel" style="margin: 28px 7% 0;">
+    <h2>로그인</h2>
+    <p>이메일로 로그인하면 판단 기록이 Supabase에 저장됩니다.</p>
+
+    <input id="email" placeholder="your@email.com" />
+
+    <div class="button-row">
+      <button onclick="signIn()">로그인 링크 받기</button>
+      <button class="secondary" onclick="signOut()">로그아웃</button>
+    </div>
+
+    <p id="authStatus" style="color:#93c5fd;font-size:14px;margin-top:14px;">
+      로그인 상태 확인 중...
+    </p>
+  </section>
 
   <main>
     <section class="panel">
@@ -192,8 +213,9 @@
         같은 문제를 여러 번 수정하며 기록하세요.
         InnerMirror는 이전 버전과 비교해 판단 변화 신호를 보여줍니다.
       </p>
+
       <p style="color:#93c5fd;font-size:14px;">
-        이전 판단을 수정하면서 다음 버전을 만들어보세요
+        이전 판단을 수정하면서 다음 버전을 만들어보세요.
       </p>
 
       <label>문제 정의</label>
@@ -216,7 +238,6 @@
 
     <section class="panel">
       <h2>판단 진화 히스토리</h2>
-
       <div id="timeline"></div>
 
       <h2>버전 기록</h2>
@@ -229,17 +250,123 @@
   </footer>
 
   <script>
-    const STORAGE_KEY = "innermirror_decision_versions";
+    const SUPABASE_URL = "https://igkrmqdnlyanoyxbtsxr.supabase.co";
 
-    function getLogs() {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    /*
+      아래 값은 Supabase Dashboard → Project Settings → API 에서 복사한
+      publishable key 또는 anon public key를 넣으세요.
+    */
+    const SUPABASE_KEY = "여기에_SUPABASE_PUBLISHABLE_KEY_또는_ANON_KEY";
+
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = null;
+    let isRendering = false;
+
+    async function initAuth() {
+      try {
+        const { data, error } = await supabaseClient.auth.getSession();
+
+        if (error) {
+          console.error("getSession error:", error);
+        }
+
+        currentUser = data.session?.user ?? null;
+        updateAuthStatus();
+
+        supabaseClient.auth.onAuthStateChange((_event, session) => {
+          currentUser = session?.user ?? null;
+          updateAuthStatus();
+          render();
+        });
+
+        await render();
+      } catch (error) {
+        console.error("initAuth error:", error);
+        alert("로그인 상태를 확인하는 중 오류가 발생했습니다.");
+      }
     }
 
-    function saveLogs(logs) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    function updateAuthStatus() {
+      const el = document.getElementById("authStatus");
+      if (!el) return;
+
+      el.textContent = currentUser
+        ? `로그인됨: ${currentUser.email}`
+        : "로그인되지 않았습니다.";
     }
 
-    function saveRecord() {
+    async function signIn() {
+      const email = document.getElementById("email").value.trim();
+
+      if (!email) {
+        alert("이메일을 입력해주세요.");
+        return;
+      }
+
+      const { error } = await supabaseClient.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: "https://innermirror.net/app/"
+        }
+      });
+
+      if (error) {
+        console.error("signIn error:", error);
+        alert(error.message);
+        return;
+      }
+
+      alert("로그인 링크를 이메일로 보냈습니다.");
+    }
+
+    async function signOut() {
+      const { error } = await supabaseClient.auth.signOut();
+
+      if (error) {
+        console.error("signOut error:", error);
+        alert(error.message);
+        return;
+      }
+
+      currentUser = null;
+      updateAuthStatus();
+      await render();
+    }
+
+    async function getLogs() {
+      if (!currentUser) return [];
+
+      const { data, error } = await supabaseClient
+        .from("decision_versions")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("version", { ascending: false });
+
+      if (error) {
+        console.error("getLogs error:", error);
+        alert("기록을 불러오는 중 오류가 발생했습니다.");
+        return [];
+      }
+
+      return data.map(row => ({
+        id: row.id,
+        version: row.version,
+        createdAt: new Date(row.created_at).toLocaleString("ko-KR"),
+        problem: row.problem,
+        approach: row.approach,
+        reason: row.reason,
+        nextAction: row.next_action || "",
+        changes: row.changes || []
+      }));
+    }
+
+    async function saveRecord() {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
       const problem = document.getElementById("problem").value.trim();
       const approach = document.getElementById("approach").value.trim();
       const reason = document.getElementById("reason").value.trim();
@@ -250,29 +377,44 @@
         return;
       }
 
-      const logs = getLogs();
+      const logs = await getLogs();
       const previous = logs[0] || null;
 
-      const newLog = {
-        id: Date.now(),
-        version: logs.length + 1,
-        createdAt: new Date().toLocaleString("ko-KR"),
-        problem,
-        approach,
-        reason,
-        nextAction,
-        changes: previous ? detectChanges(previous, { problem, approach, reason, nextAction }) : []
-      };
+      const nextVersion = logs.length + 1;
+      const changes = previous
+        ? detectChanges(previous, { problem, approach, reason, nextAction })
+        : [];
 
-      logs.unshift(newLog);
-      saveLogs(logs);
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .insert({
+          user_id: currentUser.id,
+          version: nextVersion,
+          problem,
+          approach,
+          reason,
+          next_action: nextAction,
+          changes
+        });
+
+      if (error) {
+        console.error("saveRecord error:", error);
+        alert("저장 중 오류가 발생했습니다.");
+        return;
+      }
 
       clearForm();
-      render();
+      await render();
     }
 
-    function loadLast() {
-      const logs = getLogs();
+    async function loadLast() {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const logs = await getLogs();
+
       if (logs.length === 0) {
         alert("불러올 이전 버전이 없습니다.");
         return;
@@ -311,14 +453,30 @@
       document.getElementById("nextAction").value = "";
     }
 
-    function render() {
-      renderTimeline();
-      renderHistory();
+    async function render() {
+      if (isRendering) return;
+      isRendering = true;
+
+      try {
+        const logs = await getLogs();
+        renderTimeline(logs);
+        renderHistory(logs);
+      } catch (error) {
+        console.error("render error:", error);
+      } finally {
+        isRendering = false;
+      }
     }
 
-    function renderTimeline() {
+    function renderTimeline(logsInput) {
       const timeline = document.getElementById("timeline");
-      const logs = getLogs().slice().reverse();
+
+      if (!currentUser) {
+        timeline.innerHTML = "";
+        return;
+      }
+
+      const logs = logsInput.slice().reverse();
 
       if (logs.length === 0) {
         timeline.innerHTML = "";
@@ -330,16 +488,24 @@
           ${logs.map(log => `
             <div class="timeline-item">
               <b>V${log.version}</b> · ${changeSummary(log)}
-              <span>${log.createdAt}</span>
+              <span>${escapeHtml(log.createdAt)}</span>
             </div>
           `).join("")}
         </div>
       `;
     }
 
-    function renderHistory() {
+    function renderHistory(logs) {
       const history = document.getElementById("history");
-      const logs = getLogs();
+
+      if (!currentUser) {
+        history.innerHTML = `
+          <div class="empty">
+            로그인하면 판단 기록을 저장하고 불러올 수 있습니다.
+          </div>
+        `;
+        return;
+      }
 
       if (logs.length === 0) {
         history.innerHTML = `
@@ -354,7 +520,7 @@
       history.innerHTML = logs.map(log => `
         <div class="record">
           <span class="badge">V${log.version}</span>
-          <strong>${log.createdAt}</strong>
+          <strong>${escapeHtml(log.createdAt)}</strong>
 
           <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
           <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
@@ -367,58 +533,58 @@
     }
 
     function renderDiff(log) {
-    if (log.version === 1) {
+      if (log.version === 1) {
         return `
-        <div class="diff">
+          <div class="diff">
             <h3>변화 신호</h3>
             <p class="same">첫 번째 버전입니다.</p>
-        </div>
+          </div>
         `;
-    }
+      }
 
-    if (!log.changes || log.changes.length === 0) {
+      if (!log.changes || log.changes.length === 0) {
         return `
-        <div class="diff">
+          <div class="diff">
             <h3>변화 신호</h3>
             <p class="same">이전과 동일한 판단입니다.</p>
-        </div>
+          </div>
         `;
-    }
+      }
 
-    return `
+      return `
         <div class="diff">
-        <h3>판단 변화 비교</h3>
-        ${log.changes.map(change => `
+          <h3>판단 변화 비교</h3>
+          ${log.changes.map(change => `
             <div style="margin-bottom:12px;">
-            <b class="changed">${change.label}</b>
-            <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
+              <b class="changed">${escapeHtml(change.label)}</b>
+              <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
                 이전: ${escapeHtml(change.before)}
-            </div>
-            <div style="font-size:13px;color:#93c5fd;">
+              </div>
+              <div style="font-size:13px;color:#93c5fd;">
                 현재: ${escapeHtml(change.after)}
+              </div>
             </div>
-            </div>
-        `).join("")}
+          `).join("")}
         </div>
-    `;
+      `;
     }
 
     function changeSummary(log) {
-        if (log.version === 1) return "초기 판단 생성";
+      if (log.version === 1) return "초기 판단 생성";
 
-        if (!log.changes || log.changes.length === 0) {
-            return "판단 유지";
-        }
+      if (!log.changes || log.changes.length === 0) {
+        return "판단 유지";
+      }
 
-        if (log.changes.length === 1) {
-            return `${log.changes[0].label} 수정`;
-        }
+      if (log.changes.length === 1) {
+        return `${log.changes[0].label} 수정`;
+      }
 
-        return `${log.changes.length}개 요소 변화`;
+      return `${log.changes.length}개 요소 변화`;
     }
 
     function escapeHtml(text) {
-      return String(text)
+      return String(text ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -426,7 +592,7 @@
         .replaceAll("'", "&#039;");
     }
 
-    render();
+    initAuth();
   </script>
 </body>
 </html>
