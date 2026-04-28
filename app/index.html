@@ -81,10 +81,20 @@
     button:hover { opacity: 0.92; }
 
     .button-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 22px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button.small {
+      padding: 8px 14px;
+      font-size: 14px;
+      width: auto;
+    }
+
+    button.medium {
+      padding: 10px 18px;
+      font-size: 15px;
+      width: auto;
     }
 
     .secondary {
@@ -224,25 +234,27 @@
     <h2>로그인</h2>
     <p>Google 계정으로 바로 시작하거나 이메일 링크로 로그인할 수 있습니다.</p>
 
+    <button id="googleLoginButton" onclick="signInWithGoogle()" class="medium">
+        Google로 시작하기
+    </button>
+
+    <div style="height:16px;"></div>
+
     <input id="email" placeholder="your@email.com" />
 
-    <div class="auth-actions">
-      <button id="googleLoginButton" onclick="signInWithGoogle()">
-        Google로 시작하기
-      </button>
-
-      <button id="emailLoginButton" class="secondary" onclick="signIn()">
+    <div class="button-row">
+        <button id="emailLoginButton" class="secondary small" onclick="signIn()">
         이메일 로그인 링크 받기
-      </button>
-
-      <button id="logoutButton" class="secondary" onclick="signOut()">
-        로그아웃하기
-      </button>
+        </button>
     </div>
 
-    <p id="authStatus" style="color:#93c5fd;font-size:14px;margin-top:14px;">
-      로그인 상태 확인 중...
-    </p>
+    <!-- ✅ 로그인 후에만 표시되는 영역 -->
+    <div id="userInfo" style="display:none; margin-top:12px; align-items:center; gap:10px;">
+        <span id="userEmail" style="color:#93c5fd;"></span>
+        <button onclick="signOut()" class="secondary small">로그아웃</button>
+    </div>
+
+    <p id="authStatus">...</p>
   </section>
 
   <main>
@@ -337,29 +349,33 @@
       const googleLoginButton = document.getElementById("googleLoginButton");
       const emailLoginButton = document.getElementById("emailLoginButton");
       const logoutButton = document.getElementById("logoutButton");
-      const editorPanel = document.getElementById("editorPanel");
-      const loginRequiredMessage = document.getElementById("loginRequiredMessage");
+
+      const userInfo = document.getElementById("userInfo");
+      const userEmail = document.getElementById("userEmail");
 
       if (currentUser) {
-        statusEl.textContent = `현재 로그인됨: ${currentUser.email}`;
+        statusEl.textContent = `현재 로그인됨`;
 
+        // 🔥 로그인 UI 숨김
         emailInput.style.display = "none";
         googleLoginButton.style.display = "none";
         emailLoginButton.style.display = "none";
-        logoutButton.style.display = "block";
+        logoutButton.style.display = "none";
 
-        editorPanel.classList.remove("locked");
-        loginRequiredMessage.style.display = "none";
+        // 🔥 사용자 정보 표시
+        userInfo.style.display = "flex";
+        userEmail.textContent = currentUser.email;
+
       } else {
         statusEl.textContent = "로그인되지 않았습니다.";
 
+        // 🔥 로그인 UI 표시
         emailInput.style.display = "block";
-        googleLoginButton.style.display = "block";
-        emailLoginButton.style.display = "block";
-        logoutButton.style.display = "none";
+        googleLoginButton.style.display = "inline-block";
+        emailLoginButton.style.display = "inline-block";
 
-        editorPanel.classList.add("locked");
-        loginRequiredMessage.style.display = "block";
+        // 🔥 사용자 UI 숨김
+        userInfo.style.display = "none";
       }
     }
 
