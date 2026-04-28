@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>InnerMirror App</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans KR", sans-serif;
+      background: #0f172a;
+      color: #ffffff;
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 22px 7%;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .status {
+      font-size: 14px;
+      color: #93c5fd;
+    }
+
+    main {
+      padding: 46px 7%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      align-items: start;
+    }
+
+    .panel {
+      background: rgba(30, 41, 59, 0.65);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 24px;
+      padding: 28px;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      letter-spacing: -1px;
+    }
+
+    h2 {
+      margin: 0 0 18px;
+      font-size: 22px;
+    }
+
+    p {
+      color: #cbd5e1;
+      margin: 0 0 22px;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      margin: 18px 0 8px;
+    }
+
+    textarea, input {
+      width: 100%;
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      background: rgba(15, 23, 42, 0.8);
+      color: white;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    input {
+      min-height: auto;
+    }
+
+    button {
+      margin-top: 22px;
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: #3b82f6;
+      color: white;
+      font-weight: 900;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .record {
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+    }
+
+    .record strong {
+      display: block;
+      color: #93c5fd;
+      margin-bottom: 6px;
+    }
+
+    .empty {
+      color: #94a3b8;
+      padding: 22px;
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      border-radius: 18px;
+      text-align: center;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 14px;
+    }
+
+    footer {
+      padding: 24px 7%;
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo">InnerMirror</div>
+    <div class="status">Local Prototype · Decision Log</div>
+  </header>
+
+  <main>
+    <section class="panel">
+      <h1>첫 번째 판단 기록</h1>
+      <p>
+        문제를 정의하고, 내가 선택한 접근 방식과 판단 이유를 남겨보세요.
+        기록은 브라우저 안에 임시 저장됩니다.
+      </p>
+
+      <label>문제 정의</label>
+      <textarea id="problem" placeholder="예: 로봇이 직진하지 않고 왼쪽으로 치우친다."></textarea>
+
+      <label>접근 방식</label>
+      <textarea id="approach" placeholder="예: 좌우 모터 속도 차이를 offset 값으로 보정한다."></textarea>
+
+      <label>판단 이유</label>
+      <textarea id="reason" placeholder="예: 같은 명령값에서도 모터 특성이 달라 실제 회전 속도가 다르기 때문이다."></textarea>
+
+      <label>다음 실행</label>
+      <input id="nextAction" placeholder="예: offset 값을 3단계로 테스트한다." />
+
+      <button onclick="saveRecord()">판단 기록 저장하기</button>
+
+      <div class="hint">
+        현재 버전은 로그인 없이 사용하는 MVP 프로토타입입니다.
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>판단 기록 히스토리</h2>
+      <div id="history"></div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 InnerMirror · Fribot Labs
+  </footer>
+
+  <script>
+    const STORAGE_KEY = "innermirror_decision_logs";
+
+    function getLogs() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    }
+
+    function saveLogs(logs) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+    }
+
+    function saveRecord() {
+      const problem = document.getElementById("problem").value.trim();
+      const approach = document.getElementById("approach").value.trim();
+      const reason = document.getElementById("reason").value.trim();
+      const nextAction = document.getElementById("nextAction").value.trim();
+
+      if (!problem || !approach || !reason) {
+        alert("문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
+        return;
+      }
+
+      const logs = getLogs();
+
+      logs.unshift({
+        id: Date.now(),
+        createdAt: new Date().toLocaleString("ko-KR"),
+        problem,
+        approach,
+        reason,
+        nextAction
+      });
+
+      saveLogs(logs);
+
+      document.getElementById("problem").value = "";
+      document.getElementById("approach").value = "";
+      document.getElementById("reason").value = "";
+      document.getElementById("nextAction").value = "";
+
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = document.getElementById("history");
+      const logs = getLogs();
+
+      if (logs.length === 0) {
+        history.innerHTML = `
+          <div class="empty">
+            아직 기록이 없습니다.<br />
+            첫 번째 판단을 남겨보세요.
+          </div>
+        `;
+        return;
+      }
+
+      history.innerHTML = logs.map(log => `
+        <div class="record">
+          <strong>${log.createdAt}</strong>
+          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
+          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
+          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
+          ${log.nextAction ? `<p><b>다음 실행:</b> ${escapeHtml(log.nextAction)}</p>` : ""}
+        </div>
+      `).join("");
+    }
+
+    function escapeHtml(text) {
+      return text
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderHistory();
+  </script>
+</body>
+</html>
