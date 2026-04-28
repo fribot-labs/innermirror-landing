@@ -11,58 +11,41 @@
       margin: 0;
       font-family: Arial, "Noto Sans KR", sans-serif;
       background: #0f172a;
-      color: #ffffff;
+      color: #fff;
       line-height: 1.6;
     }
 
     header {
       padding: 22px 7%;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+      border-bottom: 1px solid rgba(148,163,184,.18);
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
-    .logo {
-      font-size: 22px;
-      font-weight: 900;
-    }
-
-    .status {
-      font-size: 14px;
-      color: #93c5fd;
-    }
+    .logo { font-size: 22px; font-weight: 900; }
+    .status { font-size: 14px; color: #93c5fd; }
 
     main {
       padding: 46px 7%;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 0.95fr 1.05fr;
       gap: 28px;
       align-items: start;
     }
 
     .panel {
-      background: rgba(30, 41, 59, 0.65);
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      background: rgba(30,41,59,.65);
+      border: 1px solid rgba(148,163,184,.2);
       border-radius: 24px;
       padding: 28px;
     }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: 34px;
-      letter-spacing: -1px;
-    }
+    h1, h2 { margin-top: 0; letter-spacing: -0.8px; }
+    h1 { font-size: 32px; }
+    h2 { font-size: 22px; }
 
-    h2 {
-      margin: 0 0 18px;
-      font-size: 22px;
-    }
-
-    p {
-      color: #cbd5e1;
-      margin: 0 0 22px;
-    }
+    p { color: #cbd5e1; }
 
     label {
       display: block;
@@ -72,40 +55,44 @@
 
     textarea, input {
       width: 100%;
-      border: 1px solid rgba(148, 163, 184, 0.28);
-      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(148,163,184,.28);
+      background: rgba(15,23,42,.8);
       color: white;
       border-radius: 14px;
       padding: 14px;
       font-size: 15px;
       resize: vertical;
-      min-height: 70px;
+      min-height: 68px;
     }
 
-    input {
-      min-height: auto;
-    }
+    input { min-height: auto; }
 
     button {
-      margin-top: 22px;
-      width: 100%;
-      padding: 16px;
       border: none;
       border-radius: 14px;
+      padding: 14px 18px;
       background: #3b82f6;
       color: white;
       font-weight: 900;
-      font-size: 16px;
       cursor: pointer;
     }
 
-    button:hover {
-      opacity: 0.9;
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .secondary {
+      background: transparent;
+      border: 1px solid rgba(148,163,184,.35);
+      color: #dbeafe;
     }
 
     .record {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(148, 163, 184, 0.18);
+      background: rgba(15,23,42,.75);
+      border: 1px solid rgba(148,163,184,.18);
       border-radius: 18px;
       padding: 18px;
       margin-bottom: 14px;
@@ -114,21 +101,69 @@
     .record strong {
       display: block;
       color: #93c5fd;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+    }
+
+    .record p { margin: 6px 0; }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(59,130,246,.16);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .diff {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: rgba(2,6,23,.45);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    .diff h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .changed {
+      color: #fbbf24;
+      font-weight: 800;
+    }
+
+    .same {
+      color: #94a3b8;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .timeline-item {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: rgba(15,23,42,.68);
+      border-left: 4px solid #3b82f6;
+    }
+
+    .timeline-item span {
+      display: block;
+      color: #94a3b8;
+      font-size: 13px;
     }
 
     .empty {
       color: #94a3b8;
       padding: 22px;
-      border: 1px dashed rgba(148, 163, 184, 0.35);
+      border: 1px dashed rgba(148,163,184,.35);
       border-radius: 18px;
       text-align: center;
-    }
-
-    .hint {
-      font-size: 13px;
-      color: #94a3b8;
-      margin-top: 14px;
     }
 
     footer {
@@ -137,10 +172,9 @@
       font-size: 13px;
     }
 
-    @media (max-width: 900px) {
-      main {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 980px) {
+      main { grid-template-columns: 1fr; }
+      .button-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -148,15 +182,15 @@
 <body>
   <header>
     <div class="logo">InnerMirror</div>
-    <div class="status">Local Prototype · Decision Log</div>
+    <div class="status">Version Compare · Evolution View</div>
   </header>
 
   <main>
     <section class="panel">
-      <h1>첫 번째 판단 기록</h1>
+      <h1>판단 버전 기록</h1>
       <p>
-        문제를 정의하고, 내가 선택한 접근 방식과 판단 이유를 남겨보세요.
-        기록은 브라우저 안에 임시 저장됩니다.
+        같은 문제를 여러 번 수정하며 기록하세요.
+        InnerMirror는 이전 버전과 비교해 판단 변화 신호를 보여줍니다.
       </p>
 
       <label>문제 정의</label>
@@ -171,15 +205,18 @@
       <label>다음 실행</label>
       <input id="nextAction" placeholder="예: offset 값을 3단계로 테스트한다." />
 
-      <button onclick="saveRecord()">판단 기록 저장하기</button>
-
-      <div class="hint">
-        현재 버전은 로그인 없이 사용하는 MVP 프로토타입입니다.
+      <div class="button-row">
+        <button onclick="saveRecord()">새 버전 저장하기</button>
+        <button class="secondary" onclick="loadLast()">이전 버전 불러오기</button>
       </div>
     </section>
 
     <section class="panel">
-      <h2>판단 기록 히스토리</h2>
+      <h2>판단 진화 히스토리</h2>
+
+      <div id="timeline"></div>
+
+      <h2>버전 기록</h2>
       <div id="history"></div>
     </section>
   </main>
@@ -189,7 +226,7 @@
   </footer>
 
   <script>
-    const STORAGE_KEY = "innermirror_decision_logs";
+    const STORAGE_KEY = "innermirror_decision_versions";
 
     function getLogs() {
       return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
@@ -211,24 +248,90 @@
       }
 
       const logs = getLogs();
+      const previous = logs[0] || null;
 
-      logs.unshift({
+      const newLog = {
         id: Date.now(),
+        version: logs.length + 1,
         createdAt: new Date().toLocaleString("ko-KR"),
         problem,
         approach,
         reason,
-        nextAction
-      });
+        nextAction,
+        changes: previous ? detectChanges(previous, { problem, approach, reason, nextAction }) : []
+      };
 
+      logs.unshift(newLog);
       saveLogs(logs);
 
+      clearForm();
+      render();
+    }
+
+    function loadLast() {
+      const logs = getLogs();
+      if (logs.length === 0) {
+        alert("불러올 이전 버전이 없습니다.");
+        return;
+      }
+
+      const last = logs[0];
+
+      document.getElementById("problem").value = last.problem;
+      document.getElementById("approach").value = last.approach;
+      document.getElementById("reason").value = last.reason;
+      document.getElementById("nextAction").value = last.nextAction || "";
+    }
+
+    function detectChanges(prev, next) {
+      const fields = [
+        ["problem", "문제 정의"],
+        ["approach", "접근 방식"],
+        ["reason", "판단 이유"],
+        ["nextAction", "다음 실행"]
+      ];
+
+      return fields
+        .filter(([key]) => (prev[key] || "") !== (next[key] || ""))
+        .map(([key, label]) => ({
+          key,
+          label,
+          before: prev[key] || "",
+          after: next[key] || ""
+        }));
+    }
+
+    function clearForm() {
       document.getElementById("problem").value = "";
       document.getElementById("approach").value = "";
       document.getElementById("reason").value = "";
       document.getElementById("nextAction").value = "";
+    }
 
+    function render() {
+      renderTimeline();
       renderHistory();
+    }
+
+    function renderTimeline() {
+      const timeline = document.getElementById("timeline");
+      const logs = getLogs().slice().reverse();
+
+      if (logs.length === 0) {
+        timeline.innerHTML = "";
+        return;
+      }
+
+      timeline.innerHTML = `
+        <div class="timeline">
+          ${logs.map(log => `
+            <div class="timeline-item">
+              <b>V${log.version}</b> · ${changeSummary(log)}
+              <span>${log.createdAt}</span>
+            </div>
+          `).join("")}
+        </div>
+      `;
     }
 
     function renderHistory() {
@@ -239,7 +342,7 @@
         history.innerHTML = `
           <div class="empty">
             아직 기록이 없습니다.<br />
-            첫 번째 판단을 남겨보세요.
+            첫 번째 판단 버전을 저장해보세요.
           </div>
         `;
         return;
@@ -247,17 +350,59 @@
 
       history.innerHTML = logs.map(log => `
         <div class="record">
+          <span class="badge">V${log.version}</span>
           <strong>${log.createdAt}</strong>
+
           <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
           <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
           <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
           ${log.nextAction ? `<p><b>다음 실행:</b> ${escapeHtml(log.nextAction)}</p>` : ""}
+
+          ${renderDiff(log)}
         </div>
       `).join("");
     }
 
+    function renderDiff(log) {
+      if (log.version === 1) {
+        return `
+          <div class="diff">
+            <h3>변화 신호</h3>
+            <p class="same">첫 번째 버전입니다. 다음 버전부터 변화가 비교됩니다.</p>
+          </div>
+        `;
+      }
+
+      if (!log.changes || log.changes.length === 0) {
+        return `
+          <div class="diff">
+            <h3>변화 신호</h3>
+            <p class="same">이전 버전과 주요 변경이 없습니다.</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="diff">
+          <h3>변화 신호</h3>
+          ${log.changes.map(change => `
+            <p>
+              <span class="changed">변경됨:</span>
+              ${change.label}
+            </p>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function changeSummary(log) {
+      if (log.version === 1) return "첫 판단 생성";
+      if (!log.changes || log.changes.length === 0) return "변화 없음";
+      return `${log.changes.length}개 항목 변화`;
+    }
+
     function escapeHtml(text) {
-      return text
+      return String(text)
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
@@ -265,7 +410,7 @@
         .replaceAll("'", "&#039;");
     }
 
-    renderHistory();
+    render();
   </script>
 </body>
 </html>
