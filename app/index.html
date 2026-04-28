@@ -224,6 +224,38 @@
       font-size: 14px;
     }
 
+    .next-prompt {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(59,130,246,.12);
+      border: 1px solid rgba(96,165,250,.25);
+    }
+
+    .next-prompt strong {
+      color: #93c5fd;
+    }
+
+    .next-prompt p {
+      margin: 6px 0 0;
+    }
+
+    .next-action {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(250,204,21,.08);
+      border: 1px solid rgba(250,204,21,.2);
+    }
+
+    .next-action b {
+      color: #facc15;
+    }
+
+    .next-action p {
+      margin: 4px 0 0;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -306,7 +338,12 @@
 
       <div class="button-row">
         <button onclick="saveRecord()">새 버전 저장하기</button>
-        <button class="secondary" onclick="loadLast()">이전 버전 불러오기</button>
+        <button class="secondary" onclick="loadLast()">최근 판단 이어쓰기</button>
+      </div>
+
+      <div id="nextPrompt" class="next-prompt" style="display:none;">
+        <strong>다음 기록 질문</strong>
+        <p id="nextPromptText"></p>
       </div>
     </section>
 
@@ -518,6 +555,7 @@
 
       clearForm();
       await render();
+      showNextPrompt(changes);
     }
 
     async function loadLast() {
@@ -539,6 +577,22 @@
       document.getElementById("approach").value = last.approach;
       document.getElementById("reason").value = last.reason;
       document.getElementById("nextAction").value = last.nextAction || "";
+    }
+
+    function showNextPrompt(changes) {
+      const box = document.getElementById("nextPrompt");
+      const text = document.getElementById("nextPromptText");
+
+      if (!box || !text) return;
+
+      if (!changes || changes.length === 0) {
+        text.textContent = "다음 버전에서는 실행 결과나 새로 발견한 문제를 기록해보세요.";
+      } else {
+        const labels = changes.map(change => change.label).join(", ");
+        text.textContent = `${labels}이 바뀌었습니다. 다음 버전에서는 이 변화가 실제 결과를 어떻게 바꾸었는지 기록해보세요.`;
+      }
+
+      box.style.display = "block";
     }
 
     function detectChanges(prev, next) {
@@ -638,7 +692,12 @@
           <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
           <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
           <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
-          ${log.nextAction ? `<p><b>다음 실행:</b> ${escapeHtml(log.nextAction)}</p>` : ""}
+          ${log.nextAction ? `
+            <div class="next-action">
+                <b>다음 실행</b>
+                <p>${escapeHtml(log.nextAction)}</p>
+            </div>
+          ` : ""}
 
           ${renderDiff(log)}
         </div>
