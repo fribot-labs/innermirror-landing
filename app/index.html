@@ -180,6 +180,21 @@
       width: 100%;
     }
 
+    .locked {
+      opacity: 0.45;
+      pointer-events: none;
+    }
+
+    .login-required-message {
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(96, 165, 250, 0.25);
+      color: #bfdbfe;
+      font-size: 14px;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -231,8 +246,13 @@
   </section>
 
   <main>
-    <section class="panel">
+    <section id="editorPanel" class="panel">
       <h1>판단 버전 기록</h1>
+
+      <div id="loginRequiredMessage" class="login-required-message">
+        먼저 로그인하면 판단 기록을 저장할 수 있습니다.
+      </div>
+
       <p>
         같은 문제를 여러 번 수정하며 기록하세요.
         InnerMirror는 이전 버전과 비교해 판단 변화 신호를 보여줍니다.
@@ -317,6 +337,8 @@
       const googleLoginButton = document.getElementById("googleLoginButton");
       const emailLoginButton = document.getElementById("emailLoginButton");
       const logoutButton = document.getElementById("logoutButton");
+      const editorPanel = document.getElementById("editorPanel");
+      const loginRequiredMessage = document.getElementById("loginRequiredMessage");
 
       if (currentUser) {
         statusEl.textContent = `현재 로그인됨: ${currentUser.email}`;
@@ -325,6 +347,9 @@
         googleLoginButton.style.display = "none";
         emailLoginButton.style.display = "none";
         logoutButton.style.display = "block";
+
+        editorPanel.classList.remove("locked");
+        loginRequiredMessage.style.display = "none";
       } else {
         statusEl.textContent = "로그인되지 않았습니다.";
 
@@ -332,6 +357,9 @@
         googleLoginButton.style.display = "block";
         emailLoginButton.style.display = "block";
         logoutButton.style.display = "none";
+
+        editorPanel.classList.add("locked");
+        loginRequiredMessage.style.display = "block";
       }
     }
 
