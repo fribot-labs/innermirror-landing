@@ -57,8 +57,9 @@ Decision change becomes **data**.
 ## 🚀 Current Status
 
 - MVP live
-- No login (instant access)
-- Version + diff working
+- Google / Email login enabled
+- Version tracking + diff working
+- Decision evolution UI implemented
 
 👉 https://innermirror.net/app
 
@@ -76,3 +77,10 @@ Decision change becomes **data**.
 ## 💬 One line
 
 InnerMirror turns thinking into a system you can improve.
+
+---
+
+## 🧠 Insight
+
+In the AI era, knowledge is cheap.  
+Judgment is the new asset.
