@@ -364,10 +364,6 @@
         <div id="nextPromptText"></div>
       </div>
 
-      <div id="nextPrompt" class="next-prompt" style="display:none;">
-        <strong>다음 기록 질문</strong>
-        <p id="nextPromptText"></p>
-      </div>
     </section>
 
     <section class="panel">
@@ -611,6 +607,34 @@
       document.getElementById("nextAction").value = last.nextAction || "";
     }
 
+    async function loadVersionToForm(id) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const logs = await getLogs();
+      const selected = logs.find(log => String(log.id) === String(id));
+
+      if (!selected) {
+        alert("선택한 버전을 찾을 수 없습니다.");
+        return;
+      }
+
+      document.getElementById("problem").value = selected.problem;
+      document.getElementById("approach").value = selected.approach;
+      document.getElementById("reason").value = selected.reason;
+      document.getElementById("nextAction").value = selected.nextAction || "";
+
+      const box = document.getElementById("nextPrompt");
+      const text = document.getElementById("nextPromptText");
+
+      if (box && text) {
+        text.textContent = `V${selected.version} 내용을 불러왔습니다. 일부를 수정한 뒤 새 버전으로 저장해보세요.`;
+        box.style.display = "block";
+      }
+    }
+
     function showNextPrompt(previous, current) {
       const box = document.getElementById("nextPrompt");
       const text = document.getElementById("nextPromptText");
@@ -727,7 +751,7 @@
       }
 
       history.innerHTML = logs.map(log => `
-        <div class="record">
+        <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <span class="badge">V${log.version}</span>
           <strong>${escapeHtml(log.createdAt)}</strong>
 
