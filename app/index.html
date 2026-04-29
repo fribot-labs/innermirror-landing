@@ -193,7 +193,7 @@
     }
 
     .topic-group {
-      margin-bottom: 24px;
+      margin-bottom: 26px;
     }
 
     .topic-header {
@@ -419,9 +419,6 @@
       <p style="color:#93c5fd;font-size:14px;">
         이전 판단을 수정하면서 다음 버전을 만들어보세요.
       </p>
-
-      <label>기록 주제</label>
-      <input id="topic" placeholder="예: 좌우 바퀴 비대칭 보정" />
 
       <label>기록 주제</label>
 
@@ -661,8 +658,8 @@
       const { data, error } = await supabaseClient
         .from("topics")
         .insert({
-        user_id: currentUser.id,
-        title
+          user_id: currentUser.id,
+          title
         })
         .select()
         .single();
@@ -723,14 +720,19 @@
       const reason = document.getElementById("reason").value.trim();
       const nextAction = document.getElementById("nextAction").value.trim();
 
-      if (!topicId || !problem || !approach || !reason) {
-        alert("기록 주제, 문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
+      if (!topicId) {
+        alert("먼저 기록 주제를 선택해주세요.");
+        return;
+      }
+
+      if (!problem || !approach || !reason) {
+        alert("문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
         return;
       }
 
       const logs = await getLogs();
-
       const sameTopicLogs = logs.filter(log => log.topicId === topicId);
+
       const previous = sameTopicLogs[0] || null;
       const nextVersion = sameTopicLogs.length + 1;
 
@@ -742,9 +744,7 @@
         nextAction
       };
 
-      const changes = previous
-        ? detectChanges(previous, current)
-        : [];
+      const changes = previous ? detectChanges(previous, current) : [];
 
       const { error } = await supabaseClient
         .from("decision_versions")
@@ -767,7 +767,6 @@
 
       clearForm();
       await render();
-
       showNextPrompt(previous, current);
     }
 
@@ -1007,50 +1006,83 @@
 
     function renderHistory(logs) {
       const history = document.getElementById("history");
-      const grouped = groupLogsByTopic(logs);
 
       if (!currentUser) {
         history.innerHTML = `
-          <div class="empty">
+        <div class="empty">
             로그인하면 판단 기록을 저장하고 불러올 수 있습니다.
-          </div>
+        </div>
         `;
         return;
       }
 
       if (logs.length === 0) {
         history.innerHTML = `
-          <div class="empty">
+        <div class="empty">
             아직 기록이 없습니다.<br />
-            첫 번째 판단 버전을 저장해보세요.
-          </div>
+            첫 번째 판단 기록을 저장해보세요.
+        </div>
         `;
         return;
       }
 
-      history.innerHTML = logs.map(log => `
-        <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
-          <span class="badge">V${log.version}</span>
+      const grouped = groupLogsByTopic(logs);
 
-          <button class="secondary small" onclick="event.stopPropagation(); openTopicMove('${log.id}')">
-            주제 변경
-          </button>
+      history.innerHTML = Object.entries(grouped).map(([topicTitle, items]) => `
+        <div class="topic-group">
+        <div class="topic-header">
+            ${escapeHtml(topicTitle)}
+            <span class="topic-count">${items.length}개 기록</span>
+        </div>
 
-          <strong>${escapeHtml(log.createdAt)}</strong>
-
-          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
-          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
-          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
-          ${log.nextAction ? `
-            <div class="next-action">
-                <b>다음 실행</b>
-                <p>${escapeHtml(log.nextAction)}</p>
-            </div>
-          ` : ""}
-
-          ${renderDiff(log)}
+        ${items.map(log => renderRecordCard(log)).join("")}
         </div>
       `).join("");
+    }
+
+    function groupLogsByTopic(logs) {
+      return logs.reduce((groups, log) => {
+        const topicTitle = log.topicTitle || log.topic || "미분류";
+
+        if (!groups[topicTitle]) {
+          groups[topicTitle] = [];
+        }
+
+        groups[topicTitle].push(log);
+        return groups;
+      }, {});
+    }
+
+    function renderRecordCard(log) {
+      return `
+        <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <span class="badge">V${log.version}</span>
+
+            <button
+            class="secondary small"
+            onclick="event.stopPropagation(); openTopicMove('${log.id}')"
+            >
+            주제 변경
+            </button>
+        </div>
+
+        <strong>${escapeHtml(log.createdAt)}</strong>
+
+        <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
+        <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
+        <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
+
+        ${log.nextAction ? `
+            <div class="next-action">
+            <b>다음 실행</b>
+            <p>${escapeHtml(log.nextAction)}</p>
+            </div>
+        ` : ""}
+
+        ${renderDiff(log)}
+        </div>
+      `;
     }
 
     function renderDiff(log) {
