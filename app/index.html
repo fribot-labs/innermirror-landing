@@ -83,6 +83,7 @@
     .button-row {
       display: flex;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .auth-buttons {
@@ -356,6 +357,7 @@
       <div class="button-row">
         <button onclick="saveRecord()">새 버전 저장하기</button>
         <button class="secondary" onclick="loadLast()">최근 판단 이어쓰기</button>
+        <button class="secondary" onclick="startNewRecord()">새 기록 시작</button>
       </div>
 
       <!-- 🔥 다음 행동 유도 -->
@@ -630,7 +632,7 @@
       const text = document.getElementById("nextPromptText");
 
       if (box && text) {
-        text.textContent = `V${selected.version} 내용을 불러왔습니다. 일부를 수정한 뒤 새 버전으로 저장해보세요.`;
+        text.textContent = `V${selected.version} 내용을 불러왔습니다. 이 버전을 수정한 뒤, 실제 실행 결과가 어떻게 달라졌는지 다음 버전으로 기록해보세요.`;
         box.style.display = "block";
       }
     }
@@ -684,6 +686,18 @@
       document.getElementById("approach").value = "";
       document.getElementById("reason").value = "";
       document.getElementById("nextAction").value = "";
+    }
+
+    function startNewRecord() {
+      clearForm();
+
+      const box = document.getElementById("nextPrompt");
+      const text = document.getElementById("nextPromptText");
+
+      if (box && text) {
+        text.textContent = "새로운 판단 기록을 시작합니다. 문제 정의부터 다시 작성해보세요.";
+        box.style.display = "block";
+      }
     }
 
     async function render() {
