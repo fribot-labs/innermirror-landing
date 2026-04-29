@@ -86,6 +86,28 @@
       flex-wrap: wrap;
     }
 
+    .button-row button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+    }
+
+    .button-row button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button-row button:active {
+      transform: translateY(1px) scale(0.98);
+      opacity: 0.88;
+    }
+
+    .button-row button:first-child {
+      background: #3b82f6;
+      box-shadow: 0 4px 12px rgba(59,130,246,0.3);
+    }
+
     .auth-buttons {
       display: flex;
       flex-direction: column;
@@ -354,11 +376,11 @@
       <label>다음 실행</label>
       <input id="nextAction" placeholder="예: offset 값을 3단계로 테스트한다." />
 
-      <div class="button-row">
-        <button onclick="saveRecord()">새 버전 저장하기</button>
-        <button class="secondary" onclick="loadLast()">최근 판단 이어쓰기</button>
-        <button class="secondary" onclick="startNewRecord()">새 기록 시작</button>
-      </div>
+    <div class="button-row">
+      <button onclick="saveRecord()">✔ 저장하기</button>
+      <button class="secondary" onclick="loadLast()">↩ 이어쓰기</button>
+      <button class="secondary" onclick="startNewRecord()">✏ 새로 작성</button>
+    </div>
 
       <!-- 🔥 다음 행동 유도 -->
       <div id="nextPrompt" class="next-prompt">
