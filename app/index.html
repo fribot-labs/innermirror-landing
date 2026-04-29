@@ -172,6 +172,26 @@
       margin-bottom: 8px;
     }
 
+    .topic-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .topic-row select {
+      flex: 1;
+      border: 1px solid rgba(148,163,184,.28);
+      background: rgba(15,23,42,.8);
+      color: white;
+      border-radius: 14px;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    .topic-row button {
+      white-space: nowrap;
+    }
+
     .diff {
       margin-top: 18px;
       padding: 18px;
@@ -380,6 +400,23 @@
         이전 판단을 수정하면서 다음 버전을 만들어보세요.
       </p>
 
+      <label>기록 주제</label>
+      <input id="topic" placeholder="예: 좌우 바퀴 비대칭 보정" />
+
+      <label>기록 주제</label>
+
+      <div class="topic-row">
+        <select id="topicSelect">
+          <option value="">주제를 선택하세요</option>
+        </select>
+
+        <button class="secondary small" onclick="createTopic()">
+          + 새 주제
+        </button>
+      </div>
+
+      <input id="newTopicTitle" placeholder="새 주제명 예: 초음파 센서 탐색" style="display:none; margin-top:10px;" />
+
       <label>문제 정의</label>
       <textarea id="problem" placeholder="예: 로봇이 직진하지 않고 왼쪽으로 치우친다."></textarea>
 
@@ -437,6 +474,7 @@
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
+    let topicList = [];
     let isRendering = false;
 
     async function initAuth() {
@@ -549,6 +587,81 @@
       await render();
     }
 
+    async function getTopics() {
+      if (!currentUser) return [];
+
+      const { data, error } = await supabaseClient
+        .from("topics")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("getTopics error:", error);
+        alert("주제 목록을 불러오는 중 오류가 발생했습니다.");
+        return [];
+      }
+
+      return data;
+    }
+
+    function renderTopicSelect(topics) {
+      const select = document.getElementById("topicSelect");
+      if (!select) return;
+
+      select.innerHTML = `
+        <option value="">주제를 선택하세요</option>
+        ${topics.map(topic => `
+        <option value="${topic.id}">${escapeHtml(topic.title)}</option>
+        `).join("")}
+      `;
+    }
+
+    async function createTopic() {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const input = document.getElementById("newTopicTitle");
+
+      if (input.style.display === "none") {
+        input.style.display = "block";
+        input.focus();
+        return;
+      }
+
+      const title = input.value.trim();
+
+      if (!title) {
+        alert("새 주제명을 입력해주세요.");
+        return;
+      }
+
+      const { data, error } = await supabaseClient
+        .from("topics")
+        .insert({
+        user_id: currentUser.id,
+        title
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("createTopic error:", error);
+        alert("주제를 생성하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      input.value = "";
+      input.style.display = "none";
+
+      topicList = await getTopics();
+      renderTopicSelect(topicList);
+
+      document.getElementById("topicSelect").value = data.id;
+    }
+
     async function getLogs() {
       if (!currentUser) return [];
 
@@ -566,6 +679,8 @@
 
       return data.map(row => ({
         id: row.id,
+        topicId: row.topic_id || "",
+        topic: row.topic || "미분류",
         version: row.version,
         createdAt: new Date(row.created_at).toLocaleString("ko-KR"),
         problem: row.problem,
@@ -582,27 +697,31 @@
         return;
       }
 
+      const topicId = document.getElementById("topicSelect").value;
       const problem = document.getElementById("problem").value.trim();
       const approach = document.getElementById("approach").value.trim();
       const reason = document.getElementById("reason").value.trim();
       const nextAction = document.getElementById("nextAction").value.trim();
 
-      if (!problem || !approach || !reason) {
-        alert("문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
+      if (!topicId || !problem || !approach || !reason) {
+        alert("기록 주제, 문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
         return;
       }
 
       const logs = await getLogs();
-      const previous = logs[0] || null;
+
+      const sameTopicLogs = logs.filter(log => log.topicId === topicId);
+      const previous = sameTopicLogs[0] || null;
+      const nextVersion = sameTopicLogs.length + 1;
 
       const current = {
+        topicId,
         problem,
         approach,
         reason,
         nextAction
       };
 
-      const nextVersion = logs.length + 1;
       const changes = previous
         ? detectChanges(previous, current)
         : [];
@@ -611,6 +730,7 @@
         .from("decision_versions")
         .insert({
         user_id: currentUser.id,
+        topic_id: topicId,
         version: nextVersion,
         problem,
         approach,
@@ -628,7 +748,6 @@
       clearForm();
       await render();
 
-      // 저장 후 다음 기록 질문 표시
       showNextPrompt(previous, current);
     }
 
@@ -647,6 +766,7 @@
 
       const last = logs[0];
 
+      document.getElementById("topicSelect").value = last.topicId || "";
       document.getElementById("problem").value = last.problem;
       document.getElementById("approach").value = last.approach;
       document.getElementById("reason").value = last.reason;
@@ -667,6 +787,7 @@
         return;
       }
 
+      document.getElementById("topicSelect").value = selected.topicId || "";
       document.getElementById("problem").value = selected.problem;
       document.getElementById("approach").value = selected.approach;
       document.getElementById("reason").value = selected.reason;
@@ -726,6 +847,9 @@
     }
 
     function clearForm() {
+      document.getElementById("topicSelect").value = "";
+      document.getElementById("newTopicTitle").value = "";
+      document.getElementById("newTopicTitle").style.display = "none";
       document.getElementById("problem").value = "";
       document.getElementById("approach").value = "";
       document.getElementById("reason").value = "";
@@ -771,9 +895,13 @@
       isRendering = true;
 
       try {
+        // 🔥 주제 목록 불러오기 + dropdown 렌더링
+        topicList = await getTopics();
+        renderTopicSelect(topicList);
+
         const logs = await getLogs();
 
-        // 🔥 인사이트 생성 (여기 추가)
+        // 🔥 인사이트 생성
         const insight = generateInsight(logs);
 
         const box = document.getElementById("insightBox");
@@ -788,7 +916,6 @@
           }
         }
 
-        // 기존 렌더링
         renderTimeline(logs);
         renderHistory(logs);
 
