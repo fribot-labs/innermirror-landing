@@ -434,6 +434,10 @@
 
       <input id="newTopicTitle" placeholder="새 주제명을 입력하고 저장하면 자동 생성됩니다" style="display:none; margin-top:10px;" />
 
+      <select id="parentTopicSelect">
+        <option value="">상위 주제 없음</option>
+      </select>
+
       <label>문제 정의</label>
       <textarea id="problem" placeholder="예: 로봇이 직진하지 않고 왼쪽으로 치우친다."></textarea>
 
@@ -622,16 +626,46 @@
       return data;
     }
 
+    function renderTopicOptions(nodes, depth = 0) {
+      return nodes.map(node => {
+        const prefix = "—".repeat(depth);
+
+        return `
+          <option value="${node.id}">
+            ${prefix} ${node.title}
+          </option>
+        ${renderTopicOptions(node.children, depth + 1)}
+        `;
+      }).join("");
+    }
+
+    function buildTopicTree(topics) {
+      const map = {};
+      topics.forEach(t => map[t.id] = { ...t, children: [] });
+
+      const tree = [];
+
+      topics.forEach(t => {
+        if (t.parent_id && map[t.parent_id]) {
+          map[t.parent_id].children.push(map[t.id]);
+        } else {
+          tree.push(map[t.id]);
+        }
+      });
+
+      return tree;
+    }
+
     function renderTopicSelect(topics) {
       const select = document.getElementById("topicSelect");
-      if (!select) return;
+      const parentSelect = document.getElementById("parentTopicSelect");
 
-      select.innerHTML = `
-        <option value="">주제를 선택하세요</option>
-        ${topics.map(topic => `
-        <option value="${topic.id}">${escapeHtml(topic.title)}</option>
-        `).join("")}
-      `;
+      const tree = buildTopicTree(topics);
+
+      const options = renderTopicOptions(tree);
+
+      select.innerHTML = `<option value="">주제를 선택하세요</option>` + options;
+      parentSelect.innerHTML = `<option value="">상위 주제 없음</option>` + options;
     }
 
     async function createTopic() {
@@ -641,6 +675,7 @@
       }
 
       const input = document.getElementById("newTopicTitle");
+      const parentId = document.getElementById("parentTopicSelect").value || null;
 
       if (input.style.display === "none") {
         input.style.display = "block";
@@ -659,14 +694,15 @@
         .from("topics")
         .insert({
           user_id: currentUser.id,
-          title
+          title,
+          parent_id: parentId
         })
         .select()
         .single();
 
       if (error) {
         console.error("createTopic error:", error);
-        alert("주제를 생성하는 중 오류가 발생했습니다.");
+        alert("주제 생성 실패");
         return;
       }
 
