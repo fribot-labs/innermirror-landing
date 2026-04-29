@@ -432,7 +432,7 @@
         </button>
       </div>
 
-      <input id="newTopicTitle" placeholder="새 주제명 예: 초음파 센서 탐색" style="display:none; margin-top:10px;" />
+      <input id="newTopicTitle" placeholder="새 주제명을 입력하고 저장하면 자동 생성됩니다" style="display:none; margin-top:10px;" />
 
       <label>문제 정의</label>
       <textarea id="problem" placeholder="예: 로봇이 직진하지 않고 왼쪽으로 치우친다."></textarea>
@@ -714,20 +714,46 @@
         return;
       }
 
-      const topicId = document.getElementById("topicSelect").value;
+      let topicId = document.getElementById("topicSelect").value;
+      const newTopicTitle = document.getElementById("newTopicTitle").value.trim();
+
       const problem = document.getElementById("problem").value.trim();
       const approach = document.getElementById("approach").value.trim();
       const reason = document.getElementById("reason").value.trim();
       const nextAction = document.getElementById("nextAction").value.trim();
 
-      if (!topicId) {
-        alert("먼저 기록 주제를 선택해주세요.");
+      if (!topicId && !newTopicTitle) {
+        alert("기존 주제를 선택하거나 새 주제명을 입력해주세요.");
         return;
       }
 
       if (!problem || !approach || !reason) {
         alert("문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
         return;
+      }
+
+      // 새 주제명이 있고 topic 선택이 없으면 자동 생성
+      if (!topicId && newTopicTitle) {
+        const { data, error } = await supabaseClient
+        .from("topics")
+        .insert({
+            user_id: currentUser.id,
+            title: newTopicTitle
+        })
+        .select()
+        .single();
+
+        if (error) {
+          console.error("auto create topic error:", error);
+          alert("새 주제를 생성하는 중 오류가 발생했습니다.");
+          return;
+        }
+
+        topicId = data.id;
+
+        topicList = await getTopics();
+        renderTopicSelect(topicList);
+        document.getElementById("topicSelect").value = topicId;
       }
 
       const logs = await getLogs();
