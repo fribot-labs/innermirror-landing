@@ -986,6 +986,25 @@
       }, {});
     }
 
+    async function openTopicMove(logId) {
+      const newTopicId = prompt("이동할 주제 ID를 입력하세요");
+
+      if (!newTopicId) return;
+
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({ topic_id: newTopicId })
+        .eq("id", logId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        alert("주제 변경 중 오류가 발생했습니다.");
+        return;
+      }
+
+      await render();
+    }
+
     function renderHistory(logs) {
       const history = document.getElementById("history");
       const grouped = groupLogsByTopic(logs);
@@ -1012,6 +1031,11 @@
       history.innerHTML = logs.map(log => `
         <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <span class="badge">V${log.version}</span>
+
+          <button class="secondary small" onclick="event.stopPropagation(); openTopicMove('${log.id}')">
+            주제 변경
+          </button>
+
           <strong>${escapeHtml(log.createdAt)}</strong>
 
           <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
