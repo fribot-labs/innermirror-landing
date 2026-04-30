@@ -626,6 +626,55 @@
       return data;
     }
 
+    async function ensureDefaultTopic() {
+      if (!currentUser) return null;
+
+      const { data: existing, error: selectError } = await supabaseClient
+        .from("topics")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .eq("title", "미분류")
+        .maybeSingle();
+
+      if (selectError) {
+        console.error("ensureDefaultTopic select error:", selectError);
+        return null;
+      }
+
+      if (existing) return existing;
+
+      const { data, error } = await supabaseClient
+        .from("topics")
+        .insert({
+          user_id: currentUser.id,
+          title: "미분류",
+          parent_id: null
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error("ensureDefaultTopic insert error:", error);
+        return null;
+      }
+
+      return data;
+    }
+
+    async function assignUncategorizedLogs(defaultTopicId) {
+      if (!currentUser || !defaultTopicId) return;
+
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({ topic_id: defaultTopicId })
+        .eq("user_id", currentUser.id)
+        .is("topic_id", null);
+
+      if (error) {
+        console.error("assignUncategorizedLogs error:", error);
+      }
+    }
+
     function renderTopicOptions(nodes, depth = 0) {
       return nodes.map(node => {
         const prefix = "—".repeat(depth);
@@ -758,14 +807,21 @@
       const reason = document.getElementById("reason").value.trim();
       const nextAction = document.getElementById("nextAction").value.trim();
 
-      if (!topicId && !newTopicTitle) {
-        alert("기존 주제를 선택하거나 새 주제명을 입력해주세요.");
-        return;
-      }
-
       if (!problem || !approach || !reason) {
         alert("문제 정의, 접근 방식, 판단 이유를 입력해주세요.");
         return;
+      }
+
+      // 주제 선택도 없고 새 주제명도 없으면 기본 "미분류" topic 사용
+      if (!topicId && !newTopicTitle) {
+        const defaultTopic = topicList.find(topic => topic.title === "미분류");
+
+        if (!defaultTopic) {
+          alert("기본 주제를 준비하는 중입니다. 잠시 후 다시 시도해주세요.");
+        return;
+        }
+
+        topicId = defaultTopic.id;
       }
 
       // 새 주제명이 있고 topic 선택이 없으면 자동 생성
@@ -774,7 +830,8 @@
         .from("topics")
         .insert({
             user_id: currentUser.id,
-            title: newTopicTitle
+            title: newTopicTitle,
+            parent_id: document.getElementById("parentTopicSelect").value || null
         })
         .select()
         .single();
@@ -971,18 +1028,54 @@
       }
     }
 
+    function openTopicMove(logId) {
+      const select = document.createElement("select");
+
+      select.innerHTML = topicList.map(t => `
+        <option value="${t.id}">${t.title}</option>
+      `).join("");
+
+      select.onchange = async () => {
+        const newTopicId = select.value;
+
+        const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({ topic_id: newTopicId })
+        .eq("id", logId)
+        .eq("user_id", currentUser.id);
+
+        if (error) {
+          alert("주제 변경 실패");
+          return;
+        }
+
+        await render();
+      };
+
+      // 기존 버튼 위치에 replace
+      event.target.replaceWith(select);
+    }
+
     async function render() {
       if (isRendering) return;
       isRendering = true;
 
       try {
-        // 🔥 주제 목록 불러오기 + dropdown 렌더링
+        // 기본 "미분류" topic 보장
+        const defaultTopic = await ensureDefaultTopic();
+
+        // topic_id가 없는 기존 기록을 "미분류" topic에 연결
+        if (defaultTopic) {
+          await assignUncategorizedLogs(defaultTopic.id);
+        }
+
+        // 주제 목록 불러오기 + dropdown 렌더링
         topicList = await getTopics();
         renderTopicSelect(topicList);
 
         const logs = await getLogs();
 
-        // 🔥 인사이트 생성
+        // 인사이트 생성
         const insight = generateInsight(logs);
 
         const box = document.getElementById("insightBox");
@@ -1122,8 +1215,8 @@
             <span class="badge">V${log.version}</span>
 
             <button
-            class="secondary small"
-            onclick="event.stopPropagation(); openTopicMove('${log.id}')"
+              class="secondary small"
+              onclick="event.stopPropagation(); openTopicMove('${log.id}')"
             >
             주제 변경
             </button>
