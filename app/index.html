@@ -221,6 +221,13 @@
       font-size: 13px;
     }
 
+    .topic-label {
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 8px 0;
+    }
+
     .diff {
       margin-top: 18px;
       padding: 18px;
@@ -805,7 +812,8 @@
       return data.map(row => ({
         id: row.id,
         topicId: row.topic_id || "",
-        topic: row.topic || "미분류",
+        topicTitle: getTopicTitle(row.topic_id),
+        topic: getTopicTitle(row.topic_id),
         version: row.version,
         createdAt: new Date(row.created_at).toLocaleString("ko-KR"),
         problem: row.problem,
@@ -814,6 +822,11 @@
         nextAction: row.next_action || "",
         changes: row.changes || []
       }));
+    }
+
+    function getTopicTitle(topicId) {
+      const topic = topicList.find(t => t.id === topicId);
+      return topic ? topic.title : "미분류";
     }
 
     async function saveRecord() {
@@ -1111,7 +1124,9 @@
       select.innerHTML = `
         <option value="">이동할 주제 선택</option>
         ${topicList.map(topic => `
-        <option value="${topic.id}">${escapeHtml(topic.title)}</option>
+          <option value="${topic.id}">
+            ${escapeHtml(topic.title)}
+          </option>
         `).join("")}
       `;
 
@@ -1130,10 +1145,10 @@
         }
 
         const { error } = await supabaseClient
-        .from("decision_versions")
-        .update({ topic_id: newTopicId })
-        .eq("id", logId)
-        .eq("user_id", currentUser.id);
+          .from("decision_versions")
+          .update({ topic_id: newTopicId })
+          .eq("id", logId)
+          .eq("user_id", currentUser.id);
 
         if (error) {
           console.error("topic reassignment error:", error);
@@ -1194,20 +1209,15 @@
       }
     }
 
-    function renderTimeline(logsInput) {
+    function renderTimeline(logs) {
       const timeline = document.getElementById("timeline");
 
-      if (!currentUser) {
+      if (!currentUser || !logs || logs.length === 0) {
         timeline.innerHTML = "";
         return;
       }
 
-      if (!logsInput || logsInput.length === 0) {
-        timeline.innerHTML = "";
-        return;
-      }
-
-      const grouped = groupLogsByTopic(logsInput);
+      const grouped = groupLogsByTopic(logs);
 
       timeline.innerHTML = Object.entries(grouped).map(([topicTitle, items]) => {
         const ordered = items.slice().reverse();
@@ -1215,18 +1225,16 @@
         return `
           <div class="topic-group">
             <div class="topic-header">
-            ${escapeHtml(topicTitle)}
-            <span class="topic-count">${ordered.length}개 기록</span>
-          </div>
+              ${escapeHtml(topicTitle)}
+              <span class="topic-count">${ordered.length}개 기록</span>
+            </div>
 
-          <div class="timeline">
             ${ordered.map((log, index) => `
               <div class="timeline-item">
                 <b>V${index + 1}</b> · ${changeSummary(log)}
                 <span>${escapeHtml(log.createdAt)}</span>
               </div>
             `).join("")}
-            </div>
           </div>
         `;
       }).join("");
@@ -1328,6 +1336,10 @@
         </div>
 
         <strong>${escapeHtml(log.createdAt)}</strong>
+
+        <p class="topic-label">
+          주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
+        </p>
 
         <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
         <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
