@@ -420,6 +420,20 @@
         먼저 로그인하면 판단 기록을 저장할 수 있습니다.
       </div>
 
+      <div id="editModeNotice" style="
+        display:none;
+        margin:12px 0;
+        padding:10px 12px;
+        border-radius:10px;
+        background: rgba(250,204,21,0.12);
+        border:1px solid rgba(250,204,21,0.35);
+        color:#fde68a;
+        font-size:13px;
+        font-weight:600;
+      ">
+        ✏ 기존 기록을 수정 중입니다. 저장하면 기존 기록이 변경됩니다.
+      </div>
+
       <p>
         같은 문제를 여러 번 수정하며 기록하세요.
         InnerMirror는 이전 버전과 비교해 판단 변화 신호를 보여줍니다.
@@ -460,7 +474,7 @@
       <input id="nextAction" placeholder="예: offset 값을 3단계로 테스트한다." />
 
     <div class="button-row">
-      <button onclick="saveRecord()">✔ 저장하기</button>
+      <button id="saveButton" onclick="saveRecord()">✔ 저장하기</button>
       <button class="secondary" onclick="loadLast()">↩ 이어쓰기</button>
       <button class="secondary" onclick="startNewRecord()">✏ 새로 작성</button>
     </div>
@@ -821,24 +835,23 @@
         return;
       }
 
-      // 새 주제명이 있으면 topicSelect보다 우선하여 새 topic 생성
+      // 새 주제 생성 우선
       if (newTopicTitle) {
-        const parentTopicSelect = document.getElementById("parentTopicSelect");
-        const parentId = parentTopicSelect ? parentTopicSelect.value || null : null;
+        const parentId = document.getElementById("parentTopicSelect")?.value || null;
 
         const { data, error } = await supabaseClient
-        .from("topics")
-        .insert({
+          .from("topics")
+          .insert({
             user_id: currentUser.id,
             title: newTopicTitle,
             parent_id: parentId
-        })
-        .select()
-        .single();
+          })
+          .select()
+          .single();
 
         if (error) {
-          console.error("auto create topic error:", error);
-          alert("새 주제를 생성하는 중 오류가 발생했습니다.");
+          console.error(error);
+          alert("새 주제 생성 실패");
           return;
         }
 
@@ -849,56 +862,75 @@
         document.getElementById("topicSelect").value = topicId;
       }
 
-      // 새 주제명도 없고 기존 주제도 선택하지 않은 경우 기본 "미분류" topic 사용
+      // 미분류 fallback
       if (!topicId) {
-        const defaultTopic = topicList.find(topic => topic.title === "미분류");
-
+        const defaultTopic = topicList.find(t => t.title === "미분류");
         if (!defaultTopic) {
-          alert("기본 주제를 준비하는 중입니다. 잠시 후 다시 시도해주세요.");
+          alert("기본 주제를 찾을 수 없습니다.");
           return;
         }
-
         topicId = defaultTopic.id;
       }
 
-      const logs = await getLogs();
-      const sameTopicLogs = logs.filter(log => log.topicId === topicId);
+      // 🔥 핵심 분기
+      if (editingLogId) {
+        // UPDATE
+        const { error } = await supabaseClient
+          .from("decision_versions")
+          .update({
+            topic_id: topicId,
+            problem,
+            approach,
+            reason,
+            next_action: nextAction
+          })
+          .eq("id", editingLogId)
+          .eq("user_id", currentUser.id);
 
-      const previous = sameTopicLogs[0] || null;
-      const nextVersion = sameTopicLogs.length + 1;
+        if (error) {
+          console.error(error);
+          alert("수정 실패");
+          return;
+        }
 
-      const current = {
-        topicId,
-        problem,
-        approach,
-        reason,
-        nextAction
-      };
+      } else {
+        // INSERT
+        const logs = await getLogs();
+        const sameTopicLogs = logs.filter(log => log.topicId === topicId);
 
-      const changes = previous ? detectChanges(previous, current) : [];
+        const previous = sameTopicLogs[0] || null;
+        const nextVersion = sameTopicLogs.length + 1;
 
-      const { error } = await supabaseClient
-        .from("decision_versions")
-        .insert({
-          user_id: currentUser.id,
-          topic_id: topicId,
-          version: nextVersion,
-          problem,
-          approach,
-          reason,
-          next_action: nextAction,
-          changes
-        });
+        const changes = previous
+          ? detectChanges(previous, { problem, approach, reason, nextAction })
+          : [];
 
-      if (error) {
-        console.error("saveRecord error:", error);
-        alert("저장 중 오류가 발생했습니다.");
-        return;
+        const { error } = await supabaseClient
+          .from("decision_versions")
+          .insert({
+            user_id: currentUser.id,
+            topic_id: topicId,
+            version: nextVersion,
+            problem,
+            approach,
+            reason,
+            next_action: nextAction,
+            changes
+          });
+
+        if (error) {
+          console.error(error);
+          alert("저장 실패");
+          return;
+        }
       }
+
+      editingLogId = null;
+      document.getElementById("editModeNotice").style.display = "none";
+      document.getElementById("saveButton").textContent = "✔ 저장하기";
 
       clearForm();
       await render();
-      showNextPrompt(previous, current);
     }
 
     async function loadLast() {
@@ -937,17 +969,30 @@
         return;
       }
 
+      editingLogId = selected.id;
+
       document.getElementById("topicSelect").value = selected.topicId || "";
       document.getElementById("problem").value = selected.problem;
       document.getElementById("approach").value = selected.approach;
       document.getElementById("reason").value = selected.reason;
       document.getElementById("nextAction").value = selected.nextAction || "";
 
+      const editModeNotice = document.getElementById("editModeNotice");
+      const saveButton = document.getElementById("saveButton");
+
+      if (editModeNotice) {
+        editModeNotice.style.display = "block";
+      }
+
+      if (saveButton) {
+        saveButton.textContent = "✔ 수정하기";
+      }
+
       const box = document.getElementById("nextPrompt");
       const text = document.getElementById("nextPromptText");
 
       if (box && text) {
-        text.textContent = `V${selected.version} 내용을 불러왔습니다. 이 버전을 수정한 뒤, 실제 실행 결과가 어떻게 달라졌는지 다음 버전으로 기록해보세요.`;
+        text.textContent = `V${selected.version} 내용을 불러왔습니다. 이 버전을 수정한 뒤 저장하면 기존 기록이 변경됩니다.`;
         box.style.display = "block";
       }
     }
@@ -1007,7 +1052,19 @@
     }
 
     function startNewRecord() {
+      editingLogId = null;
       clearForm();
+
+      const editModeNotice = document.getElementById("editModeNotice");
+      const saveButton = document.getElementById("saveButton");
+
+      if (editModeNotice) {
+        editModeNotice.style.display = "none";
+      }
+
+      if (saveButton) {
+        saveButton.textContent = "✔ 저장하기";
+      }
 
       const box = document.getElementById("nextPrompt");
       const text = document.getElementById("nextPromptText");
