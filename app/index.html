@@ -238,6 +238,31 @@
       align-self: stretch;
     }
 
+    .topic-tree-box {
+      margin-top: 22px;
+      padding: 14px;
+      border-radius: 14px;
+      background: rgba(15,23,42,.45);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    .topic-tree-box h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .topic-tree-item {
+      padding: 6px 0;
+      color: #dbeafe;
+      font-size: 14px;
+    }
+
+    .topic-tree-count {
+      color: #94a3b8;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
     .diff {
       margin-top: 18px;
       padding: 18px;
@@ -445,6 +470,11 @@
       </select>
 
       <button class="secondary" onclick="createTopicOnly()">+ 주제 만들기</button>
+
+      <div class="topic-tree-box">
+        <h3>주제 구조</h3>
+        <div id="topicTree"></div>
+      </div>
     </section>
 
     <section id="editorPanel" class="panel">
@@ -804,6 +834,45 @@
 
       select.innerHTML = `<option value="">주제를 선택하세요</option>` + options;
       parentSelect.innerHTML = `<option value="">상위 주제 없음</option>` + options;
+    }
+
+    function renderTopicTree(topics, logs) {
+      const container = document.getElementById("topicTree");
+      if (!container) return;
+
+      if (!topics || topics.length === 0) {
+        container.innerHTML = `<div class="empty">아직 주제가 없습니다.</div>`;
+        return;
+      }
+
+      const tree = buildTopicTree(topics);
+      const countMap = buildTopicCountMap(logs);
+
+      container.innerHTML = renderTopicTreeNodes(tree, countMap);
+    }
+
+    function renderTopicTreeNodes(nodes, countMap, depth = 0) {
+      return nodes.map(node => {
+        const count = countMap[node.id] || 0;
+        const indent = depth * 16;
+
+        return `
+          <div class="topic-tree-item" style="padding-left:${indent}px;">
+            ${depth > 0 ? "└ " : ""}
+            ${escapeHtml(node.title)}
+            <span class="topic-tree-count">${count}개</span>
+          </div>
+          ${renderTopicTreeNodes(node.children || [], countMap, depth + 1)}
+        `;
+      }).join("");
+    }
+
+    function buildTopicCountMap(logs) {
+      return logs.reduce((map, log) => {
+        if (!log.topicId) return map;
+        map[log.topicId] = (map[log.topicId] || 0) + 1;
+        return map;
+      }, {});
     }
 
     async function createTopic() {
@@ -1194,6 +1263,7 @@
         renderTopicSelect(topicList);
 
         const logs = await getLogs();
+        renderTopicTree(topicList, logs);
 
         // 인사이트 생성
         const insight = generateInsight(logs);
