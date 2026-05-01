@@ -929,7 +929,12 @@
         .from("decision_versions")
         .select("*")
         .eq("user_id", currentUser.id)
+        .eq("status", "active")
         .order("version", { ascending: false });
+
+      // 🔥 디버깅 1
+      console.log("📊 raw logs (active only):", data);
+      console.log("📊 active logs count:", data?.length);
 
       if (error) {
         console.error("getLogs error:", error);
@@ -937,7 +942,7 @@
         return [];
       }
 
-      return data.map(row => ({
+      const mapped = data.map(row => ({
         id: row.id,
         topicId: row.topic_id || "",
         topicTitle: getTopicTitle(row.topic_id),
@@ -948,8 +953,14 @@
         approach: row.approach,
         reason: row.reason,
         nextAction: row.next_action || "",
-        changes: row.changes || []
+        changes: row.changes || [],
+        status: row.status
       }));
+
+      // 🔥 디버깅 2
+      console.log("🧠 mapped logs:", mapped);
+
+      return mapped;
     }
 
     function getTopicTitle(topicId) {
