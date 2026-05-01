@@ -1259,6 +1259,34 @@
       await render();
     }
 
+    async function archiveRecord(logId) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const ok = confirm("이 기록을 보관하시겠습니까?\n보관된 기록은 기본 화면에서 숨겨집니다.");
+
+      if (!ok) return;
+
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({
+          status: "archived",
+          archived_at: new Date().toISOString()
+        })
+        .eq("id", logId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error("archiveRecord error:", error);
+        alert("기록을 보관하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      await render();
+    }
+
     async function render() {
       if (isRendering) return;
       isRendering = true;
@@ -1400,7 +1428,7 @@
     function renderRecordCard(log) {
       return `
         <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
-        <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <span class="badge">V${log.version}</span>
 
             <select
@@ -1414,7 +1442,14 @@
                 </option>
               `).join("")}
             </select>
-        </div>
+
+            <button
+              class="secondary small"
+              onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+            >
+              📦 보관
+            </button>
+          </div>
 
         <strong>${escapeHtml(log.createdAt)}</strong>
 
