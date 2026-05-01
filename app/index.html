@@ -263,6 +263,24 @@
       margin-left: 6px;
     }
 
+    .selection-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(15,23,42,.45);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    #selectionStatus {
+      color: #93c5fd;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
     .diff {
       margin-top: 18px;
       padding: 18px;
@@ -574,6 +592,8 @@
     let currentUser = null;
     let topicList = [];
     let isRendering = false;
+    let selectionMode = false;
+    let selectedRecordIds = new Set();
 
     async function initAuth() {
       try {
@@ -1287,6 +1307,30 @@
       await render();
     }
 
+    function toggleSelectionMode() {
+      selectionMode = !selectionMode;
+      selectedRecordIds.clear();
+      render();
+    }
+
+    function toggleRecordSelection(logId) {
+      if (selectedRecordIds.has(logId)) {
+        selectedRecordIds.delete(logId);
+      } else {
+        selectedRecordIds.add(logId);
+      }
+
+      renderSelectionStatus();
+    }
+
+    function renderSelectionStatus() {
+      const status = document.getElementById("selectionStatus");
+
+      if (!status) return;
+
+      status.textContent = `${selectedRecordIds.size}개 기록 선택됨`;
+    }
+
     async function render() {
       if (isRendering) return;
       isRendering = true;
@@ -1381,35 +1425,52 @@
 
       if (!currentUser) {
         history.innerHTML = `
-        <div class="empty">
+          <div class="empty">
             로그인하면 판단 기록을 저장하고 불러올 수 있습니다.
-        </div>
+          </div>
         `;
         return;
       }
 
       if (logs.length === 0) {
         history.innerHTML = `
-        <div class="empty">
+          <div class="empty">
             아직 기록이 없습니다.<br />
             첫 번째 판단 기록을 저장해보세요.
-        </div>
+          </div>
         `;
         return;
       }
 
       const grouped = groupLogsByTopic(logs);
 
-      history.innerHTML = Object.entries(grouped).map(([topicTitle, items]) => `
+      const selectionToolbar = `
+        <div class="selection-toolbar">
+          <button class="secondary small" onclick="toggleSelectionMode()">
+            ${selectionMode ? "정리 모드 끄기" : "정리 모드 켜기"}
+          </button>
+
+          ${selectionMode ? `
+            <span id="selectionStatus">${selectedRecordIds.size}개 기록 선택됨</span>
+            <button class="secondary small" onclick="alert('다음 PR에서 통합 기능을 연결합니다.')">
+              선택 기록 통합
+            </button>
+          ` : ""}
+        </div>
+      `;
+
+      history.innerHTML = selectionToolbar + Object.entries(grouped).map(([topicTitle, items]) => `
         <div class="topic-group">
-        <div class="topic-header">
+          <div class="topic-header">
             ${escapeHtml(topicTitle)}
             <span class="topic-count">${items.length}개 기록</span>
-        </div>
+          </div>
 
-        ${items.map(log => renderRecordCard(log)).join("")}
+          ${items.map(log => renderRecordCard(log)).join("")}
         </div>
       `).join("");
+
+      renderSelectionStatus();
     }
 
     function groupLogsByTopic(logs) {
@@ -1429,46 +1490,60 @@
       return `
         <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <span class="badge">V${log.version}</span>
+            
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${selectionMode ? `
+                <input
+                  type="checkbox"
+                  onclick="event.stopPropagation(); toggleRecordSelection('${log.id}')"
+                  ${selectedRecordIds.has(log.id) ? "checked" : ""}
+                  style="width:auto;"
+                />
+              ` : ""}
 
-            <select
-              class="topic-move-select"
-              onclick="event.stopPropagation();"
-              onchange="event.stopPropagation(); changeTopic('${log.id}', this.value)"
-            >
-              ${topicList.map(topic => `
-                <option value="${topic.id}" ${topic.id === log.topicId ? "selected" : ""}>
-                  ${escapeHtml(topic.title)}
-                </option>
-              `).join("")}
-            </select>
+              <span class="badge">V${log.version}</span>
+            </div>
 
-            <button
-              class="secondary small"
-              onclick="event.stopPropagation(); archiveRecord('${log.id}')"
-            >
-              📦 보관
-            </button>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <select
+                class="topic-move-select"
+                onclick="event.stopPropagation();"
+                onchange="event.stopPropagation(); changeTopic('${log.id}', this.value)"
+              >
+                ${topicList.map(topic => `
+                  <option value="${topic.id}" ${topic.id === log.topicId ? "selected" : ""}>
+                    ${escapeHtml(topic.title)}
+                  </option>
+                `).join("")}
+              </select>
+
+              <button
+                class="secondary small"
+                onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+              >
+                📦 보관
+              </button>
+            </div>
           </div>
 
-        <strong>${escapeHtml(log.createdAt)}</strong>
+          <strong>${escapeHtml(log.createdAt)}</strong>
 
-        <p class="topic-label">
-          주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
-        </p>
+          <p class="topic-label">
+            주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
+          </p>
 
-        <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
-        <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
-        <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
+          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
+          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
+          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
 
-        ${log.nextAction ? `
+          ${log.nextAction ? `
             <div class="next-action">
-            <b>다음 실행</b>
-            <p>${escapeHtml(log.nextAction)}</p>
+              <b>다음 실행</b>
+              <p>${escapeHtml(log.nextAction)}</p>
             </div>
-        ` : ""}
+          ` : ""}
 
-        ${renderDiff(log)}
+          ${renderDiff(log)}
         </div>
       `;
     }
