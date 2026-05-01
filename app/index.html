@@ -1299,25 +1299,6 @@
       }, {});
     }
 
-    async function openTopicMove(logId) {
-      const newTopicId = prompt("이동할 주제 ID를 입력하세요");
-
-      if (!newTopicId) return;
-
-      const { error } = await supabaseClient
-        .from("decision_versions")
-        .update({ topic_id: newTopicId })
-        .eq("id", logId)
-        .eq("user_id", currentUser.id);
-
-      if (error) {
-        alert("주제 변경 중 오류가 발생했습니다.");
-        return;
-      }
-
-      await render();
-    }
-
     function renderHistory(logs) {
       const history = document.getElementById("history");
 
