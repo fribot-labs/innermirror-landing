@@ -1153,62 +1153,27 @@
       }
     }
 
-    function openTopicMove(logId) {
-      const target = event.target;
+    async function changeTopic(logId, newTopicId) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
 
-      const wrapper = document.createElement("div");
-      wrapper.style.display = "flex";
-      wrapper.style.gap = "8px";
-      wrapper.style.alignItems = "center";
-      wrapper.style.flexWrap = "wrap";
+      if (!newTopicId) return;
 
-      const select = document.createElement("select");
-      select.className = "topic-move-select";
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({ topic_id: newTopicId })
+        .eq("id", logId)
+        .eq("user_id", currentUser.id);
 
-      select.innerHTML = `
-        <option value="">이동할 주제 선택</option>
-        ${topicList.map(topic => `
-          <option value="${topic.id}">
-            ${escapeHtml(topic.title)}
-          </option>
-        `).join("")}
-      `;
+      if (error) {
+        console.error("changeTopic error:", error);
+        alert("주제 변경 중 오류가 발생했습니다.");
+        return;
+      }
 
-      const moveButton = document.createElement("button");
-      moveButton.className = "secondary small";
-      moveButton.textContent = "이동";
-
-      moveButton.onclick = async (e) => {
-        e.stopPropagation();
-
-        const newTopicId = select.value;
-
-        if (!newTopicId) {
-          alert("이동할 주제를 선택해주세요.");
-          return;
-        }
-
-        const { error } = await supabaseClient
-          .from("decision_versions")
-          .update({ topic_id: newTopicId })
-          .eq("id", logId)
-          .eq("user_id", currentUser.id);
-
-        if (error) {
-          console.error("topic reassignment error:", error);
-          alert("주제 변경 중 오류가 발생했습니다.");
-          return;
-        }
-
-        await render();
-      };
-
-      wrapper.onclick = (e) => e.stopPropagation();
-
-      wrapper.appendChild(select);
-      wrapper.appendChild(moveButton);
-
-      target.replaceWith(wrapper);
+      await render();
     }
 
     async function render() {
@@ -1354,12 +1319,17 @@
         <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <span class="badge">V${log.version}</span>
 
-            <button
-              class="secondary small"
-              onclick="event.stopPropagation(); openTopicMove('${log.id}')"
+            <select
+              class="topic-move-select"
+              onclick="event.stopPropagation();"
+              onchange="event.stopPropagation(); changeTopic('${log.id}', this.value)"
             >
-            주제 변경
-            </button>
+              ${topicList.map(topic => `
+                <option value="${topic.id}" ${topic.id === log.topicId ? "selected" : ""}>
+                  ${escapeHtml(topic.title)}
+                </option>
+              `).join("")}
+            </select>
         </div>
 
         <strong>${escapeHtml(log.createdAt)}</strong>
