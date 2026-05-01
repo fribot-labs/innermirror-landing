@@ -219,6 +219,7 @@
       border-radius: 10px;
       padding: 8px 10px;
       font-size: 13px;
+      min-width: 180px;
     }
 
     .topic-label {
@@ -226,6 +227,15 @@
       font-size: 13px;
       font-weight: 700;
       margin: 8px 0;
+    }
+
+    #topicPanel {
+      min-height: 260px;
+    }
+
+    #topicPanel,
+    #editorPanel {
+      align-self: stretch;
     }
 
     .diff {
@@ -473,10 +483,6 @@
         <select id="topicSelect">
           <option value="">주제를 선택하세요</option>
         </select>
-
-        <button class="secondary small" onclick="createTopic()">
-          + 새 주제
-        </button>
       </div>
 
       <label>문제 정의</label>
@@ -1154,6 +1160,7 @@
       wrapper.style.display = "flex";
       wrapper.style.gap = "8px";
       wrapper.style.alignItems = "center";
+      wrapper.style.flexWrap = "wrap";
 
       const select = document.createElement("select");
       select.className = "topic-move-select";
@@ -1195,6 +1202,8 @@
 
         await render();
       };
+
+      wrapper.onclick = (e) => e.stopPropagation();
 
       wrapper.appendChild(select);
       wrapper.appendChild(moveButton);
