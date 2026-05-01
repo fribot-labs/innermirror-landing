@@ -942,6 +942,9 @@
         return [];
       }
 
+      // ✅ 여기 추가
+      console.log("DEBUG IDs:", data.map(d => d.id));
+
       const mapped = data.map(row => ({
         id: row.id,
         topicId: row.topic_id || "",
