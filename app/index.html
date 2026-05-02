@@ -644,6 +644,7 @@
     let selectionMode = false;
     let selectedRecordIds = new Set();
     let collapsedTopicIds = new Set();
+    let showMergedRecords = false;
 
     async function initAuth() {
       try {
@@ -1073,12 +1074,7 @@
         .from("decision_versions")
         .select("*")
         .eq("user_id", currentUser.id)
-        .eq("status", "active")
         .order("version", { ascending: false });
-
-      // 🔥 디버깅 1
-      console.log("📊 raw logs (active only):", data);
-      console.log("📊 active logs count:", data?.length);
 
       if (error) {
         console.error("getLogs error:", error);
@@ -1086,10 +1082,21 @@
         return [];
       }
 
-      // ✅ 여기 추가
-      console.log("DEBUG IDs:", data.map(d => d.id));
+      const visibleRows = showMergedRecords
+        ? data.filter(row => row.status === "active" || row.status === "merged")
+        : data.filter(row => row.status === "active");
 
-      const mapped = data.map(row => ({
+      console.log(
+        showMergedRecords
+        ? "📊 raw logs (active + merged):"
+        : "📊 raw logs (active only):",
+        visibleRows
+      );
+
+      console.log("📊 visible logs count:", visibleRows.length);
+      console.log("DEBUG IDs:", visibleRows.map(d => d.id));
+
+      const mapped = visibleRows.map(row => ({
         id: row.id,
         topicId: row.topic_id || "",
         topicTitle: getTopicTitle(row.topic_id),
@@ -1101,10 +1108,11 @@
         reason: row.reason,
         nextAction: row.next_action || "",
         changes: row.changes || [],
-        status: row.status
+        status: row.status,
+        mergedInto: row.merged_into || null,
+        mergedAt: row.merged_at || null
       }));
 
-      // 🔥 디버깅 2
       console.log("🧠 mapped logs:", mapped);
 
       return mapped;
@@ -1550,6 +1558,11 @@
       render();
     }
 
+    function toggleMergedRecords() {
+      showMergedRecords = !showMergedRecords;
+      render();
+    }
+
     function toggleRecordSelection(logId) {
       if (selectedRecordIds.has(logId)) {
         selectedRecordIds.delete(logId);
@@ -1687,6 +1700,10 @@
             ${selectionMode ? "정리 모드 끄기" : "정리 모드 켜기"}
           </button>
 
+          <button class="secondary small" onclick="toggleMergedRecords()">
+            ${showMergedRecords ? "통합 원본 숨기기" : "통합 원본 보기"}
+          </button>
+
           ${selectionMode ? `
             <span id="selectionStatus">${selectedRecordIds.size}개 기록 선택됨</span>
             <button class="secondary small" onclick="mergeSelectedRecords()">
@@ -1734,6 +1751,14 @@
       // 🔥 통합된 기록 표시
       let mergedInfoHtml = "";
 
+      if (log.status === "merged") {
+        mergedSourceHtml = `
+          <div class="merge-info" style="background:rgba(250,204,21,0.10); border-color:rgba(250,204,21,0.25); color:#fde68a;">
+            🧩 통합된 원본 기록입니다
+          </div>
+        `;
+      }
+
       if (log.status === "active") {
         if (log.changes && log.changes.some(c => c.key === "merge")) {
           mergedInfoHtml = `
@@ -1775,12 +1800,14 @@
                 `).join("")}
               </select>
 
-              <button
-                class="secondary small"
-                onclick="event.stopPropagation(); archiveRecord('${log.id}')"
-              >
-                📦 보관
-              </button>
+              ${log.status === "active" ? `
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+                >
+                  📦 보관
+                </button>
+              ` : ""}
             </div>
           </div>
 
@@ -1802,6 +1829,7 @@
           ` : ""}
 
           ${mergedInfoHtml}
+          ${mergedSourceHtml}
 
           ${renderDiff(log)}
         </div>
