@@ -263,6 +263,16 @@
       margin-left: 6px;
     }
 
+    .topic-parent-select {
+      border: 1px solid rgba(148,163,184,.28);
+      background: rgba(15,23,42,.95);
+      color: white;
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      min-width: 150px;
+    }
+
     .selection-toolbar {
       display: flex;
       align-items: center;
@@ -800,6 +810,33 @@
       document.getElementById("topicSelect").value = data.id;
     }
 
+    async function changeParentTopic(topicId, parentId) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      if (topicId === parentId) {
+        alert("자기 자신을 상위 주제로 설정할 수 없습니다.");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("topics")
+        .update({ parent_id: parentId || null })
+        .eq("id", topicId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error("changeParentTopic error:", error);
+        alert("상위 주제를 변경하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      topicList = await getTopics();
+      await render();
+    }
+
     async function assignUncategorizedLogs(defaultTopicId) {
       if (!currentUser || !defaultTopicId) return;
 
@@ -878,10 +915,30 @@
 
         return `
           <div class="topic-tree-item" style="padding-left:${indent}px;">
-            ${depth > 0 ? "└ " : ""}
-            ${escapeHtml(node.title)}
-            <span class="topic-tree-count">${count}개</span>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+              <div>
+                ${depth > 0 ? "└ " : ""}
+                ${escapeHtml(node.title)}
+                <span class="topic-tree-count">${count}개</span>
+              </div>
+
+              <select
+                class="topic-parent-select"
+                onclick="event.stopPropagation();"
+                onchange="event.stopPropagation(); changeParentTopic('${node.id}', this.value)"
+              >
+                <option value="">상위 주제 없음</option>
+                ${topicList
+                  .filter(topic => topic.id !== node.id)
+                  .map(topic => `
+                    <option value="${topic.id}" ${topic.id === node.parent_id ? "selected" : ""}>
+                      ${escapeHtml(topic.title)}
+                    </option>
+                  `).join("")}
+              </select>
+            </div>
           </div>
+
           ${renderTopicTreeNodes(node.children || [], countMap, depth + 1)}
         `;
       }).join("");
