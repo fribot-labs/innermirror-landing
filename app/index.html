@@ -290,6 +290,18 @@
       width: 24px;
     }
 
+    .selection-help {
+      margin-top: 8px;
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(96,165,250,0.25);
+      color: #93c5fd;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
     .selection-toolbar {
       display: flex;
       align-items: center;
@@ -328,6 +340,16 @@
 
     .same {
       color: #94a3b8;
+    }
+
+    .merge-info {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: rgba(16,185,129,0.12);
+      border: 1px solid rgba(52,211,153,0.25);
+      color: #6ee7b7;
+      font-size: 12px;
     }
 
     .timeline {
@@ -1409,6 +1431,21 @@
       await render();
     }
 
+    async function getMergedSources(mergedId) {
+      const { data, error } = await supabaseClient
+        .from("decision_versions")
+        .select("id, version")
+        .eq("merged_into", mergedId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error("getMergedSources error:", error);
+        return [];
+      }
+
+      return data;
+    }
+
     async function mergeSelectedRecords() {
       if (!currentUser) {
         alert("먼저 로그인해주세요.");
@@ -1659,7 +1696,14 @@
         </div>
       `;
 
-      history.innerHTML = selectionToolbar + Object.entries(grouped).map(([topicTitle, items]) => `
+      const selectionHelp = selectionMode ? `
+        <div class="selection-help">
+            📌 여러 기록을 선택해서 하나로 통합할 수 있습니다.<br/>
+            통합하면 기존 기록은 사라지지 않고 숨겨집니다.
+        </div>
+      ` : "";
+
+      history.innerHTML = selectionToolbar + selectionHelp + Object.entries(grouped).map(([topicTitle, items]) => `
         <div class="topic-group">
           <div class="topic-header">
             ${escapeHtml(topicTitle)}
@@ -1687,8 +1731,22 @@
     }
 
     function renderRecordCard(log) {
+      // 🔥 통합된 기록 표시
+      let mergedInfoHtml = "";
+
+      if (log.status === "active") {
+        if (log.changes && log.changes.some(c => c.key === "merge")) {
+          mergedInfoHtml = `
+            <div class="merge-info">
+              📦 통합된 기록입니다
+            </div>
+          `;
+        }
+      }
+
       return `
         <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
+        
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
             
             <div style="display:flex; align-items:center; gap:8px;">
@@ -1742,6 +1800,8 @@
               <p>${escapeHtml(log.nextAction)}</p>
             </div>
           ` : ""}
+
+          ${mergedInfoHtml}
 
           ${renderDiff(log)}
         </div>
