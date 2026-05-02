@@ -1409,6 +1409,104 @@
       await render();
     }
 
+    async function mergeSelectedRecords() {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const selectedIds = Array.from(selectedRecordIds);
+
+      if (selectedIds.length < 2) {
+        alert("통합하려면 최소 2개 이상의 기록을 선택해주세요.");
+        return;
+      }
+
+      const logs = await getLogs();
+      const selectedLogs = logs.filter(log => selectedIds.includes(log.id));
+
+      if (selectedLogs.length < 2) {
+        alert("선택한 기록을 찾을 수 없습니다.");
+        return;
+      }
+
+      const topicId = selectedLogs[0].topicId || "";
+      const sameTopic = selectedLogs.every(log => log.topicId === topicId);
+
+      if (!sameTopic) {
+        alert("현재는 같은 주제 안의 기록만 통합할 수 있습니다.");
+        return;
+      }
+
+      const ok = confirm(`${selectedLogs.length}개의 기록을 하나의 통합 기록으로 만들까요?\n원본 기록은 삭제되지 않고 통합 상태로 숨겨집니다.`);
+
+      if (!ok) return;
+
+      const ordered = selectedLogs
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      const latest = ordered[ordered.length - 1];
+
+      const problem = latest.problem;
+      const approach = latest.approach;
+      const reason = latest.reason;
+      const nextAction = latest.nextAction;
+
+      const sameTopicLogs = logs.filter(log => log.topicId === topicId);
+      const nextVersion = sameTopicLogs.length + 1;
+
+      const changes = [{
+        key: "merge",
+        label: "기록 통합",
+        before: selectedLogs.map(log => `V${log.version}`).join(", "),
+        after: "선택된 기록을 하나의 통합 기록으로 정리"
+      }];
+
+      const { data: mergedRecord, error: insertError } = await supabaseClient
+        .from("decision_versions")
+        .insert({
+          user_id: currentUser.id,
+          topic_id: topicId,
+          version: nextVersion,
+          problem,
+          approach,
+          reason,
+          next_action: nextAction,
+          changes,
+          status: "active"
+        })
+        .select()
+        .single();
+
+      if (insertError) {
+        console.error("merge insert error:", insertError);
+        alert("통합 기록을 생성하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      const { error: updateError } = await supabaseClient
+        .from("decision_versions")
+        .update({
+          status: "merged",
+          merged_into: mergedRecord.id,
+          merged_at: new Date().toISOString()
+        })
+        .in("id", selectedIds)
+        .eq("user_id", currentUser.id);
+
+      if (updateError) {
+        console.error("merge update error:", updateError);
+        alert("원본 기록을 통합 상태로 변경하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      selectedRecordIds.clear();
+      selectionMode = false;
+
+      await render();
+    }
+
     function toggleSelectionMode() {
       selectionMode = !selectionMode;
       selectedRecordIds.clear();
@@ -1554,7 +1652,7 @@
 
           ${selectionMode ? `
             <span id="selectionStatus">${selectedRecordIds.size}개 기록 선택됨</span>
-            <button class="secondary small" onclick="alert('다음 PR에서 통합 기능을 연결합니다.')">
+            <button class="secondary small" onclick="mergeSelectedRecords()">
               선택 기록 통합
             </button>
           ` : ""}
