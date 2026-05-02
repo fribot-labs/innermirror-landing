@@ -1682,7 +1682,7 @@
         return;
       }
 
-      if (logs.length === 0) {
+      if (!logs || logs.length === 0) {
         history.innerHTML = `
           <div class="empty">
             아직 기록이 없습니다.<br />
@@ -1748,14 +1748,14 @@
     }
 
     function renderRecordCard(log) {
-      // 🔥 통합된 기록 표시
       let mergedInfoHtml = "";
+      let mergedSourceHtml = "";
 
       if (log.status === "merged") {
         mergedSourceHtml = `
-          <div class="merge-info" style="background:rgba(250,204,21,0.10); border-color:rgba(250,204,21,0.25); color:#fde68a;">
+        <div class="merge-info" style="background:rgba(250,204,21,0.10); border-color:rgba(250,204,21,0.25); color:#fde68a;">
             🧩 통합된 원본 기록입니다
-          </div>
+        </div>
         `;
       }
 
@@ -1771,9 +1771,7 @@
 
       return `
         <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
-        
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            
             <div style="display:flex; align-items:center; gap:8px;">
               ${selectionMode ? `
                 <input
