@@ -1147,13 +1147,13 @@
                 onchange="event.stopPropagation(); changeParentTopic('${node.id}', this.value)"
               >
                 <option value="">상위 주제 없음</option>
-                ${topicList
-                  .filter(topic => topic.id !== node.id)
-                  .map(topic => `
-                    <option value="${topic.id}" ${topic.id === node.parent_id ? "selected" : ""}>
-                      ${escapeHtml(topic.title)}
-                    </option>
-                  `).join("")}
+              ${topicList
+                .filter(topic => topic.id !== node.id && topic.title !== "미분류")
+                .map(topic => `
+                  <option value="${topic.id}" ${topic.id === node.parent_id ? "selected" : ""}>
+                    ${escapeHtml(topic.title)}
+                  </option>
+                `).join("")}
               </select>
             </div>
           </div>
