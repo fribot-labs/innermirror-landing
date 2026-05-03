@@ -1072,8 +1072,8 @@
           high: 36
         };
 
-        // ✅ 미분류 topic에 속한 기록은 graph에서 제외
-        if (!topicExists) return;
+        // ✅ 수정 (미분류도 허용)
+        if (!topicExists && log.topicId) return;
 
         nodes.push({
           id: logNodeId,
@@ -1107,6 +1107,15 @@
 
       if (!container) return;
 
+      // 🔥 디버그 위치 (여기에 넣으세요)
+      console.log("🔥 topicList:", topicList.map(t => t.id));
+      console.log("🔥 logs topicIds:", (window.currentLogs || []).map(l => l.topicId));
+      console.log("🔥 unmatched logs:",
+        (window.currentLogs || []).filter(l =>
+            l.topicId && !topicList.some(t => String(t.id) === String(l.topicId))
+        )
+      );
+      
       const data = buildGraphData(topicList, window.currentLogs || []);
 
       const network = new vis.Network(container, data, {
@@ -1241,8 +1250,10 @@
 
     function buildTopicCountMap(logs) {
       return logs.reduce((map, log) => {
-        if (!log.topicId) return map;
-        map[log.topicId] = (map[log.topicId] || 0) + 1;
+        const key = log.topicId || "uncategorized";
+
+        map[key] = (map[key] || 0) + 1;
+
         return map;
       }, {});
     }
@@ -1346,7 +1357,9 @@
     }
 
     function getTopicTitle(topicId) {
-      const topic = topicList.find(t => t.id === topicId);
+      if (!topicId) return "미분류";
+
+      const topic = topicList.find(t => String(t.id) === String(topicId));
       return topic ? topic.title : "미분류";
     }
 
@@ -1994,22 +2007,19 @@
     }
 
     function groupLogsByTopic(logs) {
-      const grouped = {};
-
-      logs.forEach(log => {
-        const topicKey =
+      return logs.reduce((groups, log) => {
+        const topicTitle =
           log.topicId && log.topicTitle
             ? log.topicTitle
             : "미분류";
 
-        if (!grouped[topicKey]) {
-          grouped[topicKey] = [];
+        if (!groups[topicTitle]) {
+          groups[topicTitle] = [];
         }
 
-        grouped[topicKey].push(log);
-      });
-
-      return grouped;
+        groups[topicTitle].push(log);
+        return groups;
+      }, {});
     }
 
     function renderHistory(logs) {
