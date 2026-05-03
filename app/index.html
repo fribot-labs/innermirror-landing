@@ -1767,6 +1767,41 @@
       render();
     }
 
+    function buildEvolutionPathData(logs) {
+      const nodes = [];
+      const edges = [];
+
+      const grouped = groupLogsByTopic(logs);
+
+      Object.entries(grouped).forEach(([topicTitle, items]) => {
+        const ordered = items.slice().sort((a, b) => {
+          return new Date(a.createdAt) - new Date(b.createdAt);
+        });
+
+        ordered.forEach((log, index) => {
+          const nodeId = "evo-" + log.id;
+
+          nodes.push({
+            id: nodeId,
+            label: `V${index + 1}`,
+            title: `${topicTitle}\n${log.problem}`,
+            shape: "ellipse",
+            color: log.changes?.some(c => c.key === "merge") ? "#10b981" : "#2563eb"
+          });
+
+          if (index > 0) {
+            edges.push({
+              from: "evo-" + ordered[index - 1].id,
+              to: nodeId,
+              arrows: "to"
+            });
+          }
+        });
+      });
+
+      return { nodes, edges };
+    }
+
     function selectAllInTopic(topicTitle) {
       const logs = window.currentLogs || [];
 
