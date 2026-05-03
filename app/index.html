@@ -2226,9 +2226,20 @@
 
     function getChangeImpact(log) {
       const changes = log.changes || [];
-      const count = changes.length;
 
-      if (count === 0) {
+      const isMergeRecord =
+        log.status === "active" &&
+        changes.some(change => change.key === "merge");
+
+      if (isMergeRecord) {
+        return {
+          level: "high",
+          label: "높음",
+          score: 5
+        };
+      }
+
+      if (changes.length === 0) {
         return {
           level: "none",
           label: "변화 없음",
@@ -2236,26 +2247,65 @@
         };
       }
 
-      if (count <= 1) {
+      let score = 0;
+
+      // 1. 변경 필드 수 반영
+      score += changes.length;
+
+      // 2. 변경 문장 길이 반영
+      changes.forEach(change => {
+        const beforeText = String(change.before || "");
+        const afterText = String(change.after || "");
+
+        const lengthDiff = Math.abs(afterText.length - beforeText.length);
+
+        if (lengthDiff >= 80) {
+          score += 3;
+        } else if (lengthDiff >= 40) {
+          score += 2;
+        } else if (lengthDiff >= 15) {
+          score += 1;
+        }
+
+        // 3. nextAction 확장 여부 반영
+        const isNextActionChange =
+          change.key === "nextAction" ||
+          change.key === "next_action" ||
+          change.label === "다음 실행";
+
+        if (isNextActionChange && afterText.length > beforeText.length) {
+          score += 2;
+        }
+      });
+
+      if (score === 0) {
         return {
-          level: "low",
-          label: "낮음",
-          score: count
+          level: "none",
+          label: "변화 없음",
+          score
         };
       }
 
-      if (count <= 3) {
+      if (score <= 2) {
+        return {
+          level: "low",
+          label: "낮음",
+          score
+        };
+      }
+
+      if (score <= 5) {
         return {
           level: "medium",
           label: "보통",
-          score: count
+          score
         };
       }
 
       return {
         level: "high",
         label: "높음",
-        score: count
+        score
       };
     }
 
