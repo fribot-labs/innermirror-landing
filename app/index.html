@@ -1994,16 +1994,22 @@
     }
 
     function groupLogsByTopic(logs) {
-      return logs.reduce((groups, log) => {
-        const topicName = log.topicTitle || log.topic || "미분류";
+      const grouped = {};
 
-        if (!groups[topicName]) {
-        groups[topicName] = [];
+      logs.forEach(log => {
+        const topicKey =
+          log.topicId && log.topicTitle
+            ? log.topicTitle
+            : "미분류";
+
+        if (!grouped[topicKey]) {
+          grouped[topicKey] = [];
         }
 
-        groups[topicName].push(log);
-        return groups;
-      }, {});
+        grouped[topicKey].push(log);
+      });
+
+      return grouped;
     }
 
     function renderHistory(logs) {
