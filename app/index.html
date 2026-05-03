@@ -645,6 +645,7 @@
     let selectedRecordIds = new Set();
     let collapsedTopicIds = new Set();
     let showMergedRecords = false;
+    let selectedTopicId = null;
 
     async function initAuth() {
       try {
@@ -1613,14 +1614,37 @@
       render();
     }
 
-    function toggleRecordSelection(logId) {
-      if (selectedRecordIds.has(logId)) {
-        selectedRecordIds.delete(logId);
-      } else {
+    function toggleRecordSelection(logId, topicId) {
+      if (!selectedRecordIds.has(logId)) {
+        if (selectedTopicId && selectedTopicId !== topicId) {
+          alert("같은 주제의 기록만 선택할 수 있습니다.");
+          return;
+        }
+        selectedTopicId = topicId;
         selectedRecordIds.add(logId);
+      } else {
+        selectedRecordIds.delete(logId);
+        if (selectedRecordIds.size === 0) {
+          selectedTopicId = null;
+        }
       }
 
-      renderSelectionStatus();
+      render();
+    }
+
+    function selectAllInTopic(topicTitle) {
+      const logs = window.currentLogs || [];
+
+      const sameTopicLogs = logs.filter(
+        l => (l.topicTitle || "미분류") === topicTitle
+      );
+
+      selectedRecordIds.clear();
+      sameTopicLogs.forEach(l => selectedRecordIds.add(l.id));
+
+      selectedTopicId = sameTopicLogs[0]?.topicId || null;
+
+      render();
     }
 
     function renderSelectionStatus() {
@@ -1721,6 +1745,7 @@
     }
 
     function renderHistory(logs) {
+      window.currentLogs = logs;
       const history = document.getElementById("history");
 
       if (!currentUser) {
@@ -1833,7 +1858,7 @@
               ${selectionMode ? `
                 <input
                   type="checkbox"
-                  onclick="event.stopPropagation(); toggleRecordSelection('${log.id}')"
+                  onclick="event.stopPropagation(); toggleRecordSelection('${log.id}', '${log.topicId}')"
                   ${selectedRecordIds.has(log.id) ? "checked" : ""}
                   style="width:auto;"
                 />
