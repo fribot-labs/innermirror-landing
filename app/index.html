@@ -1099,12 +1099,14 @@
       const container = document.getElementById("topicTree");
       if (!container) return;
 
-      if (!topics || topics.length === 0) {
-        container.innerHTML = `<div class="empty">아직 주제가 없습니다.</div>`;
+      const visibleTopics = topics.filter(topic => topic.title !== "미분류");
+
+      if (!visibleTopics || visibleTopics.length === 0) {
+        container.innerHTML = `<div class="empty">아직 구조화된 주제가 없습니다.</div>`;
         return;
       }
 
-      const tree = buildTopicTree(topics);
+      const tree = buildTopicTree(visibleTopics);
       const countMap = buildTopicCountMap(logs);
 
       container.innerHTML = renderTopicTreeNodes(tree, countMap);
