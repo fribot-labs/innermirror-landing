@@ -352,6 +352,33 @@
       font-size: 12px;
     }
 
+    .merge-source-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,.55);
+      border: 1px solid rgba(52,211,153,.25);
+    }
+
+    .merge-source-box > strong {
+      display: block;
+      color: #6ee7b7;
+      margin-bottom: 10px;
+    }
+
+    .merge-source-card {
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 10px;
+      background: rgba(2,6,23,.45);
+      border: 1px solid rgba(148,163,184,.18);
+    }
+
+    .merge-source-card p {
+      margin: 4px 0;
+      font-size: 13px;
+    }
+
     .timeline {
       display: grid;
       gap: 12px;
@@ -1822,9 +1849,16 @@
       }, {});
     }
 
+    function getMergeSources(logId) {
+      const logs = window.currentLogs || [];
+
+      return logs.filter(log => log.mergedInto === logId);
+    }
+
     function renderRecordCard(log) {
       let mergedInfoHtml = "";
       let mergedSourceHtml = "";
+      let mergeSourceCardsHtml = "";
 
       if (log.status === "merged") {
         mergedSourceHtml = `
@@ -1846,6 +1880,25 @@
                 >
                   ↩ 통합 취소
                 </button>
+            </div>
+          `;
+        }
+      }
+
+      if (log.status === "active" && log.changes && log.changes.some(c => c.key === "merge")) {
+        const sources = getMergeSources(log.id);
+
+        if (sources.length > 0) {
+          mergeSourceCardsHtml = `
+            <div class="merge-source-box">
+                <strong>통합 출처</strong>
+                ${sources.map(source => `
+                  <div class="merge-source-card">
+                    <span class="badge">V${source.version}</span>
+                    <p><b>문제:</b> ${escapeHtml(source.problem)}</p>
+                    <p><b>접근:</b> ${escapeHtml(source.approach)}</p>
+                  </div>
+                `).join("")}
             </div>
           `;
         }
@@ -1909,6 +1962,7 @@
           ` : ""}
 
           ${mergedInfoHtml}
+          ${mergeSourceCardsHtml}
           ${mergedSourceHtml}
 
           ${renderDiff(log)}
