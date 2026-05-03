@@ -1552,6 +1552,56 @@
       await render();
     }
 
+    async function undoMergeRecord(mergedRecordId) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const ok = confirm(
+        "이 통합을 취소하시겠습니까?\n원본 기록은 다시 표시되고, 통합 기록은 보관됩니다."
+      );
+
+      if (!ok) return;
+
+      const { error: restoreError } = await supabaseClient
+        .from("decision_versions")
+        .update({
+          status: "active",
+          merged_into: null,
+          merged_at: null
+        })
+        .eq("merged_into", mergedRecordId)
+        .eq("user_id", currentUser.id);
+
+      if (restoreError) {
+        console.error("undoMerge restore error:", restoreError);
+        alert("원본 기록을 복구하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      const { error: archiveError } = await supabaseClient
+        .from("decision_versions")
+        .update({
+          status: "archived",
+          archived_at: new Date().toISOString()
+        })
+        .eq("id", mergedRecordId)
+        .eq("user_id", currentUser.id);
+
+      if (archiveError) {
+        console.error("undoMerge archive error:", archiveError);
+        alert("통합 기록을 보관하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      showMergedRecords = false;
+      selectedRecordIds.clear();
+      selectionMode = false;
+
+      await render();
+    }
+
     function toggleSelectionMode() {
       selectionMode = !selectionMode;
       selectedRecordIds.clear();
@@ -1763,7 +1813,14 @@
         if (log.changes && log.changes.some(c => c.key === "merge")) {
           mergedInfoHtml = `
             <div class="merge-info">
-              📦 통합된 기록입니다
+                📦 통합된 기록입니다
+                <button
+                  class="secondary small"
+                  style="margin-left:8px;"
+                  onclick="event.stopPropagation(); undoMergeRecord('${log.id}')"
+                >
+                  ↩ 통합 취소
+                </button>
             </div>
           `;
         }
