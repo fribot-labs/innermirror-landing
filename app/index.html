@@ -1168,14 +1168,16 @@
 
     function renderTopicSelect(topics) {
       const select = document.getElementById("topicSelect");
-      const parentSelect = document.getElementById("parentTopicSelect");
+
+      if (!select) {
+        console.warn("⚠️ topicSelect element not found");
+        return;
+      }
 
       const tree = buildTopicTree(topics);
-
       const options = renderTopicOptions(tree);
 
       select.innerHTML = `<option value="">주제를 선택하세요</option>` + options;
-      parentSelect.innerHTML = `<option value="">상위 주제 없음</option>` + options;
     }
 
     function renderTopicTree(topics, logs) {
@@ -1259,50 +1261,7 @@
     }
 
     async function createTopic() {
-      if (!currentUser) {
-        alert("먼저 로그인해주세요.");
-        return;
-      }
-
-      const input = document.getElementById("newTopicTitle");
-      const parentId = document.getElementById("parentTopicSelect").value || null;
-
-      if (input.style.display === "none") {
-        input.style.display = "block";
-        input.focus();
-        return;
-      }
-
-      const title = input.value.trim();
-
-      if (!title) {
-        alert("새 주제명을 입력해주세요.");
-        return;
-      }
-
-      const { data, error } = await supabaseClient
-        .from("topics")
-        .insert({
-          user_id: currentUser.id,
-          title,
-          parent_id: parentId
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error("createTopic error:", error);
-        alert("주제 생성 실패");
-        return;
-      }
-
-      input.value = "";
-      input.style.display = "none";
-
-      topicList = await getTopics();
-      renderTopicSelect(topicList);
-
-      document.getElementById("topicSelect").value = data.id;
+      return createTopicOnly();
     }
 
     async function getLogs() {
@@ -2024,7 +1983,13 @@
 
     function renderHistory(logs) {
       window.currentLogs = logs;
+
       const history = document.getElementById("history");
+
+      if (!history) {
+        console.warn("⚠️ history element not found");
+        return;
+      }
 
       if (!currentUser) {
         history.innerHTML = `
