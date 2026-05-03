@@ -497,6 +497,45 @@
       margin: 4px 0 0;
     }
 
+    .impact-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 8px 0;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(148,163,184,.22);
+    }
+
+    .impact-badge span {
+      opacity: .8;
+    }
+
+    .impact-none {
+      color: #94a3b8;
+      background: rgba(148,163,184,.08);
+    }
+
+    .impact-low {
+      color: #93c5fd;
+      background: rgba(59,130,246,.12);
+      border-color: rgba(96,165,250,.25);
+    }
+
+    .impact-medium {
+      color: #fde68a;
+      background: rgba(250,204,21,.12);
+      border-color: rgba(250,204,21,.28);
+    }
+
+    .impact-high {
+      color: #fca5a5;
+      background: rgba(239,68,68,.12);
+      border-color: rgba(248,113,113,.28);
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -2065,6 +2104,8 @@
         }
       }
 
+      const impact = getChangeImpact(log);
+
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -2106,6 +2147,11 @@
           </div>
 
           <strong>${escapeHtml(log.createdAt)}</strong>
+
+          <div class="impact-badge impact-${impact.level}">
+            변화 강도: ${impact.label}
+            <span>${impact.score}</span>
+          </div>
 
           <p class="topic-label">
             주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
@@ -2166,6 +2212,41 @@
           `).join("")}
         </div>
       `;
+    }
+
+    function getChangeImpact(log) {
+      const changes = log.changes || [];
+      const count = changes.length;
+
+      if (count === 0) {
+        return {
+          level: "none",
+          label: "변화 없음",
+          score: 0
+        };
+      }
+
+      if (count <= 1) {
+        return {
+          level: "low",
+          label: "낮음",
+          score: count
+        };
+      }
+
+      if (count <= 3) {
+        return {
+          level: "medium",
+          label: "보통",
+          score: count
+        };
+      }
+
+      return {
+        level: "high",
+        label: "높음",
+        score: count
+      };
     }
 
     function changeSummary(log) {
