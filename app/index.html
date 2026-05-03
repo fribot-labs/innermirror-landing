@@ -290,6 +290,16 @@
       width: 24px;
     }
 
+    .topic-create-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .topic-create-row input {
+      flex: 1;
+    }
+
     .selection-help {
       margin-top: 8px;
       margin-bottom: 12px;
@@ -596,14 +606,10 @@
       </p>
 
       <label>새 주제명</label>
-      <input id="newTopicTitle" placeholder="예: 초음파 센서 탐색" />
-
-      <label>상위 주제</label>
-      <select id="parentTopicSelect">
-        <option value="">상위 주제 없음</option>
-      </select>
-
-      <button class="secondary" onclick="createTopicOnly()">+ 주제 만들기</button>
+      <div class="topic-create-row">
+        <input id="newTopicTitle" placeholder="예: 초음파 센서 탐색" />
+        <button class="secondary" onclick="createTopicOnly()">+ 주제 만들기</button>
+      </div>
 
       <div class="topic-tree-box">
         <h3>주제 구조</h3>
@@ -889,10 +895,7 @@
       }
 
       const titleInput = document.getElementById("newTopicTitle");
-      const parentSelect = document.getElementById("parentTopicSelect");
-
       const title = titleInput.value.trim();
-      const parentId = parentSelect.value || null;
 
       if (!title) {
         alert("새 주제명을 입력해주세요.");
@@ -904,7 +907,7 @@
         .insert({
           user_id: currentUser.id,
           title,
-          parent_id: parentId
+          parent_id: null
         })
         .select()
         .single();
@@ -916,12 +919,29 @@
       }
 
       titleInput.value = "";
-      parentSelect.value = "";
 
       topicList = await getTopics();
       renderTopicSelect(topicList);
 
       document.getElementById("topicSelect").value = data.id;
+
+      await render();
+    }
+
+    function isDescendantTopic(parentCandidateId, topicId) {
+      const children = topicList.filter(topic => topic.parent_id === topicId);
+
+      for (const child of children) {
+        if (child.id === parentCandidateId) {
+          return true;
+        }
+
+        if (isDescendantTopic(parentCandidateId, child.id)) {
+          return true;
+        }
+      }
+
+      return false;
     }
 
     async function changeParentTopic(topicId, parentId) {
@@ -932,6 +952,11 @@
 
       if (topicId === parentId) {
         alert("자기 자신을 상위 주제로 설정할 수 없습니다.");
+        return;
+      }
+
+      if (parentId && isDescendantTopic(parentId, topicId)) {
+        alert("하위 주제를 상위 주제로 설정할 수 없습니다. 순환 구조가 만들어집니다.");
         return;
       }
 
@@ -1195,7 +1220,7 @@
                 onclick="event.stopPropagation();"
                 onchange="event.stopPropagation(); changeParentTopic('${node.id}', this.value)"
               >
-                <option value="">상위 주제 없음</option>
+                <option value="">독립 주제로 두기</option>
               ${topicList
                 .filter(topic => topic.id !== node.id && topic.title !== "미분류")
                 .map(topic => `
