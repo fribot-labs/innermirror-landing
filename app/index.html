@@ -520,6 +520,7 @@
   <header>
     <div class="logo">InnerMirror</div>
     <div class="status">Supabase Auth · Decision Evolution</div>
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   </header>
 
   <section class="panel" style="margin: 28px 7% 0;">
@@ -569,6 +570,11 @@
         <h3>주제 구조</h3>
         <div id="topicTree"></div>
       </div>
+    </section>
+
+    <section class="panel">
+      <h2>🧠 Topic Graph</h2>
+      <div id="topicGraph" style="height:400px;"></div>
     </section>
 
     <section id="editorPanel" class="panel">
@@ -958,6 +964,73 @@
       });
 
       return tree;
+    }
+
+    function buildGraphData(topics, logs) {
+      const nodes = [];
+      const edges = [];
+
+      // 🔵 topic 노드
+      topics.forEach(topic => {
+        nodes.push({
+          id: topic.id,
+          label: topic.title,
+          shape: "box",
+          color: "#1e293b"
+        });
+
+        if (topic.parent_id) {
+          edges.push({
+            from: topic.parent_id,
+            to: topic.id
+          });
+        }
+      });
+
+      // 🟢 log 노드
+      logs.forEach(log => {
+        const logNodeId = "log-" + log.id;
+
+        nodes.push({
+          id: logNodeId,
+          label: "V" + log.version,
+          shape: "ellipse",
+          color: log.status === "active" ? "#2563eb" : "#64748b"
+        });
+
+        if (log.topicId) {
+          edges.push({
+            from: log.topicId,
+            to: logNodeId
+          });
+        }
+      });
+
+      return { nodes, edges };
+    }
+
+    function renderTopicGraph() {
+      const container = document.getElementById("topicGraph");
+
+      if (!container) return;
+
+      const data = buildGraphData(topicList, window.currentLogs || []);
+
+      const network = new vis.Network(container, data, {
+        layout: {
+          hierarchical: {
+            direction: "UD",
+            sortMethod: "directed"
+          }
+        },
+        physics: false,
+        nodes: {
+          font: { color: "#fff" }
+        },
+        edges: {
+          color: "#94a3b8"
+        }
+      });
     }
 
     function renderTopicSelect(topics) {
@@ -1719,6 +1792,7 @@
 
         renderTimeline(logs);
         renderHistory(logs);
+        renderTopicGraph();
 
       } catch (error) {
         console.error("render error:", error);
