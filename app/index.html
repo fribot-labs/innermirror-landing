@@ -970,8 +970,11 @@
       const nodes = [];
       const edges = [];
 
+      // ✅ "미분류"는 Topic Graph에서 제외
+      const visibleTopics = topics.filter(topic => topic.title !== "미분류");
+
       // 🔵 topic 노드
-      topics.forEach(topic => {
+      visibleTopics.forEach(topic => {
         nodes.push({
           id: topic.id,
           label: topic.title,
@@ -979,7 +982,8 @@
           color: "#1e293b"
         });
 
-        if (topic.parent_id) {
+        // ✅ 부모도 visibleTopics 안에 있을 때만 연결
+        if (topic.parent_id && visibleTopics.some(t => t.id === topic.parent_id)) {
           edges.push({
             from: topic.parent_id,
             to: topic.id
@@ -990,25 +994,31 @@
       // 🟢 log 노드
       logs.forEach(log => {
         const logNodeId = "log-" + log.id;
+        const topicExists = visibleTopics.some(t => t.id === log.topicId);
+        const isMergedResult =
+          log.status === "active" &&
+          log.changes?.some(change => change.key === "merge");
+
+        // ✅ 미분류 topic에 속한 기록은 graph에서 제외
+        if (!topicExists) return;
 
         nodes.push({
           id: logNodeId,
-          label: "V" + log.version,
+          label: isMergedResult ? `V${log.version}\n통합` : `V${log.version}`,
           shape: "ellipse",
-          color: log.status === "active" ? "#2563eb" : "#64748b"
+          color: isMergedResult ? "#10b981" : "#2563eb"
         });
 
-        if (log.topicId) {
-          edges.push({
-            from: log.topicId,
-            to: logNodeId
-          });
-        }
+        edges.push({
+          from: log.topicId,
+          to: logNodeId
+        });
 
-        if (log.merged_into) {
+        // 🟡 merge 관계 점선 표시
+        if (log.mergedInto) {
           edges.push({
             from: "log-" + log.id,
-            to: "log-" + log.merged_into,
+            to: "log-" + log.mergedInto,
             dashes: true,
             color: "#facc15"
           });
@@ -1040,7 +1050,10 @@
           color: "#94a3b8"
         },
         interaction: {
-          hover: true
+          hover: true,
+          dragNodes: false,
+          dragView: true,
+          zoomView: true
         }
       });
 
@@ -1050,15 +1063,17 @@
 
         const nodeId = String(params.nodes[0]);
 
-        // log 노드 클릭
         if (nodeId.startsWith("log-")) {
           const logId = nodeId.replace("log-", "");
 
           loadVersionToForm(logId);
 
-          document.getElementById("history")?.scrollIntoView({
-            behavior: "smooth"
-          });
+          setTimeout(() => {
+            document.getElementById(`record-${logId}`)?.scrollIntoView({
+              behavior: "smooth",
+              block: "center"
+            });
+          }, 100);
         }
       });
 
@@ -2049,7 +2064,7 @@
       }
 
       return `
-        <div class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
+        <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
             <div style="display:flex; align-items:center; gap:8px;">
               ${selectionMode ? `
