@@ -1004,6 +1004,15 @@
             to: logNodeId
           });
         }
+
+        if (log.merged_into) {
+          edges.push({
+            from: "log-" + log.id,
+            to: "log-" + log.merged_into,
+            dashes: true,
+            color: "#facc15"
+          });
+        }
       });
 
       return { nodes, edges };
@@ -1029,7 +1038,33 @@
         },
         edges: {
           color: "#94a3b8"
+        },
+        interaction: {
+          hover: true
         }
+      });
+
+      // ✅ 노드 클릭 → 해당 기록으로 이동
+      network.on("click", function (params) {
+        if (params.nodes.length === 0) return;
+
+        const nodeId = String(params.nodes[0]);
+
+        // log 노드 클릭
+        if (nodeId.startsWith("log-")) {
+          const logId = nodeId.replace("log-", "");
+
+          loadVersionToForm(logId);
+
+          document.getElementById("history")?.scrollIntoView({
+            behavior: "smooth"
+          });
+        }
+      });
+
+      // ✅ hover 시 노드 강조
+      network.on("hoverNode", function (params) {
+        network.selectNodes([params.node]);
       });
     }
 
