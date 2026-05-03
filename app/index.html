@@ -1038,6 +1038,15 @@
           log.status === "active" &&
           log.changes?.some(change => change.key === "merge");
 
+        const impact = getChangeImpact(log);
+
+        const nodeSizeMap = {
+          none: 18,
+          low: 22,
+          medium: 28,
+          high: 36
+        };
+
         // ✅ 미분류 topic에 속한 기록은 graph에서 제외
         if (!topicExists) return;
 
@@ -1045,6 +1054,7 @@
           id: logNodeId,
           label: isMergedResult ? `V${log.version}\n통합` : `V${log.version}`,
           shape: "ellipse",
+          size: nodeSizeMap[impact.level],
           color: isMergedResult ? "#10b981" : "#2563eb"
         });
 
