@@ -510,6 +510,24 @@
       line-height: 1.5;
     }
 
+    .coaching-suppressed-box {
+      margin: 8px 0 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(100,116,139,0.12);
+      border: 1px solid rgba(148,163,184,0.22);
+      color: #cbd5e1;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .coaching-suppressed-box p {
+      margin: 4px 0 0;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -2397,6 +2415,9 @@
       const milestone = detectMilestone(log, topicLogs);
       const coaching = generateMilestoneCoaching(log, milestone);
       const coachingStats = coaching ? getCoachingStats(coaching.id) : null;
+      const suppressCoaching = coachingStats
+        ? shouldSuppressCoaching(coachingStats)
+        : false;
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
@@ -2455,7 +2476,7 @@
             </div>
           ` : ""}
 
-          ${coaching ? `
+          ${coaching && !suppressCoaching ? `
             <div class="coaching-box">
               🧭 다음 코칭
               <p>${escapeHtml(coaching.text)}</p>
@@ -2482,6 +2503,14 @@
                   ❌ 무시함
                 </button>
               </div>
+
+              ${coachingStats && coachingStats.total > 0 ? `
+                <div class="coaching-stats">
+                  실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
+                  <br />
+                  실행률 ${coachingStats.executedRate}%
+                </div>
+              ` : ""}
             </div>
           ` : ""}
 
@@ -2490,6 +2519,13 @@
                 실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
                 <br />
                 실행률 ${coachingStats.executedRate}%
+            </div>
+          ` : ""}
+
+          ${coaching && suppressCoaching ? `
+            <div class="coaching-suppressed-box">
+                💤 이 코칭은 최근 반응이 낮아 잠시 줄였습니다.
+                <p>다른 방식의 코칭이 더 적합할 수 있습니다.</p>
             </div>
           ` : ""}
 
@@ -2790,6 +2826,30 @@
         ignored,
         executedRate
       };
+    }
+
+    function shouldSuppressCoaching(coachingStats) {
+      if (!coachingStats) return false;
+
+      // 데이터가 너무 적으면 억제하지 않음
+      if (coachingStats.total < 3) return false;
+
+      // 무시함이 2회 이상이고 실행률이 낮으면 억제
+      if (coachingStats.ignored >= 2 && coachingStats.executedRate < 35) {
+        return true;
+      }
+
+      // 보류 + 무시가 대부분이면 억제
+      const passiveCount = coachingStats.later + coachingStats.ignored;
+      const passiveRate = coachingStats.total > 0
+        ? Math.round((passiveCount / coachingStats.total) * 100)
+        : 0;
+
+      if (passiveRate >= 80 && coachingStats.executedRate < 30) {
+        return true;
+      }
+
+      return false;
     }
 
     async function handleCoachingFeedback(coachingId, logId, coachingType, feedback) {
