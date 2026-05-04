@@ -780,6 +780,7 @@
     let showMergedRecords = false;
     let selectedTopicId = null;
     let graphScope = "all";
+    let showOnlyMilestones = false;
 
     async function initAuth() {
       try {
@@ -1961,6 +1962,11 @@
       render();
     }
 
+    function toggleMilestoneFilter() {
+      showOnlyMilestones = !showOnlyMilestones;
+      render();
+    }
+
     function toggleRecordSelection(logId, topicId) {
       if (!selectedRecordIds.has(logId)) {
         if (selectedTopicId && selectedTopicId !== topicId) {
@@ -2056,10 +2062,12 @@
         renderGraphScopeSelect(topicList);
 
         const logs = await getLogs();
-        renderTopicTree(topicList, logs);
+        const visibleLogs = filterMilestoneLogs(logs);
+
+        renderTopicTree(topicList, visibleLogs);
 
         // 인사이트 생성
-        const insight = generateInsight(logs);
+        const insight = generateInsight(visibleLogs);
 
         const box = document.getElementById("insightBox");
         const text = document.getElementById("insightText");
@@ -2073,8 +2081,10 @@
           }
         }
 
-        renderTimeline(logs);
-        renderHistory(logs);
+        renderTimeline(visibleLogs);
+        renderHistory(visibleLogs);
+
+        window.currentLogs = visibleLogs;
         renderTopicGraph();
 
       } catch (error) {
@@ -2181,6 +2191,10 @@
 
           <button class="secondary small" onclick="toggleMergedRecords()">
             ${showMergedRecords ? "통합 원본 숨기기" : "통합 원본 보기"}
+          </button>
+
+          <button class="secondary small" onclick="toggleMilestoneFilter()">
+            ${showOnlyMilestones ? "전체 기록 보기" : "⭐ 전환점만 보기"}
           </button>
 
           ${selectionMode ? `
@@ -2535,6 +2549,16 @@
         label: "",
         reason: ""
       };
+    }
+
+    function filterMilestoneLogs(logs) {
+      if (!showOnlyMilestones) return logs;
+
+      return logs.filter(log => {
+        const topicLogs = logs.filter(item => item.topicId === log.topicId);
+        const milestone = detectMilestone(log, topicLogs);
+        return milestone.isMilestone;
+      });
     }
 
     function changeSummary(log) {
