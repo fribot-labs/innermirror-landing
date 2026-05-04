@@ -426,6 +426,13 @@
       font-size: 13px;
     }
 
+    .timeline-desc {
+      font-size: 12px;
+      color: #c4b5fd;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
     .timeline-milestone {
       display: inline-block;
       margin-top: 4px;
@@ -450,6 +457,14 @@
       margin-top: 4px;
       color: #c4b5fd;
       font-size: 12px;
+      font-weight: 500;
+    }
+
+    .milestone-desc {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #e9d5ff;
+      line-height: 1.5;
       font-weight: 500;
     }
 
@@ -2136,8 +2151,11 @@
 
                   ${milestone.isMilestone ? `
                     <span class="timeline-milestone">
-                    ⭐ ${escapeHtml(milestone.label)}
+                      ⭐ ${escapeHtml(milestone.label)}
                     </span>
+                    <div class="timeline-desc">
+                      ${escapeHtml(milestone.description)}
+                    </div>
                   ` : ""}
 
                   <span>${escapeHtml(log.createdAt)}</span>
@@ -2367,6 +2385,9 @@
             <div class="milestone-badge">
               ⭐ ${escapeHtml(milestone.label)}
               <span>${escapeHtml(milestone.reason)}</span>
+              <p class="milestone-desc">
+                ${escapeHtml(milestone.description)}
+              </p>
             </div>
           ` : ""}
 
@@ -2533,35 +2554,80 @@
         .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
         .findIndex(item => item.id === log.id) + 1;
 
+      const prevLog = topicLogs
+        .filter(item => item.id !== log.id)
+        .filter(item => new Date(item.createdAt) < new Date(log.createdAt))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+
       if (isMergeRecord) {
         return {
           isMilestone: true,
           label: "통합 전환점",
-          reason: "여러 기록이 하나의 판단 흐름으로 통합되었습니다."
+          reason: "여러 기록이 하나의 판단 흐름으로 통합되었습니다.",
+          description: generateMilestoneDescription(log, prevLog)
         };
       }
 
       if (impact.level === "high") {
         return {
-        isMilestone: true,
-        label: "큰 변화",
-        reason: "판단 변화 강도가 높게 감지되었습니다."
+          isMilestone: true,
+          label: "큰 변화",
+          reason: "판단 변화 강도가 높게 감지되었습니다.",
+          description: generateMilestoneDescription(log, prevLog)
         };
       }
 
       if (coreFieldChanged && topicOrder >= 3) {
         return {
-        isMilestone: true,
-        label: "판단 전환",
-        reason: "핵심 판단 필드가 반복 기록 이후 변경되었습니다."
+          isMilestone: true,
+          label: "판단 전환",
+          reason: "핵심 판단 필드가 반복 기록 이후 변경되었습니다.",
+          description: generateMilestoneDescription(log, prevLog)
         };
       }
 
       return {
         isMilestone: false,
         label: "",
-        reason: ""
+        reason: "",
+        description: ""
       };
+    }
+
+    function generateMilestoneDescription(log, prevLog) {
+      if (!prevLog) return "초기 판단입니다.";
+
+      const changes = log.changes || [];
+
+      // 🔥 핵심 변화 유형 분석
+      const changedKeys = changes.map(change => change.key);
+
+      if (changedKeys.includes("merge")) {
+        return "여러 판단 흐름을 하나로 통합한 전략 전환입니다.";
+      }
+
+      if (changedKeys.includes("approach") && changedKeys.includes("problem")) {
+        return "문제 정의와 접근 방식이 동시에 재구성되었습니다.";
+      }
+
+      if (changedKeys.includes("problem")) {
+        return "문제 정의가 새롭게 조정되었습니다.";
+      }
+
+      if (changedKeys.includes("approach")) {
+        return "문제 해결 접근 방식이 변경되었습니다.";
+      }
+
+      if (changedKeys.includes("reason")) {
+        return "판단 이유가 더 명확하게 재정리되었습니다.";
+      }
+
+      if (changedKeys.includes("nextAction")) {
+        return "다음 실행 전략이 구체화되었습니다.";
+      }
+
+      // fallback
+      return "판단 구조에 의미 있는 변화가 발생했습니다.";
     }
 
     function filterMilestoneLogs(logs) {
