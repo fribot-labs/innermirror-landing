@@ -1177,6 +1177,8 @@
           log.changes?.some(change => change.key === "merge");
 
         const impact = getChangeImpact(log);
+        const topicLogs = logs.filter(item => item.topicId === log.topicId);
+        const milestone = detectMilestone(log, topicLogs);
 
         const nodeSizeMap = {
           none: 18,
@@ -1191,11 +1193,22 @@
 
         nodes.push({
           id: logNodeId,
-          label: isMergedResult ? `V${log.version}\n통합` : `V${log.version}`,
-          shape: "ellipse",
-          size: nodeSizeMap[impact.level],
-          color: isMergedResult ? "#10b981" : "#2563eb",
-          font: { color: "#fff" }
+          label: milestone.isMilestone
+            ? `⭐ V${log.version}`
+            : isMergedResult
+              ? `V${log.version}\n통합`
+              : `V${log.version}`,
+          shape: milestone.isMilestone ? "star" : "ellipse",
+          size: milestone.isMilestone
+            ? Math.max(nodeSizeMap[impact.level], 34)
+            : nodeSizeMap[impact.level],
+          color: milestone.isMilestone
+            ? "#a855f7"
+            : isMergedResult
+              ? "#10b981"
+              : "#2563eb",
+          font: { color: "#fff" },
+          borderWidth: milestone.isMilestone ? 3 : 1
         });
 
         edges.push({
