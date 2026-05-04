@@ -300,6 +300,24 @@
       flex: 1;
     }
 
+    .graph-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .graph-toolbar select {
+      border: 1px solid rgba(148,163,184,.28);
+      background: rgba(15,23,42,.95);
+      color: white;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 13px;
+      min-width: 180px;
+    }
+
     .selection-help {
       margin-top: 8px;
       margin-bottom: 12px;
@@ -619,6 +637,16 @@
 
     <section class="panel">
       <h2>🧠 Topic Graph</h2>
+
+      <div class="graph-toolbar">
+        <button class="secondary small" onclick="setGraphScope('all')">
+          전체 보기
+        </button>
+        <select id="graphScopeSelect" onchange="setGraphScope(this.value)">
+          <option value="all">전체 사고 영역</option>
+        </select>
+      </div>
+
       <div id="topicGraph" style="height:400px;"></div>
     </section>
 
@@ -724,6 +752,7 @@
     let collapsedTopicIds = new Set();
     let showMergedRecords = false;
     let selectedTopicId = null;
+    let graphScope = "all";
 
     async function initAuth() {
       try {
@@ -1033,6 +1062,36 @@
       }).join("");
     }
 
+    function getTopicDescendantIds(rootTopicId) {
+      const ids = new Set([rootTopicId]);
+      const stack = [rootTopicId];
+
+      while (stack.length > 0) {
+        const currentId = stack.pop();
+
+        topicList
+          .filter(topic => String(topic.parent_id) === String(currentId))
+          .forEach(child => {
+            ids.add(child.id);
+            stack.push(child.id);
+        });
+      }
+
+      return ids;
+    }
+
+    function getGraphScopeTopics(topics) {
+      const visibleTopics = topics.filter(topic => topic.title !== "미분류");
+
+      if (graphScope === "all") {
+        return visibleTopics;
+      }
+
+      const scopeIds = getTopicDescendantIds(graphScope);
+
+      return visibleTopics.filter(topic => scopeIds.has(topic.id));
+    }
+
     function buildTopicTree(topics) {
       const map = {};
       topics.forEach(t => map[t.id] = { ...t, children: [] });
@@ -1054,8 +1113,7 @@
       const nodes = [];
       const edges = [];
 
-      // ✅ "미분류"는 Topic Graph에서 제외
-      const visibleTopics = topics.filter(topic => topic.title !== "미분류");
+      const visibleTopics = getGraphScopeTopics(topics);
 
       // 🔵 topic 노드
       visibleTopics.forEach(topic => {
@@ -1197,6 +1255,30 @@
       network.on("hoverNode", function (params) {
         network.selectNodes([params.node]);
       });
+    }
+
+    function renderGraphScopeSelect(topics) {
+      const select = document.getElementById("graphScopeSelect");
+      if (!select) return;
+
+      const candidates = topics.filter(topic =>
+        topic.title !== "미분류" &&
+        (topic.is_independent === true || !topic.parent_id)
+      );
+
+      select.innerHTML = `
+        <option value="all">전체 사고 영역</option>
+        ${candidates.map(topic => `
+          <option value="${topic.id}" ${graphScope === topic.id ? "selected" : ""}>
+            ${topic.is_independent ? "🧩 " : ""}${escapeHtml(topic.title)}
+          </option>
+        `).join("")}
+      `;
+    }
+
+    function setGraphScope(scope) {
+      graphScope = scope || "all";
+      render();
     }
 
     function renderTopicSelect(topics) {
@@ -1941,9 +2023,10 @@
           await assignUncategorizedLogs(defaultTopic.id);
         }
 
-        // 주제 목록 불러오기 + dropdown 렌더링
+        // 주제 목록 불러오기 + dropdown 렌더링 + scope select 렌더 추가
         topicList = await getTopics();
         renderTopicSelect(topicList);
+        renderGraphScopeSelect(topicList);
 
         const logs = await getLogs();
         renderTopicTree(topicList, logs);
