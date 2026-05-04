@@ -426,6 +426,25 @@
       font-size: 13px;
     }
 
+    .milestone-badge {
+      margin: 8px 0 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(168,85,247,0.12);
+      border: 1px solid rgba(192,132,252,0.28);
+      color: #d8b4fe;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .milestone-badge span {
+      display: block;
+      margin-top: 4px;
+      color: #c4b5fd;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -2245,6 +2264,12 @@
 
       const impact = getChangeImpact(log);
 
+      const topicLogs = (window.currentLogs || []).filter(
+        item => item.topicId === log.topicId
+      );
+
+      const milestone = detectMilestone(log, topicLogs);
+
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
           <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
@@ -2291,6 +2316,13 @@
             변화 강도: ${impact.label}
             <span>${impact.score}</span>
           </div>
+
+          ${milestone.isMilestone ? `
+            <div class="milestone-badge">
+              ⭐ ${escapeHtml(milestone.label)}
+              <span>${escapeHtml(milestone.reason)}</span>
+            </div>
+          ` : ""}
 
           <p class="topic-label">
             주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
@@ -2435,6 +2467,54 @@
         level: "high",
         label: "높음",
         score
+      };
+    }
+
+    function detectMilestone(log, topicLogs = []) {
+      const impact = getChangeImpact(log);
+      const changes = log.changes || [];
+
+      const isMergeRecord =
+        log.status === "active" &&
+        changes.some(change => change.key === "merge");
+
+      const coreFieldChanged = changes.some(change =>
+        ["problem", "approach", "reason"].includes(change.key)
+      );
+
+      const topicOrder = topicLogs
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .findIndex(item => item.id === log.id) + 1;
+
+      if (isMergeRecord) {
+        return {
+          isMilestone: true,
+          label: "통합 전환점",
+          reason: "여러 기록이 하나의 판단 흐름으로 통합되었습니다."
+        };
+      }
+
+      if (impact.level === "high") {
+        return {
+        isMilestone: true,
+        label: "큰 변화",
+        reason: "판단 변화 강도가 높게 감지되었습니다."
+        };
+      }
+
+      if (coreFieldChanged && topicOrder >= 3) {
+        return {
+        isMilestone: true,
+        label: "판단 전환",
+        reason: "핵심 판단 필드가 반복 기록 이후 변경되었습니다."
+        };
+      }
+
+      return {
+        isMilestone: false,
+        label: "",
+        reason: ""
       };
     }
 
