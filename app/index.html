@@ -468,6 +468,25 @@
       font-weight: 500;
     }
 
+    .coaching-box {
+      margin: 8px 0 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(14,165,233,0.10);
+      border: 1px solid rgba(56,189,248,0.28);
+      color: #bae6fd;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .coaching-box p {
+      margin: 6px 0 0;
+      color: #e0f2fe;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -2333,6 +2352,7 @@
       );
 
       const milestone = detectMilestone(log, topicLogs);
+      const coaching = generateMilestoneCoaching(log, milestone);
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
@@ -2388,6 +2408,13 @@
               <p class="milestone-desc">
                 ${escapeHtml(milestone.description)}
               </p>
+            </div>
+          ` : ""}
+
+          ${coaching ? `
+            <div class="coaching-box">
+              🧭 다음 코칭
+              <p>${escapeHtml(coaching)}</p>
             </div>
           ` : ""}
 
@@ -2628,6 +2655,39 @@
 
       // fallback
       return "판단 구조에 의미 있는 변화가 발생했습니다.";
+    }
+
+    function generateMilestoneCoaching(log, milestone) {
+      if (!milestone?.isMilestone) return "";
+
+      const changes = log.changes || [];
+      const changedKeys = changes.map(change => change.key);
+
+      if (changedKeys.includes("merge")) {
+        return "통합된 판단을 기준으로 다음 실행을 하나만 정해 실제 결과를 기록해보세요.";
+      }
+
+      if (changedKeys.includes("problem")) {
+        return "바뀐 문제 정의가 실제 상황을 더 잘 설명하는지 하나의 사례로 검증해보세요.";
+      }
+
+      if (changedKeys.includes("approach")) {
+        return "새 접근 방식을 작은 실험으로 실행하고, 이전 접근과 결과 차이를 비교해보세요.";
+      }
+
+      if (changedKeys.includes("reason")) {
+        return "새 판단 이유가 충분한 근거를 갖는지 반례를 하나 찾아보세요.";
+      }
+
+      if (changedKeys.includes("nextAction")) {
+        return "다음 실행을 가능한 한 작게 쪼개고, 첫 번째 행동만 바로 실행해보세요.";
+      }
+
+      if (milestone.label === "큰 변화") {
+        return "변화가 큰 기록입니다. 바로 실행하기보다 핵심 가정 하나를 먼저 확인해보세요.";
+      }
+
+      return "이 전환점을 기준으로 다음 기록에는 실제 실행 결과와 배운 점을 남겨보세요.";
     }
 
     function filterMilestoneLogs(logs) {
