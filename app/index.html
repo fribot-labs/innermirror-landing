@@ -499,6 +499,17 @@
       font-size: 12px;
     }
 
+    .coaching-stats {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(15,23,42,0.45);
+      border: 1px solid rgba(125,211,252,0.18);
+      color: #bae6fd;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -827,6 +838,7 @@
     let selectedTopicId = null;
     let graphScope = "all";
     let showOnlyMilestones = false;
+    let coachingFeedbackList = [];
 
     async function initAuth() {
       try {
@@ -1475,6 +1487,23 @@
       return createTopicOnly();
     }
 
+    async function getCoachingFeedback() {
+      if (!currentUser) return [];
+
+      const { data, error } = await supabaseClient
+        .from("coaching_feedback")
+        .select("*")
+        .eq("user_id", currentUser.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("getCoachingFeedback error:", error);
+        return [];
+      }
+
+      return data || [];
+    }
+
     async function getLogs() {
       if (!currentUser) return [];
 
@@ -1847,37 +1876,6 @@
       await render();
     }
 
-    async function handleCoachingFeedback(coachingId, logId, coachingType, feedback) {
-      if (!currentUser) {
-        alert("먼저 로그인해주세요.");
-        return;
-      }
-
-      const { error } = await supabaseClient
-        .from("coaching_feedback")
-        .insert({
-          user_id: currentUser.id,
-          coaching_id: coachingId,
-          log_id: logId,
-          coaching_type: coachingType,
-          feedback
-        });
-
-      if (error) {
-        console.error("handleCoachingFeedback error:", error);
-        alert("코칭 피드백을 저장하는 중 오류가 발생했습니다.");
-        return;
-      }
-
-      const messageMap = {
-        executed: "실행함으로 기록했습니다.",
-        later: "보류로 기록했습니다.",
-        ignored: "무시함으로 기록했습니다."
-      };
-
-      alert(messageMap[feedback] || "피드백이 기록되었습니다.");
-    }
-
     async function getMergedSources(mergedId) {
       const { data, error } = await supabaseClient
         .from("decision_versions")
@@ -2151,6 +2149,8 @@
         renderTopicSelect(topicList);
         renderGraphScopeSelect(topicList);
 
+        coachingFeedbackList = await getCoachingFeedback();
+
         const logs = await getLogs();
         const visibleLogs = filterMilestoneLogs(logs);
 
@@ -2396,6 +2396,7 @@
 
       const milestone = detectMilestone(log, topicLogs);
       const coaching = generateMilestoneCoaching(log, milestone);
+      const coachingStats = coaching ? getCoachingStats(coaching.id) : null;
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
@@ -2481,6 +2482,14 @@
                   ❌ 무시함
                 </button>
               </div>
+            </div>
+          ` : ""}
+
+          ${coachingStats && coachingStats.total > 0 ? `
+            <div class="coaching-stats">
+                실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
+                <br />
+                실행률 ${coachingStats.executedRate}%
             </div>
           ` : ""}
 
@@ -2758,6 +2767,63 @@
         type,
         text
       };
+    }
+
+    function getCoachingStats(coachingId) {
+      const feedbacks = coachingFeedbackList.filter(
+        item => item.coaching_id === coachingId
+      );
+
+      const executed = feedbacks.filter(item => item.feedback === "executed").length;
+      const later = feedbacks.filter(item => item.feedback === "later").length;
+      const ignored = feedbacks.filter(item => item.feedback === "ignored").length;
+      const total = feedbacks.length;
+
+      const executedRate = total > 0
+        ? Math.round((executed / total) * 100)
+        : 0;
+
+      return {
+        total,
+        executed,
+        later,
+        ignored,
+        executedRate
+      };
+    }
+
+    async function handleCoachingFeedback(coachingId, logId, coachingType, feedback) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("coaching_feedback")
+        .insert({
+          user_id: currentUser.id,
+          coaching_id: coachingId,
+          log_id: logId,
+          coaching_type: coachingType,
+          feedback
+        });
+
+      if (error) {
+        console.error("handleCoachingFeedback error:", error);
+        alert("코칭 피드백을 저장하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      const messageMap = {
+        executed: "실행함으로 기록했습니다.",
+        later: "보류로 기록했습니다.",
+        ignored: "무시함으로 기록했습니다."
+      };
+
+      alert(messageMap[feedback] || "피드백이 기록되었습니다.");
+
+      coachingFeedbackList = await getCoachingFeedback();
+      await render();
     }
 
     function filterMilestoneLogs(logs) {
