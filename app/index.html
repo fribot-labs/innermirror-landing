@@ -528,6 +528,30 @@
       font-weight: 500;
     }
 
+    .coaching-preferred {
+      border-color: rgba(34,197,94,0.45);
+      background: rgba(22,163,74,0.12);
+    }
+
+    .preferred-label {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      background: rgba(34,197,94,0.18);
+      border: 1px solid rgba(74,222,128,0.35);
+      color: #bbf7d0;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .preferred-note {
+      margin-top: 8px;
+      color: #bbf7d0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -2418,6 +2442,9 @@
       const suppressCoaching = coachingStats
         ? shouldSuppressCoaching(coachingStats)
         : false;
+      const preferredCoaching = coaching
+        ? isPreferredCoaching(coaching.type)
+        : false;
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
@@ -2477,8 +2504,8 @@
           ` : ""}
 
           ${coaching && !suppressCoaching ? `
-            <div class="coaching-box">
-              🧭 다음 코칭
+            <div class="coaching-box ${preferredCoaching ? "coaching-preferred" : ""}">
+              🧭 다음 코칭 ${preferredCoaching ? `<span class="preferred-label">추천</span>` : ""}
               <p>${escapeHtml(coaching.text)}</p>
 
               <div class="coaching-actions">
@@ -2504,6 +2531,12 @@
                 </button>
               </div>
 
+              ${preferredCoaching ? `
+                <div class="preferred-note">
+                  ✅ 이전에 실행률이 높았던 코칭 유형입니다.
+                </div>
+              ` : ""}
+
               ${coachingStats && coachingStats.total > 0 ? `
                 <div class="coaching-stats">
                   실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
@@ -2511,14 +2544,6 @@
                   실행률 ${coachingStats.executedRate}%
                 </div>
               ` : ""}
-            </div>
-          ` : ""}
-
-          ${coachingStats && coachingStats.total > 0 ? `
-            <div class="coaching-stats">
-                실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
-                <br />
-                실행률 ${coachingStats.executedRate}%
             </div>
           ` : ""}
 
@@ -2850,6 +2875,37 @@
       }
 
       return false;
+    }
+
+    function getCoachingTypeStats(coachingType) {
+      const feedbacks = coachingFeedbackList.filter(
+        item => item.coaching_type === coachingType
+      );
+
+      const executed = feedbacks.filter(item => item.feedback === "executed").length;
+      const later = feedbacks.filter(item => item.feedback === "later").length;
+      const ignored = feedbacks.filter(item => item.feedback === "ignored").length;
+      const total = feedbacks.length;
+
+      const executedRate = total > 0
+        ? Math.round((executed / total) * 100)
+        : 0;
+
+      return {
+        total,
+        executed,
+        later,
+        ignored,
+        executedRate
+      };
+    }
+
+    function isPreferredCoaching(coachingType) {
+      const stats = getCoachingTypeStats(coachingType);
+
+      if (stats.total < 2) return false;
+
+      return stats.executedRate >= 60 && stats.executed >= 2;
     }
 
     async function handleCoachingFeedback(coachingId, logId, coachingType, feedback) {
