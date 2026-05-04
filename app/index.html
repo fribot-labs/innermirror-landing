@@ -950,19 +950,25 @@
         return;
       }
 
-      if (topicId === parentId) {
+      const isIndependent = parentId === "__independent__";
+      const nextParentId = isIndependent ? null : parentId || null;
+
+      if (topicId === nextParentId) {
         alert("자기 자신을 상위 주제로 설정할 수 없습니다.");
         return;
       }
 
-      if (parentId && isDescendantTopic(parentId, topicId)) {
+      if (nextParentId && isDescendantTopic(nextParentId, topicId)) {
         alert("하위 주제를 상위 주제로 설정할 수 없습니다. 순환 구조가 만들어집니다.");
         return;
       }
 
       const { error } = await supabaseClient
         .from("topics")
-        .update({ parent_id: parentId || null })
+        .update({
+          parent_id: nextParentId,
+          is_independent: isIndependent
+        })
         .eq("id", topicId)
         .eq("user_id", currentUser.id);
 
@@ -974,6 +980,20 @@
 
       topicList = await getTopics();
       await render();
+    }
+
+    async function changeTopicParent(topicId, parentId) {
+      const isIndependent = parentId === "__independent__";
+
+      await supabaseClient
+        .from("topics")
+        .update({
+          parent_id: isIndependent ? null : parentId || null,
+          is_independent: isIndependent
+        })
+        .eq("id", topicId);
+
+      await reloadTopics();
     }
 
     function toggleTopicCollapse(topicId) {
@@ -1039,15 +1059,22 @@
 
       // 🔵 topic 노드
       visibleTopics.forEach(topic => {
+        const isIndependent = topic.is_independent === true;
+
         nodes.push({
           id: topic.id,
-          label: topic.title,
+          label: isIndependent ? `🧩 ${topic.title}` : topic.title,
           shape: "box",
-          color: "#1e293b"
+          color: isIndependent ? "#7c3aed" : "#1e293b",
+          font: { color: "#fff" }
         });
 
-        // ✅ 부모도 visibleTopics 안에 있을 때만 연결
-        if (topic.parent_id && visibleTopics.some(t => t.id === topic.parent_id)) {
+        // ✅ 독립 주제는 연결선을 만들지 않음
+        if (
+          !isIndependent &&
+          topic.parent_id &&
+          visibleTopics.some(t => String(t.id) === String(topic.parent_id))
+        ) {
           edges.push({
             from: topic.parent_id,
             to: topic.id
@@ -1058,7 +1085,7 @@
       // 🟢 log 노드
       logs.forEach(log => {
         const logNodeId = "log-" + log.id;
-        const topicExists = visibleTopics.some(t => t.id === log.topicId);
+        const topicExists = visibleTopics.some(t => String(t.id) === String(log.topicId));
         const isMergedResult =
           log.status === "active" &&
           log.changes?.some(change => change.key === "merge");
@@ -1072,15 +1099,17 @@
           high: 36
         };
 
-        // ✅ 수정 (미분류도 허용)
-        if (!topicExists && log.topicId) return;
+        // ✅ topicId가 있는데 topicList와 매칭되지 않으면 graph에서 제외
+        // ✅ topicId가 없는 미분류 기록은 graph에서 제외
+        if (!log.topicId || !topicExists) return;
 
         nodes.push({
           id: logNodeId,
           label: isMergedResult ? `V${log.version}\n통합` : `V${log.version}`,
           shape: "ellipse",
           size: nodeSizeMap[impact.level],
-          color: isMergedResult ? "#10b981" : "#2563eb"
+          color: isMergedResult ? "#10b981" : "#2563eb",
+          font: { color: "#fff" }
         });
 
         edges.push({
@@ -1100,6 +1129,19 @@
       });
 
       return { nodes, edges };
+    }
+
+    function isCircularRelation(topicId, targetParentId) {
+      let current = targetParentId;
+
+      while (current) {
+        if (current === topicId) return true;
+
+        const parent = topicList.find(t => t.id === current);
+        current = parent?.parent_id;
+      }
+
+      return false;
     }
 
     function renderTopicGraph() {
@@ -1194,13 +1236,14 @@
         const indent = depth * 16;
         const hasChildren = node.children && node.children.length > 0;
         const isCollapsed = collapsedTopicIds.has(node.id);
+        const isIndependent = node.is_independent === true;
 
         return `
           <div class="topic-tree-item" style="padding-left:${indent}px;">
             <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
               <div style="display:flex; align-items:center; gap:6px;">
                 ${
-                  hasChildren
+                hasChildren
                     ? `<button
                         class="topic-collapse-button"
                         onclick="event.stopPropagation(); toggleTopicCollapse('${node.id}')"
@@ -1212,6 +1255,7 @@
 
                 <span>
                   ${depth > 0 ? "└ " : ""}
+                  ${isIndependent ? "🧩 " : ""}
                   ${escapeHtml(node.title)}
                   <span class="topic-tree-count">${count}개</span>
                 </span>
@@ -1222,14 +1266,21 @@
                 onclick="event.stopPropagation();"
                 onchange="event.stopPropagation(); changeParentTopic('${node.id}', this.value)"
               >
-                <option value="">독립 주제로 두기</option>
-              ${topicList
-                .filter(topic => topic.id !== node.id && topic.title !== "미분류")
-                .map(topic => `
-                  <option value="${topic.id}" ${topic.id === node.parent_id ? "selected" : ""}>
-                    ${escapeHtml(topic.title)}
-                  </option>
-                `).join("")}
+                <option value="" ${!node.parent_id && !isIndependent ? "selected" : ""}>
+                  루트 주제로 두기
+                </option>
+
+                <option value="__independent__" ${isIndependent ? "selected" : ""}>
+                  🧩 독립 주제
+                </option>
+
+                ${topicList
+                  .filter(topic => topic.id !== node.id && topic.title !== "미분류")
+                  .map(topic => `
+                    <option value="${topic.id}" ${topic.id === node.parent_id ? "selected" : ""}>
+                      ${escapeHtml(topic.title)}
+                    </option>
+                  `).join("")}
               </select>
             </div>
           </div>
