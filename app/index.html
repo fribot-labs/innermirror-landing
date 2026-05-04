@@ -487,6 +487,18 @@
       font-weight: 500;
     }
 
+    .coaching-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .coaching-actions button {
+      padding: 7px 10px;
+      font-size: 12px;
+    }
+
     .empty {
       color: #94a3b8;
       padding: 22px;
@@ -1835,6 +1847,37 @@
       await render();
     }
 
+    async function handleCoachingFeedback(coachingId, logId, coachingType, feedback) {
+      if (!currentUser) {
+        alert("먼저 로그인해주세요.");
+        return;
+      }
+
+      const { error } = await supabaseClient
+        .from("coaching_feedback")
+        .insert({
+          user_id: currentUser.id,
+          coaching_id: coachingId,
+          log_id: logId,
+          coaching_type: coachingType,
+          feedback
+        });
+
+      if (error) {
+        console.error("handleCoachingFeedback error:", error);
+        alert("코칭 피드백을 저장하는 중 오류가 발생했습니다.");
+        return;
+      }
+
+      const messageMap = {
+        executed: "실행함으로 기록했습니다.",
+        later: "보류로 기록했습니다.",
+        ignored: "무시함으로 기록했습니다."
+      };
+
+      alert(messageMap[feedback] || "피드백이 기록되었습니다.");
+    }
+
     async function getMergedSources(mergedId) {
       const { data, error } = await supabaseClient
         .from("decision_versions")
@@ -2414,7 +2457,30 @@
           ${coaching ? `
             <div class="coaching-box">
               🧭 다음 코칭
-              <p>${escapeHtml(coaching)}</p>
+              <p>${escapeHtml(coaching.text)}</p>
+
+              <div class="coaching-actions">
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'executed')"
+                >
+                  ✅ 실행함
+                </button>
+
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'later')"
+                >
+                  ⏳ 보류
+                </button>
+
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'ignored')"
+                >
+                  ❌ 무시함
+                </button>
+              </div>
             </div>
           ` : ""}
 
@@ -2658,36 +2724,40 @@
     }
 
     function generateMilestoneCoaching(log, milestone) {
-      if (!milestone?.isMilestone) return "";
+      if (!milestone?.isMilestone) return null;
 
       const changes = log.changes || [];
-      const changedKeys = changes.map(change => change.key);
+       changedKeys = changes.map(change => change.key);
+
+      let type = "general";
+      let text = "이 전환점을 기준으로 다음 기록에는 실제 실행 결과와 배운 점을 남겨보세요.";
 
       if (changedKeys.includes("merge")) {
-        return "통합된 판단을 기준으로 다음 실행을 하나만 정해 실제 결과를 기록해보세요.";
+        type = "merge";
+        text = "통합된 판단을 기준으로 다음 실행을 하나만 정해 실제 결과를 기록해보세요.";
+      } else if (changedKeys.includes("problem")) {
+        type = "problem-change";
+        text = "바뀐 문제 정의가 실제 상황을 더 잘 설명하는지 하나의 사례로 검증해보세요.";
+      } else if (changedKeys.includes("approach")) {
+        type = "approach-change";
+        text = "새 접근 방식을 작은 실험으로 실행하고, 이전 접근과 결과 차이를 비교해보세요.";
+      } else if (changedKeys.includes("reason")) {
+        type = "reason-change";
+        text = "새 판단 이유가 충분한 근거를 갖는지 반례를 하나 찾아보세요.";
+      } else if (changedKeys.includes("nextAction")) {
+        type = "next-action-change";
+        text = "다음 실행을 가능한 한 작게 쪼개고, 첫 번째 행동만 바로 실행해보세요.";
+      } else if (milestone.label === "큰 변화") {
+        type = "high-impact";
+        text = "변화가 큰 기록입니다. 바로 실행하기보다 핵심 가정 하나를 먼저 확인해보세요.";
       }
 
-      if (changedKeys.includes("problem")) {
-        return "바뀐 문제 정의가 실제 상황을 더 잘 설명하는지 하나의 사례로 검증해보세요.";
-      }
-
-      if (changedKeys.includes("approach")) {
-        return "새 접근 방식을 작은 실험으로 실행하고, 이전 접근과 결과 차이를 비교해보세요.";
-      }
-
-      if (changedKeys.includes("reason")) {
-        return "새 판단 이유가 충분한 근거를 갖는지 반례를 하나 찾아보세요.";
-      }
-
-      if (changedKeys.includes("nextAction")) {
-        return "다음 실행을 가능한 한 작게 쪼개고, 첫 번째 행동만 바로 실행해보세요.";
-      }
-
-      if (milestone.label === "큰 변화") {
-        return "변화가 큰 기록입니다. 바로 실행하기보다 핵심 가정 하나를 먼저 확인해보세요.";
-      }
-
-      return "이 전환점을 기준으로 다음 기록에는 실제 실행 결과와 배운 점을 남겨보세요.";
+      return {
+        id: `coach-${log.id}-${type}`,
+        logId: log.id,
+        type,
+        text
+      };
     }
 
     function filterMilestoneLogs(logs) {
