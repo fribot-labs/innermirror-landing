@@ -1107,15 +1107,6 @@
 
       if (!container) return;
 
-      // 🔥 디버그 위치 (여기에 넣으세요)
-      console.log("🔥 topicList:", topicList.map(t => t.id));
-      console.log("🔥 logs topicIds:", (window.currentLogs || []).map(l => l.topicId));
-      console.log("🔥 unmatched logs:",
-        (window.currentLogs || []).filter(l =>
-            l.topicId && !topicList.some(t => String(t.id) === String(l.topicId))
-        )
-      );
-      
       const data = buildGraphData(topicList, window.currentLogs || []);
 
       const network = new vis.Network(container, data, {
@@ -1283,34 +1274,26 @@
         ? data.filter(row => row.status === "active" || row.status === "merged")
         : data.filter(row => row.status === "active");
 
-      console.log(
-        showMergedRecords
-        ? "📊 raw logs (active + merged):"
-        : "📊 raw logs (active only):",
-        visibleRows
-      );
+      const mapped = visibleRows.map(row => {
+        const safeTopicId = topicExists(row.topic_id) ? row.topic_id : "";
 
-      console.log("📊 visible logs count:", visibleRows.length);
-      console.log("DEBUG IDs:", visibleRows.map(d => d.id));
-
-      const mapped = visibleRows.map(row => ({
-        id: row.id,
-        topicId: row.topic_id || "",
-        topicTitle: getTopicTitle(row.topic_id),
-        topic: getTopicTitle(row.topic_id),
-        version: row.version,
-        createdAt: new Date(row.created_at).toLocaleString("ko-KR"),
-        problem: row.problem,
-        approach: row.approach,
-        reason: row.reason,
-        nextAction: row.next_action || "",
-        changes: row.changes || [],
-        status: row.status,
-        mergedInto: row.merged_into || null,
-        mergedAt: row.merged_at || null
-      }));
-
-      console.log("🧠 mapped logs:", mapped);
+        return {
+          id: row.id,
+          topicId: safeTopicId,
+          topicTitle: getTopicTitle(safeTopicId),
+          topic: getTopicTitle(safeTopicId),
+          version: row.version,
+          createdAt: new Date(row.created_at).toLocaleString("ko-KR"),
+          problem: row.problem,
+          approach: row.approach,
+          reason: row.reason,
+          nextAction: row.next_action || "",
+          changes: row.changes || [],
+          status: row.status,
+          mergedInto: row.merged_into || null,
+          mergedAt: row.merged_at || null
+        };
+      });
 
       return mapped;
     }
@@ -1320,6 +1303,12 @@
 
       const topic = topicList.find(t => String(t.id) === String(topicId));
       return topic ? topic.title : "미분류";
+    }
+
+    function topicExists(topicId) {
+      if (!topicId) return false;
+
+      return topicList.some(topic => String(topic.id) === String(topicId));
     }
 
     async function saveRecord() {
