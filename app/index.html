@@ -407,6 +407,33 @@
       font-size: 13px;
     }
 
+    .ai-recommendation-box {
+      margin: 8px 0 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(129,140,248,0.32);
+      color: #c7d2fe;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .ai-recommendation-box p {
+      margin: 6px 0 0;
+      color: #e0e7ff;
+      font-size: 13px;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .ai-recommendation-box small {
+      display: block;
+      margin-top: 6px;
+      color: #a5b4fc;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
     .timeline {
       display: grid;
       gap: 12px;
@@ -2475,333 +2502,6 @@
       return logs.filter(log => log.mergedInto === logId);
     }
 
-    function renderRecordCard(log) {
-      let mergedInfoHtml = "";
-      let mergedSourceHtml = "";
-      let mergeSourceCardsHtml = "";
-
-      if (log.status === "merged") {
-        mergedSourceHtml = `
-        <div class="merge-info" style="background:rgba(250,204,21,0.10); border-color:rgba(250,204,21,0.25); color:#fde68a;">
-            🧩 통합된 원본 기록입니다
-        </div>
-        `;
-      }
-
-      if (log.status === "active") {
-        if (log.changes && log.changes.some(c => c.key === "merge")) {
-          mergedInfoHtml = `
-            <div class="merge-info">
-                📦 통합된 기록입니다
-                <button
-                  class="secondary small"
-                  style="margin-left:8px;"
-                  onclick="event.stopPropagation(); undoMergeRecord('${log.id}')"
-                >
-                  ↩ 통합 취소
-                </button>
-            </div>
-          `;
-        }
-      }
-
-      if (log.status === "active" && log.changes && log.changes.some(c => c.key === "merge")) {
-        const sources = getMergeSources(log.id);
-
-        if (sources.length > 0) {
-          mergeSourceCardsHtml = `
-            <div class="merge-source-box">
-                <strong>통합 출처</strong>
-                ${sources.map(source => `
-                  <div class="merge-source-card">
-                    <span class="badge">V${source.version}</span>
-                    <p><b>문제:</b> ${escapeHtml(source.problem)}</p>
-                    <p><b>접근:</b> ${escapeHtml(source.approach)}</p>
-                  </div>
-                `).join("")}
-            </div>
-          `;
-        }
-      }
-
-      const impact = getChangeImpact(log);
-
-      const topicLogs = (window.currentLogs || []).filter(
-        item => item.topicId === log.topicId
-      );
-
-      const milestone = detectMilestone(log, topicLogs);
-      const coaching = generateMilestoneCoaching(log, milestone);
-      const coachingStats = coaching ? getCoachingStats(coaching.id) : null;
-      const suppressCoaching = coachingStats
-        ? shouldSuppressCoaching(coachingStats)
-        : false;
-      const preferredCoaching = coaching
-        ? isPreferredCoaching(coaching.type)
-        : false;
-
-      return `
-        <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
-              ${selectionMode ? `
-                <input
-                  type="checkbox"
-                  onclick="event.stopPropagation(); toggleRecordSelection('${log.id}', '${log.topicId}')"
-                  ${selectedRecordIds.has(log.id) ? "checked" : ""}
-                  style="width:auto;"
-                />
-              ` : ""}
-
-              <span class="badge">V${log.version}</span>
-            </div>
-
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <select
-                class="topic-move-select"
-                onclick="event.stopPropagation();"
-                onchange="event.stopPropagation(); changeTopic('${log.id}', this.value)"
-              >
-                ${topicList.map(topic => `
-                  <option value="${topic.id}" ${topic.id === log.topicId ? "selected" : ""}>
-                    ${escapeHtml(topic.title)}
-                  </option>
-                `).join("")}
-              </select>
-
-              ${log.status === "active" ? `
-                <button
-                  class="secondary small"
-                  onclick="event.stopPropagation(); archiveRecord('${log.id}')"
-                >
-                  📦 보관
-                </button>
-              ` : ""}
-            </div>
-          </div>
-
-          <strong>${escapeHtml(log.createdAt)}</strong>
-
-          <div class="impact-badge impact-${impact.level}">
-            변화 강도: ${impact.label}
-            <span>${impact.score}</span>
-          </div>
-
-          ${milestone.isMilestone ? `
-            <div class="milestone-badge">
-              ⭐ ${escapeHtml(milestone.label)}
-              <span>${escapeHtml(milestone.reason)}</span>
-              <p class="milestone-desc">
-                ${escapeHtml(milestone.description)}
-              </p>
-            </div>
-          ` : ""}
-
-          ${coaching && !suppressCoaching ? `
-            <div class="coaching-box ${preferredCoaching ? "coaching-preferred" : ""}">
-              🧭 다음 코칭
-              ${preferredCoaching ? `<span class="preferred-label">추천</span>` : ""}
-              ${coaching.adapted ? `<span class="adaptive-label">문구 조정</span>` : ""}
-              <p>${escapeHtml(coaching.text)}</p>
-
-              ${coaching.adapted ? `
-                <div class="adaptive-note">
-                    이전 반응을 바탕으로 더 실행하기 쉬운 문구로 조정했습니다.
-                </div>
-              ` : ""}
-
-              <div class="coaching-actions">
-                <button
-                  class="secondary small"
-                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'executed')"
-                >
-                  ✅ 실행함
-                </button>
-
-                <button
-                  class="secondary small"
-                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'later')"
-                >
-                  ⏳ 보류
-                </button>
-
-                <button
-                  class="secondary small"
-                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'ignored')"
-                >
-                  ❌ 무시함
-                </button>
-              </div>
-
-              ${preferredCoaching ? `
-                <div class="preferred-note">
-                  ✅ 이전에 실행률이 높았던 코칭 유형입니다.
-                </div>
-              ` : ""}
-
-              ${coachingStats && coachingStats.total > 0 ? `
-                <div class="coaching-stats">
-                  실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
-                  <br />
-                  실행률 ${coachingStats.executedRate}%
-                </div>
-              ` : ""}
-            </div>
-          ` : ""}
-
-          ${coaching && suppressCoaching ? `
-            <div class="coaching-suppressed-box">
-                💤 이 코칭은 최근 반응이 낮아 잠시 줄였습니다.
-                <p>다른 방식의 코칭이 더 적합할 수 있습니다.</p>
-            </div>
-          ` : ""}
-
-          <p class="topic-label">
-            주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
-          </p>
-
-          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
-          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
-          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
-
-          ${log.nextAction ? `
-            <div class="next-action">
-              <b>다음 실행</b>
-              <p>${escapeHtml(log.nextAction)}</p>
-            </div>
-          ` : ""}
-
-          ${mergedInfoHtml}
-          ${mergeSourceCardsHtml}
-          ${mergedSourceHtml}
-
-          ${renderDiff(log)}
-        </div>
-      `;
-    }
-
-    function renderDiff(log) {
-      if (log.version === 1) {
-        return `
-          <div class="diff">
-            <h3>변화 신호</h3>
-            <p class="same">첫 번째 버전입니다.</p>
-          </div>
-        `;
-      }
-
-      if (!log.changes || log.changes.length === 0) {
-        return `
-          <div class="diff">
-            <h3>변화 신호</h3>
-            <p class="same">이전과 동일한 판단입니다.</p>
-          </div>
-        `;
-      }
-
-      return `
-        <div class="diff">
-          <h3>판단 변화 비교</h3>
-          ${log.changes.map(change => `
-            <div style="margin-bottom:12px;">
-              <b class="changed">${escapeHtml(change.label)}</b>
-              <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
-                이전: ${escapeHtml(change.before)}
-              </div>
-              <div style="font-size:13px;color:#93c5fd;">
-                현재: ${escapeHtml(change.after)}
-              </div>
-            </div>
-          `).join("")}
-        </div>
-      `;
-    }
-
-    function getChangeImpact(log) {
-      const changes = log.changes || [];
-
-      const isMergeRecord =
-        log.status === "active" &&
-        changes.some(change => change.key === "merge");
-
-      if (isMergeRecord) {
-        return {
-          level: "high",
-          label: "높음",
-          score: 5
-        };
-      }
-
-      if (changes.length === 0) {
-        return {
-          level: "none",
-          label: "변화 없음",
-          score: 0
-        };
-      }
-
-      let score = 0;
-
-      // 1. 변경 필드 수 반영
-      score += changes.length;
-
-      // 2. 변경 문장 길이 반영
-      changes.forEach(change => {
-        const beforeText = String(change.before || "");
-        const afterText = String(change.after || "");
-
-        const lengthDiff = Math.abs(afterText.length - beforeText.length);
-
-        if (lengthDiff >= 80) {
-          score += 3;
-        } else if (lengthDiff >= 40) {
-          score += 2;
-        } else if (lengthDiff >= 15) {
-          score += 1;
-        }
-
-        // 3. nextAction 확장 여부 반영
-        const isNextActionChange =
-          change.key === "nextAction" ||
-          change.key === "next_action" ||
-          change.label === "다음 실행";
-
-        if (isNextActionChange && afterText.length > beforeText.length) {
-          score += 2;
-        }
-      });
-
-      if (score === 0) {
-        return {
-          level: "none",
-          label: "변화 없음",
-          score
-        };
-      }
-
-      if (score <= 2) {
-        return {
-          level: "low",
-          label: "낮음",
-          score
-        };
-      }
-
-      if (score <= 5) {
-        return {
-          level: "medium",
-          label: "보통",
-          score
-        };
-      }
-
-      return {
-        level: "high",
-        label: "높음",
-        score
-      };
-    }
-
     function detectMilestone(log, topicLogs = []) {
       const impact = getChangeImpact(log);
       const changes = log.changes || [];
@@ -3129,6 +2829,403 @@
         const milestone = detectMilestone(log, topicLogs);
         return milestone.isMilestone;
       });
+    }
+
+    function buildRecommendationContext(log, milestone, coaching, coachingStats) {
+      return {
+        logId: log.id,
+        topicId: log.topicId,
+        problem: log.problem,
+        approach: log.approach,
+        reason: log.reason,
+        nextAction: log.nextAction,
+        milestoneLabel: milestone?.label || "",
+        milestoneReason: milestone?.reason || "",
+        milestoneDescription: milestone?.description || "",
+        coachingType: coaching?.type || "general",
+        coachingText: coaching?.text || "",
+        executedRate: coachingStats?.executedRate ?? 0,
+        executed: coachingStats?.executed ?? 0,
+        later: coachingStats?.later ?? 0,
+        ignored: coachingStats?.ignored ?? 0
+      };
+    }
+
+    function getFallbackRecommendation(context) {
+      if (context.executedRate >= 60) {
+        return "이전 반응이 좋았던 방식입니다. 같은 방식으로 다음 실행을 더 작게 구체화해보세요.";
+      }
+
+      if (context.ignored >= 2) {
+        return "이 코칭은 반응이 낮았습니다. 다른 관점에서 문제를 다시 한 문장으로 정리해보세요.";
+      }
+
+      if (context.later >= 2) {
+        return "보류가 반복되고 있습니다. 오늘 바로 할 수 있는 가장 작은 행동 하나만 선택해보세요.";
+      }
+
+      return "이 기록을 기준으로 다음 실행 결과를 한 번만 기록해보세요.";
+    }
+
+    async function requestRecommendation(context) {
+      // TODO: private engine 연결 예정
+      // return await callPrivateRecommendationEngine(context);
+
+      return {
+        source: "fallback",
+        text: getFallbackRecommendation(context),
+        confidence: "basic"
+      };
+    }
+
+    function renderRecordCard(log) {
+      let mergedInfoHtml = "";
+      let mergedSourceHtml = "";
+      let mergeSourceCardsHtml = "";
+
+      if (log.status === "merged") {
+        mergedSourceHtml = `
+          <div class="merge-info" style="background:rgba(250,204,21,0.10); border-color:rgba(250,204,21,0.25); color:#fde68a;">
+            🧩 통합된 원본 기록입니다
+          </div>
+        `;
+      }
+
+      if (log.status === "active") {
+        if (log.changes && log.changes.some(c => c.key === "merge")) {
+          mergedInfoHtml = `
+            <div class="merge-info">
+              📦 통합된 기록입니다
+              <button
+                class="secondary small"
+                style="margin-left:8px;"
+                onclick="event.stopPropagation(); undoMergeRecord('${log.id}')"
+              >
+                ↩ 통합 취소
+              </button>
+            </div>
+          `;
+        }
+      }
+
+      if (log.status === "active" && log.changes && log.changes.some(c => c.key === "merge")) {
+        const sources = getMergeSources(log.id);
+
+        if (sources.length > 0) {
+          mergeSourceCardsHtml = `
+            <div class="merge-source-box">
+              <strong>통합 출처</strong>
+              ${sources.map(source => `
+                <div class="merge-source-card">
+                  <span class="badge">V${source.version}</span>
+                  <p><b>문제:</b> ${escapeHtml(source.problem)}</p>
+                  <p><b>접근:</b> ${escapeHtml(source.approach)}</p>
+                </div>
+              `).join("")}
+            </div>
+          `;
+        }
+      }
+
+      const impact = getChangeImpact(log);
+
+      const topicLogs = (window.currentLogs || []).filter(
+        item => item.topicId === log.topicId
+      );
+
+      const milestone = detectMilestone(log, topicLogs);
+      const coaching = generateMilestoneCoaching(log, milestone);
+      const coachingStats = coaching ? getCoachingStats(coaching.id) : null;
+
+      const suppressCoaching = coachingStats
+        ? shouldSuppressCoaching(coachingStats)
+        : false;
+
+      const preferredCoaching = coaching
+        ? isPreferredCoaching(coaching.type)
+        : false;
+
+      const recommendationContext = coaching
+        ? buildRecommendationContext(log, milestone, coaching, coachingStats)
+        : null;
+
+      const aiRecommendation = recommendationContext
+        ? requestFallbackRecommendation(recommendationContext)
+        : null;
+
+      return `
+        <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              ${selectionMode ? `
+                <input
+                  type="checkbox"
+                  onclick="event.stopPropagation(); toggleRecordSelection('${log.id}', '${log.topicId}')"
+                  ${selectedRecordIds.has(log.id) ? "checked" : ""}
+                  style="width:auto;"
+                />
+              ` : ""}
+
+              <span class="badge">V${log.version}</span>
+            </div>
+
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <select
+                class="topic-move-select"
+                onclick="event.stopPropagation();"
+                onchange="event.stopPropagation(); changeTopic('${log.id}', this.value)"
+              >
+                ${topicList.map(topic => `
+                  <option value="${topic.id}" ${topic.id === log.topicId ? "selected" : ""}>
+                    ${escapeHtml(topic.title)}
+                  </option>
+                `).join("")}
+              </select>
+
+              ${log.status === "active" ? `
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+                >
+                  📦 보관
+                </button>
+              ` : ""}
+            </div>
+          </div>
+
+          <strong>${escapeHtml(log.createdAt)}</strong>
+
+          <div class="impact-badge impact-${impact.level}">
+            변화 강도: ${impact.label}
+            <span>${impact.score}</span>
+          </div>
+
+          ${milestone.isMilestone ? `
+            <div class="milestone-badge">
+              ⭐ ${escapeHtml(milestone.label)}
+              <span>${escapeHtml(milestone.reason)}</span>
+              <p class="milestone-desc">
+                ${escapeHtml(milestone.description)}
+              </p>
+            </div>
+          ` : ""}
+
+          ${coaching && !suppressCoaching ? `
+            <div class="coaching-box ${preferredCoaching ? "coaching-preferred" : ""}">
+              🧭 다음 코칭
+              ${preferredCoaching ? `<span class="preferred-label">추천</span>` : ""}
+              ${coaching.adapted ? `<span class="adaptive-label">문구 조정</span>` : ""}
+
+              <p>${escapeHtml(coaching.text)}</p>
+
+              ${coaching.adapted ? `
+                <div class="adaptive-note">
+                  이전 반응을 바탕으로 더 실행하기 쉬운 문구로 조정했습니다.
+                </div>
+              ` : ""}
+
+              <div class="coaching-actions">
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'executed')"
+                >
+                  ✅ 실행함
+                </button>
+
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'later')"
+                >
+                  ⏳ 보류
+                </button>
+
+                <button
+                  class="secondary small"
+                  onclick="event.stopPropagation(); handleCoachingFeedback('${coaching.id}', '${log.id}', '${coaching.type}', 'ignored')"
+                >
+                  ❌ 무시함
+                </button>
+              </div>
+
+              ${preferredCoaching ? `
+                <div class="preferred-note">
+                  ✅ 이전에 실행률이 높았던 코칭 유형입니다.
+                </div>
+              ` : ""}
+
+              ${coachingStats && coachingStats.total > 0 ? `
+                <div class="coaching-stats">
+                  실행함 ${coachingStats.executed}회 · 보류 ${coachingStats.later}회 · 무시함 ${coachingStats.ignored}회
+                  <br />
+                  실행률 ${coachingStats.executedRate}%
+                </div>
+              ` : ""}
+            </div>
+          ` : ""}
+
+          ${coaching && suppressCoaching ? `
+            <div class="coaching-suppressed-box">
+              💤 이 코칭은 최근 반응이 낮아 잠시 줄였습니다.
+              <p>다른 방식의 코칭이 더 적합할 수 있습니다.</p>
+            </div>
+          ` : ""}
+
+          ${aiRecommendation ? `
+            <div class="ai-recommendation-box">
+              🧠 InnerMirror 추천
+              <p>${escapeHtml(aiRecommendation.text)}</p>
+              <small>
+                ${aiRecommendation.source === "fallback"
+                  ? "기본 추천 · private engine 연결 예정"
+                  : "Private engine 추천"}
+              </small>
+            </div>
+          ` : ""}
+
+          <p class="topic-label">
+            주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
+          </p>
+
+          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
+          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
+          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
+
+          ${log.nextAction ? `
+            <div class="next-action">
+              <b>다음 실행</b>
+              <p>${escapeHtml(log.nextAction)}</p>
+            </div>
+          ` : ""}
+
+          ${mergedInfoHtml}
+          ${mergeSourceCardsHtml}
+          ${mergedSourceHtml}
+
+          ${renderDiff(log)}
+        </div>
+      `;
+    }
+
+    function renderDiff(log) {
+      if (log.version === 1) {
+        return `
+          <div class="diff">
+            <h3>변화 신호</h3>
+            <p class="same">첫 번째 버전입니다.</p>
+          </div>
+        `;
+      }
+
+      if (!log.changes || log.changes.length === 0) {
+        return `
+          <div class="diff">
+            <h3>변화 신호</h3>
+            <p class="same">이전과 동일한 판단입니다.</p>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="diff">
+          <h3>판단 변화 비교</h3>
+          ${log.changes.map(change => `
+            <div style="margin-bottom:12px;">
+              <b class="changed">${escapeHtml(change.label)}</b>
+              <div style="font-size:13px;color:#94a3b8;margin-top:4px;">
+                이전: ${escapeHtml(change.before)}
+              </div>
+              <div style="font-size:13px;color:#93c5fd;">
+                현재: ${escapeHtml(change.after)}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+      `;
+    }
+
+    function getChangeImpact(log) {
+      const changes = log.changes || [];
+
+      const isMergeRecord =
+        log.status === "active" &&
+        changes.some(change => change.key === "merge");
+
+      if (isMergeRecord) {
+        return {
+          level: "high",
+          label: "높음",
+          score: 5
+        };
+      }
+
+      if (changes.length === 0) {
+        return {
+          level: "none",
+          label: "변화 없음",
+          score: 0
+        };
+      }
+
+      let score = 0;
+
+      // 1. 변경 필드 수 반영
+      score += changes.length;
+
+      // 2. 변경 문장 길이 반영
+      changes.forEach(change => {
+        const beforeText = String(change.before || "");
+        const afterText = String(change.after || "");
+
+        const lengthDiff = Math.abs(afterText.length - beforeText.length);
+
+        if (lengthDiff >= 80) {
+          score += 3;
+        } else if (lengthDiff >= 40) {
+          score += 2;
+        } else if (lengthDiff >= 15) {
+          score += 1;
+        }
+
+        // 3. nextAction 확장 여부 반영
+        const isNextActionChange =
+          change.key === "nextAction" ||
+          change.key === "next_action" ||
+          change.label === "다음 실행";
+
+        if (isNextActionChange && afterText.length > beforeText.length) {
+          score += 2;
+        }
+      });
+
+      if (score === 0) {
+        return {
+          level: "none",
+          label: "변화 없음",
+          score
+        };
+      }
+
+      if (score <= 2) {
+        return {
+          level: "low",
+          label: "낮음",
+          score
+        };
+      }
+
+      if (score <= 5) {
+        return {
+          level: "medium",
+          label: "보통",
+          score
+        };
+      }
+
+      return {
+        level: "high",
+        label: "높음",
+        score
+      };
     }
 
     function changeSummary(log) {
