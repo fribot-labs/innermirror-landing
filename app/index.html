@@ -2867,6 +2867,14 @@
       return "이 기록을 기준으로 다음 실행 결과를 한 번만 기록해보세요.";
     }
 
+    function requestFallbackRecommendation(context) {
+      return {
+        source: "fallback",
+        text: getFallbackRecommendation(context),
+        confidence: "basic"
+      };
+    }
+
     async function requestRecommendation(context) {
       // TODO: private engine 연결 예정
       // return await callPrivateRecommendationEngine(context);
@@ -3070,7 +3078,7 @@
             </div>
           ` : ""}
 
-          ${aiRecommendation ? `
+          ${aiRecommendation && aiRecommendation.text ? `
             <div class="ai-recommendation-box">
               🧠 InnerMirror 추천
               <p>${escapeHtml(aiRecommendation.text)}</p>
