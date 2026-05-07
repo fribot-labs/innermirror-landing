@@ -972,6 +972,7 @@
     let graphScope = "all";
     let showOnlyMilestones = false;
     let coachingFeedbackList = [];
+    let recommendationCache = {};
 
     async function initAuth() {
       try {
@@ -2875,6 +2876,54 @@
       };
     }
 
+    async function requestPrivateEngineRecommendation(context) {
+      try {
+        const response = await fetch(
+          `${SUPABASE_URL}/functions/v1/recommendation`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "apikey": SUPABASE_KEY
+            },
+            body: JSON.stringify(context)
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Private engine failed: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        return {
+          source: result.source || "private-engine",
+          text: result.recommendationText || getFallbackRecommendation(context),
+          confidence: result.confidence || "medium",
+          strategy: result.strategy || "unknown",
+          reason: result.reason || ""
+        };
+      } catch (error) {
+        console.warn("Private engine unavailable. Using fallback.", error);
+        return requestFallbackRecommendation(context);
+      }
+    }
+
+    async function loadPrivateRecommendation(context) {
+      const cacheKey = context.logId;
+
+      if (recommendationCache[cacheKey]?.source === "private-engine") {
+        return;
+      }
+
+      recommendationCache[cacheKey] = requestFallbackRecommendation(context);
+
+      const result = await requestPrivateEngineRecommendation(context);
+      recommendationCache[cacheKey] = result;
+
+      await render();
+    }
+
     async function requestRecommendation(context) {
       // TODO: private engine 연결 예정
       // return await callPrivateRecommendationEngine(context);
@@ -2958,8 +3007,14 @@
         : null;
 
       const aiRecommendation = recommendationContext
-        ? requestFallbackRecommendation(recommendationContext)
+        ? recommendationCache[log.id] || requestFallbackRecommendation(recommendationContext)
         : null;
+
+      if (recommendationContext && !recommendationCache[log.id]) {
+        setTimeout(() => {
+          loadPrivateRecommendation(recommendationContext);
+        }, 0);
+      }
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
@@ -3085,7 +3140,7 @@
               <small>
                 ${aiRecommendation.source === "fallback"
                   ? "기본 추천 · private engine 연결 예정"
-                  : "Private engine 추천"}
+                  : `Private engine 추천 · ${escapeHtml(aiRecommendation.strategy || "strategy")}`}
               </small>
             </div>
           ` : ""}
