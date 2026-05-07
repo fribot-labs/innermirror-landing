@@ -2961,6 +2961,31 @@
       }
     }
 
+    function getStrategyReasonLabel(strategy) {
+      switch (strategy) {
+        case "record-next-result":
+          return "최근 판단 흐름이 안정적으로 유지되고 있습니다.";
+
+        case "reinforce-successful-pattern":
+          return "이전 실행 패턴이 반복적으로 좋은 반응을 보였습니다.";
+
+        case "improve-execution-quality":
+          return "실행은 진행되지만 결과 안정성이 낮게 감지되었습니다.";
+
+        case "change-perspective":
+          return "현재 접근 방식의 반응률이 낮게 감지되었습니다.";
+
+        case "reduce-action-size":
+          return "실행 부담이 높아 보류 흐름이 반복되고 있습니다.";
+
+        case "single-action-after-merge":
+          return "통합된 판단 이후 우선순위 정리가 필요합니다.";
+
+        default:
+          return "현재 판단 흐름을 분석중입니다.";
+      }
+    }
+
     function renderRecordCard(log) {
       let mergedInfoHtml = "";
       let mergedSourceHtml = "";
@@ -3163,6 +3188,20 @@
             <div class="ai-recommendation-box">
               🧠 InnerMirror 추천
               <p>${escapeHtml(aiRecommendation.text)}</p>
+              <div
+                style="
+                  margin-top:6px;
+                  font-size:12px;
+                  color:#a5b4fc;
+                  font-weight:700;
+                "
+              >
+                🧠 판단 상태:
+                ${escapeHtml(
+                  getStrategyLabel(aiRecommendation.strategy || "")
+                )}
+              </div>
+
               <small>
                 ${aiRecommendation.source === "fallback"
                   ? "기본 추천 · private engine 연결 예정"
@@ -3170,6 +3209,19 @@
                       getStrategyLabel(aiRecommendation.strategy || "")
                     )}`}
               </small>
+
+              <div
+                style="
+                  margin-top:8px;
+                  font-size:13px;
+                  line-height:1.5;
+                  color:#cbd5e1;
+                "
+              >
+                ${escapeHtml(
+                  getStrategyReasonLabel(aiRecommendation.strategy || "")
+                )}
+              </div>
             </div>
           ` : ""}
 
