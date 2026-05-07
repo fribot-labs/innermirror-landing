@@ -2639,6 +2639,49 @@
       return "현재 판단 흐름은 초기 단계입니다. 반복 기록을 통해 패턴을 학습해보세요.";
     }
 
+    function generateStrategyTrendInsight(logs = window.currentLogs || []) {
+      if (!logs || logs.length === 0) {
+        return "아직 판단 흐름 추세를 분석할 기록이 없습니다.";
+      }
+
+      const recentLogs = logs.slice(0, 3);
+
+      const strategies = recentLogs.map(log => {
+        const recommendation = recommendationCache[log.id];
+
+        return recommendation?.strategy || "record-next-result";
+      });
+
+      const countMap = strategies.reduce((map, strategy) => {
+        map[strategy] = (map[strategy] || 0) + 1;
+        return map;
+      }, {});
+
+      const dominantStrategy = Object.entries(countMap)
+        .sort((a, b) => b[1] - a[1])[0]?.[0];
+
+      if (!dominantStrategy) {
+        return "최근 판단 흐름을 분석하는 중입니다.";
+      }
+
+      const visual = getStrategyStateVisual(dominantStrategy);
+      const label = visual.label;
+
+      if (countMap[dominantStrategy] >= 2) {
+        return `최근 기록에서 '${label}' 흐름이 반복되고 있습니다. 같은 상태가 이어지는 이유를 다음 기록에서 확인해보세요.`;
+      }
+
+      if (strategies.includes("change-perspective")) {
+        return "최근 기록 중 관점 전환 신호가 감지되었습니다. 문제 정의를 다시 쓰는 것이 도움이 될 수 있습니다.";
+      }
+
+      if (strategies.includes("improve-execution-quality")) {
+        return "최근 기록 중 실행 불안정 신호가 감지되었습니다. 실행 결과와 실패 원인을 함께 기록해보세요.";
+      }
+
+      return "최근 판단 흐름은 큰 위험 신호 없이 유지되고 있습니다. 다음 실행 결과를 기록해 흐름을 이어가세요.";
+    }
+
     function renderCoachingPerformance() {
       const container = document.getElementById("coachingPerformance");
       if (!container) return;
@@ -2687,6 +2730,16 @@
                 getStrategyStateSummary(window.currentLogs || [])
               )
             )}
+          </p>
+        </div>
+
+        <div class="strategy-summary-insight">
+          <div class="strategy-summary-title">
+            📈 판단 흐름 추세
+          </div>
+
+          <p>
+            ${escapeHtml(generateStrategyTrendInsight(window.currentLogs || []))}
           </p>
         </div>
       `;
