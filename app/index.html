@@ -2455,33 +2455,149 @@
       renderSelectionStatus();
     }
 
+    function buildStrategySummary(logs) {
+      const summary = {
+        "reinforce-successful-pattern": 0,
+        "improve-execution-quality": 0,
+        "change-perspective": 0,
+        "reduce-action-size": 0,
+        "single-action-after-merge": 0,
+        "record-next-result": 0,
+      };
+
+      logs.forEach((log) => {
+        const strategy =
+          log?.aiRecommendation?.strategy ||
+          "record-next-result";
+
+        if (summary[strategy] !== undefined) {
+          summary[strategy] += 1;
+        }
+      });
+
+      return summary;
+    }
+
+    function renderStrategySummaryPanel(logs) {
+      const summary = buildStrategySummary(logs);
+
+      const strategyOrder = [
+        "reinforce-successful-pattern",
+        "improve-execution-quality",
+        "change-perspective",
+        "reduce-action-size",
+        "single-action-after-merge",
+        "record-next-result",
+      ];
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,0.08);
+            background:rgba(15,23,42,0.35);
+          "
+        >
+          <div
+            style="
+              font-size:15px;
+              font-weight:800;
+              margin-bottom:14px;
+              color:#f8fafc;
+            "
+          >
+            🧠 판단 상태 요약
+          </div>
+
+          <div
+            style="
+              display:grid;
+              gap:10px;
+            "
+          >
+            ${strategyOrder
+              .map((strategy) => {
+                const visual =
+                  getStrategyStateVisual(strategy);
+
+                return `
+                  <div
+                    style="
+                      display:flex;
+                      justify-content:space-between;
+                      align-items:center;
+                      padding:10px 12px;
+                      border-radius:12px;
+                      background:rgba(255,255,255,0.03);
+                    "
+                  >
+                    <div
+                      style="
+                        display:flex;
+                        align-items:center;
+                        gap:8px;
+                        color:${visual.color};
+                        font-weight:700;
+                      "
+                    >
+                      <span>${visual.icon}</span>
+                      <span>${visual.label}</span>
+                    </div>
+
+                    <div
+                      style="
+                        color:#cbd5e1;
+                        font-size:13px;
+                        font-weight:700;
+                      "
+                    >
+                      ${summary[strategy]}개
+                    </div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        </div>
+      `;
+    }
+
     function renderCoachingPerformance() {
       const container = document.getElementById("coachingPerformance");
       if (!container) return;
 
       const performanceList = getCoachingTypePerformanceList();
+      const strategySummaryHtml = renderStrategySummaryPanel(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
-        <div class="empty">
-          아직 코칭 피드백 데이터가 없습니다.
-        </div>
+          <div class="empty">
+            아직 코칭 피드백 데이터가 없습니다.
+          </div>
+
+          ${strategySummaryHtml}
         `;
         return;
       }
 
-      container.innerHTML = performanceList.map(item => `
-        <div class="coaching-performance-item">
-          <strong>${escapeHtml(item.type)}</strong>
-          <p>
-            실행함 ${item.executed}회 · 보류 ${item.later}회 · 무시함 ${item.ignored}회
-          </p>
-          <div class="performance-bar">
-            <div style="width:${item.executedRate}%"></div>
+      container.innerHTML = `
+        ${performanceList.map(item => `
+          <div class="coaching-performance-item">
+            <strong>${escapeHtml(item.type)}</strong>
+            <p>
+              실행함 ${item.executed}회 · 보류 ${item.later}회 · 무시함 ${item.ignored}회
+            </p>
+            <div class="performance-bar">
+              <div style="width:${item.executedRate}%"></div>
+            </div>
+            <span>실행률 ${item.executedRate}%</span>
           </div>
-          <span>실행률 ${item.executedRate}%</span>
-        </div>
-      `).join("");
+        `).join("")}
+
+        ${strategySummaryHtml}
+      `;
     }
 
     function groupLogsByTopic(logs) {
