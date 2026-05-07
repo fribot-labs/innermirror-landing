@@ -2936,6 +2936,31 @@
       };
     }
 
+    function getStrategyLabel(strategy) {
+      switch (strategy) {
+        case "record-next-result":
+          return "다음 실행 기록형";
+
+        case "reinforce-successful-pattern":
+          return "성공 패턴 강화형";
+
+        case "improve-execution-quality":
+          return "실행 품질 개선형";
+
+        case "change-perspective":
+          return "관점 전환형";
+
+        case "reduce-action-size":
+          return "행동 축소형";
+
+        case "single-action-after-merge":
+          return "통합 실행 집중형";
+
+        default:
+          return "판단 추천형";
+      }
+    }
+
     function renderRecordCard(log) {
       let mergedInfoHtml = "";
       let mergedSourceHtml = "";
@@ -3141,7 +3166,9 @@
               <small>
                 ${aiRecommendation.source === "fallback"
                   ? "기본 추천 · private engine 연결 예정"
-                  : `Private engine 추천 · ${escapeHtml(aiRecommendation.strategy || "strategy")}`}
+                  : `Private engine 추천 · ${escapeHtml(
+                      getStrategyLabel(aiRecommendation.strategy || "")
+                    )}`}
               </small>
             </div>
           ` : ""}
