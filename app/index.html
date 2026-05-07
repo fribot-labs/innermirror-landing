@@ -2986,6 +2986,52 @@
       }
     }
 
+    function getStrategyStateVisual(strategy) {
+      switch (strategy) {
+        case "reinforce-successful-pattern":
+          return {
+            icon: "🟢",
+            label: "안정 실행 상태",
+            color: "#22c55e"
+          };
+
+        case "improve-execution-quality":
+          return {
+            icon: "🟡",
+            label: "실행 불안정 상태",
+            color: "#facc15"
+          };
+
+        case "change-perspective":
+          return {
+            icon: "🔴",
+            label: "관점 전환 필요",
+            color: "#ef4444"
+          };
+
+        case "reduce-action-size":
+          return {
+            icon: "🟠",
+            label: "행동 축소 필요",
+            color: "#fb923c"
+          };
+
+        case "single-action-after-merge":
+          return {
+            icon: "🟣",
+            label: "통합 판단 상태",
+            color: "#a855f7"
+          };
+
+        default:
+          return {
+            icon: "🔵",
+            label: "다음 실행 기록 상태",
+            color: "#60a5fa"
+          };
+      }
+    }
+
     function renderRecordCard(log) {
       let mergedInfoHtml = "";
       let mergedSourceHtml = "";
@@ -3196,10 +3242,28 @@
                   font-weight:700;
                 "
               >
-                🧠 판단 상태:
-                ${escapeHtml(
-                  getStrategyLabel(aiRecommendation.strategy || "")
-                )}
+                ${(() => {
+                  const visual = getStrategyStateVisual(
+                    aiRecommendation.strategy || ""
+                  );
+
+                  return `
+                    <div
+                      style="
+                        margin-top:6px;
+                        font-size:12px;
+                        font-weight:700;
+                        color:${visual.color};
+                        display:flex;
+                        align-items:center;
+                        gap:6px;
+                      "
+                    >
+                      <span>${visual.icon}</span>
+                      <span>${escapeHtml(visual.label)}</span>
+                    </div>
+                  `;
+                })()}
               </div>
 
               <small>
