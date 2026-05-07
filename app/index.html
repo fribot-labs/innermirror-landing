@@ -2327,9 +2327,10 @@
 
         renderTimeline(visibleLogs);
         renderHistory(visibleLogs);
-        renderCoachingPerformance();
 
         window.currentLogs = visibleLogs;
+
+        renderCoachingPerformance();
         renderTopicGraph();
 
       } catch (error) {
@@ -2496,6 +2497,19 @@
       });
 
       return summary;
+    }
+
+    function getStrategyStateSummary(logs = window.currentLogs || []) {
+      const rawSummary = buildStrategySummary(logs);
+
+      return {
+        stable: rawSummary["reinforce-successful-pattern"] || 0,
+        unstable: rawSummary["improve-execution-quality"] || 0,
+        perspective: rawSummary["change-perspective"] || 0,
+        reduce: rawSummary["reduce-action-size"] || 0,
+        merge: rawSummary["single-action-after-merge"] || 0,
+        record: rawSummary["record-next-result"] || 0
+      };
     }
 
     function renderStrategySummaryPanel(logs) {
@@ -2668,8 +2682,10 @@
           </div>
 
           <p>
-            ${generateStrategySummaryInsight(
-              getStrategyStateSummary()
+            ${escapeHtml(
+              generateStrategySummaryInsight(
+                getStrategyStateSummary(window.currentLogs || [])
+              )
             )}
           </p>
         </div>
