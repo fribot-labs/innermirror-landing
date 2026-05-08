@@ -793,6 +793,17 @@
       color: rgba(255,255,255,0.88);
     }
 
+    .strategy-risk-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-top: 8px;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -3247,6 +3258,52 @@
       }
     }
 
+    function getStrategyRiskLevel(strategy) {
+      switch (strategy) {
+        case "reinforce-successful-pattern":
+          return {
+            label: "낮음",
+            color: "#22c55e"
+          };
+
+        case "record-next-result":
+          return {
+            label: "낮음",
+            color: "#3b82f6"
+          };
+
+        case "improve-execution-quality":
+          return {
+            label: "주의",
+            color: "#facc15"
+          };
+
+        case "reduce-action-size":
+          return {
+            label: "주의",
+            color: "#fb923c"
+          };
+
+        case "change-perspective":
+          return {
+            label: "높음",
+            color: "#ef4444"
+          };
+
+        case "single-action-after-merge":
+          return {
+            label: "중간",
+            color: "#a855f7"
+          };
+
+        default:
+          return {
+            label: "분석중",
+            color: "#64748b"
+          };
+      }
+    }
+
     function getStrategyStateVisual(strategy) {
       switch (strategy) {
         case "reinforce-successful-pattern":
@@ -3366,6 +3423,10 @@
 
       const aiRecommendation = recommendationContext
         ? recommendationCache[log.id] || requestFallbackRecommendation(recommendationContext)
+        : null;
+
+      const strategyRisk = aiRecommendation
+        ? getStrategyRiskLevel(aiRecommendation.strategy || "record-next-result")
         : null;
 
       if (recommendationContext && !recommendationCache[log.id]) {
@@ -3534,6 +3595,19 @@
                       getStrategyLabel(aiRecommendation.strategy || "")
                     )}`}
               </small>
+
+              ${strategyRisk ? `
+                <div
+                  class="strategy-risk-badge"
+                  style="
+                    background:${strategyRisk.color}22;
+                    color:${strategyRisk.color};
+                    border:1px solid ${strategyRisk.color}55;
+                  "
+                >
+                  위험도 ${escapeHtml(strategyRisk.label)}
+                </div>
+              ` : ""}
 
               <div
                 style="
