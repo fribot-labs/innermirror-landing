@@ -2706,6 +2706,8 @@
         renderStrategyEvolutionTimeline(window.currentLogs || []);
       const strategyStabilityHtml =
         renderStrategyStabilityPanel(window.currentLogs || []);
+      const coachingEvolutionExplanationHtml =
+        renderCoachingEvolutionExplanationPanel(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
@@ -2742,6 +2744,7 @@
         ${riskTrendWarningHtml}
         ${strategyEvolutionTimelineHtml}
         ${strategyStabilityHtml}
+        ${coachingEvolutionExplanationHtml}
 
         <div class="strategy-summary-insight">
           <div class="strategy-summary-title">
@@ -3490,6 +3493,126 @@
             "
           >
             ${escapeHtml(trend.message)}
+          </p>
+        </div>
+      `;
+    }
+
+    function generateCoachingEvolutionExplanation(logs = window.currentLogs || []) {
+      if (!logs || logs.length === 0) {
+        return "아직 코칭 진화 흐름을 설명할 기록이 충분하지 않습니다.";
+      }
+
+      const stability = calculateStrategyStabilityScore(logs);
+      const riskTrend = analyzeRiskTrend(logs);
+      const stateSummary = getStrategyStateSummary(logs);
+
+      const dominantState = Object.entries(stateSummary)
+        .sort((a, b) => b[1] - a[1])[0]?.[0];
+
+      const stateLabelMap = {
+        stable: "안정 실행 상태",
+        unstable: "실행 불안정 상태",
+        perspective: "관점 전환 필요 상태",
+        reduce: "행동 축소 필요 상태",
+        merge: "통합 판단 상태",
+        record: "다음 실행 기록 상태"
+      };
+
+      const dominantLabel =
+        stateLabelMap[dominantState] || "초기 판단 상태";
+
+      if (stability.score >= 80 && riskTrend.level === "stable") {
+        return `현재 코칭은 '${dominantLabel}'를 중심으로 안정적으로 유지되고 있습니다. 위험 흐름도 낮기 때문에 AI는 새로운 방향 전환보다 기존 실행 기록을 강화하는 방향으로 코칭을 유지합니다.`;
+      }
+
+      if (riskTrend.level === "high") {
+        return `최근 판단 흐름에서 위험 증가 신호가 감지되었습니다. AI는 기존 코칭을 반복하기보다 문제 정의, 실행 부담, 관점 전환을 다시 점검하는 방향으로 코칭을 조정해야 합니다.`;
+      }
+
+      if (riskTrend.level === "warning") {
+        return `최근 판단 흐름에 주의 신호가 반복되고 있습니다. AI는 실행을 더 작은 단위로 나누거나, 현재 접근 방식을 다시 검토하도록 코칭을 조정합니다.`;
+      }
+
+      if (stability.score < 60) {
+        return `판단 상태가 자주 변하고 있습니다. AI는 하나의 해결책을 강하게 밀기보다 사용자의 판단 흐름을 먼저 안정시키는 방향으로 코칭을 조정합니다.`;
+      }
+
+      if (stateSummary.merge > 0) {
+        return `통합 판단 기록이 포함되어 있습니다. AI는 여러 기록의 공통 흐름을 기준으로 핵심 실행 하나를 선택하도록 코칭을 정리합니다.`;
+      }
+
+      return `현재 코칭은 '${dominantLabel}' 흐름을 중심으로 작동하고 있습니다. AI는 다음 기록에서 실제 실행 결과와 배운 점을 더 명확히 남기도록 코칭을 이어갑니다.`;
+    }
+
+    function renderCoachingEvolutionExplanationPanel(logs = window.currentLogs || []) {
+      const stability = calculateStrategyStabilityScore(logs);
+      const riskTrend = analyzeRiskTrend(logs);
+      const explanation = generateCoachingEvolutionExplanation(logs);
+
+      const panelColor =
+        riskTrend.level === "high"
+          ? "#ef4444"
+          : riskTrend.level === "warning"
+          ? "#f59e0b"
+          : stability.score >= 80
+          ? "#22c55e"
+          : "#60a5fa";
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid ${panelColor}55;
+            background:${panelColor}14;
+          "
+        >
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+              margin-bottom:10px;
+            "
+          >
+            <div
+              style="
+                font-size:15px;
+                font-weight:900;
+                color:#f8fafc;
+              "
+            >
+              🤖 AI 코칭 진화 설명
+            </div>
+
+            <div
+              style="
+                padding:4px 10px;
+                border-radius:999px;
+                background:${panelColor}22;
+                border:1px solid ${panelColor}55;
+                color:${panelColor};
+                font-size:12px;
+                font-weight:900;
+                white-space:nowrap;
+              "
+            >
+              자동 해석
+            </div>
+          </div>
+
+          <p
+            style="
+              margin:0;
+              color:#e5e7eb;
+              font-size:13px;
+              line-height:1.7;
+            "
+          >
+            ${escapeHtml(explanation)}
           </p>
         </div>
       `;
