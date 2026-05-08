@@ -2700,6 +2700,8 @@
       const performanceList = getCoachingTypePerformanceList();
       const strategySummaryHtml = renderStrategySummaryPanel(window.currentLogs || []);
       const riskSummaryHtml = renderRiskSummaryPanel(window.currentLogs || []);
+      const riskTrendWarningHtml =
+        renderRiskTrendWarningPanel(window.currentLogs || []);
       const strategyEvolutionTimelineHtml =
         renderStrategyEvolutionTimeline(window.currentLogs || []);
       const strategyStabilityHtml =
@@ -2737,6 +2739,7 @@
 
         ${strategySummaryHtml}
         ${riskSummaryHtml}
+        ${riskTrendWarningHtml}
         ${strategyEvolutionTimelineHtml}
         ${strategyStabilityHtml}
 
@@ -3314,6 +3317,25 @@
       }
     }
 
+    function getRiskScoreByLabel(label) {
+      switch (label) {
+        case "낮음":
+          return 1;
+
+        case "중간":
+          return 2;
+
+        case "주의":
+          return 3;
+
+        case "높음":
+          return 4;
+
+        default:
+          return 0;
+      }
+    }
+
     function buildRiskSummary(logs = window.currentLogs || []) {
       const summary = {
         낮음: 0,
@@ -3409,6 +3431,136 @@
           </div>
         </div>
       `;
+    }
+
+    function renderRiskTrendWarningPanel(logs = window.currentLogs || []) {
+      const trend = analyzeRiskTrend(logs);
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid ${trend.color}55;
+            background:${trend.color}14;
+          "
+        >
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+              margin-bottom:10px;
+            "
+          >
+            <div
+              style="
+                font-size:15px;
+                font-weight:900;
+                color:#f8fafc;
+              "
+            >
+              🚨 위험 추세 경고
+            </div>
+
+            <div
+              style="
+                padding:4px 10px;
+                border-radius:999px;
+                background:${trend.color}22;
+                border:1px solid ${trend.color}55;
+                color:${trend.color};
+                font-size:12px;
+                font-weight:900;
+                white-space:nowrap;
+              "
+            >
+              ${escapeHtml(trend.label)}
+            </div>
+          </div>
+
+          <p
+            style="
+              margin:0;
+              color:#e5e7eb;
+              font-size:13px;
+              line-height:1.6;
+            "
+          >
+            ${escapeHtml(trend.message)}
+          </p>
+        </div>
+      `;
+    }
+
+    function analyzeRiskTrend(logs = window.currentLogs || []) {
+      if (!logs || logs.length < 2) {
+        return {
+          level: "none",
+          label: "분석중",
+          color: "#64748b",
+          message: "위험 추세를 분석하려면 기록이 2개 이상 필요합니다."
+        };
+      }
+
+      const ordered = logs
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      const riskScores = ordered.map(log => {
+        const recommendation = recommendationCache[log.id];
+        const strategy = recommendation?.strategy || "record-next-result";
+        const risk = getStrategyRiskLevel(strategy);
+
+        return getRiskScoreByLabel(risk.label);
+      });
+
+      const latest = riskScores[riskScores.length - 1];
+      const previous = riskScores[riskScores.length - 2];
+
+      const recentAverage =
+        riskScores.slice(-3).reduce((sum, score) => sum + score, 0) /
+        Math.min(3, riskScores.length);
+
+      if (latest > previous && latest >= 3) {
+        return {
+          level: "high",
+          label: "위험 증가",
+          color: "#ef4444",
+          message:
+            "최근 기록에서 위험 신호가 증가하고 있습니다. 다음 기록에서는 문제 정의와 실행 부담을 다시 점검하세요."
+        };
+      }
+
+      if (recentAverage >= 3) {
+        return {
+          level: "warning",
+          label: "주의 필요",
+          color: "#f59e0b",
+          message:
+            "최근 판단 흐름에 주의 신호가 반복되고 있습니다. 실행을 줄이거나 관점을 전환해보세요."
+        };
+      }
+
+      if (latest < previous) {
+        return {
+          level: "improving",
+          label: "위험 완화",
+          color: "#22c55e",
+          message:
+            "최근 기록에서 위험도가 낮아지는 흐름이 보입니다. 현재 방식의 효과를 계속 확인해보세요."
+        };
+      }
+
+      return {
+        level: "stable",
+        label: "안정 유지",
+        color: "#60a5fa",
+        message:
+          "최근 위험 흐름은 안정적으로 유지되고 있습니다. 다음 실행 결과 기록을 이어가세요."
+      };
     }
 
     function buildStrategyEvolutionTimeline(logs = window.currentLogs || []) {
