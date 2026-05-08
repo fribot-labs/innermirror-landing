@@ -804,6 +804,25 @@
       margin-top: 8px;
     }
 
+    .dashboard-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .dashboard-insight-stack {
+      display: grid;
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    @media (min-width: 1100px) {
+      .dashboard-summary-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -2741,36 +2760,45 @@
           </div>
         `).join("")}
 
-        ${strategySummaryHtml}
-        ${riskSummaryHtml}
-        ${riskTrendWarningHtml}
-        ${strategyEvolutionTimelineHtml}
-        ${strategyStabilityHtml}
-        ${coachingEvolutionExplanationHtml}
-        ${judgmentRecoverySignalHtml}
+        <div class="dashboard-summary-grid">
 
-        <div class="strategy-summary-insight">
-          <div class="strategy-summary-title">
-            🧠 판단 흐름 인사이트
-          </div>
+          ${strategySummaryHtml}
+          ${riskSummaryHtml}
 
-          <p>
-            ${escapeHtml(
-              generateStrategySummaryInsight(
-                getStrategyStateSummary(window.currentLogs || [])
-              )
-            )}
-          </p>
         </div>
 
-        <div class="strategy-summary-insight">
-          <div class="strategy-summary-title">
-            📈 판단 흐름 추세
+        ${strategyStabilityHtml}
+        ${judgmentRecoverySignalHtml}
+        ${coachingEvolutionExplanationHtml}
+        ${riskTrendWarningHtml}
+        ${strategyEvolutionTimelineHtml}
+
+        <div class="dashboard-insight-stack">
+
+          <div class="strategy-summary-insight">
+            <div class="strategy-summary-title">
+              🧠 판단 흐름 인사이트
+            </div>
+
+            <p>
+              ${generateStrategySummaryInsight(
+                getStrategyStateSummary()
+              )}
+            </p>
           </div>
 
-          <p>
-            ${escapeHtml(generateStrategyTrendInsight(window.currentLogs || []))}
-          </p>
+          <div class="strategy-summary-insight">
+            <div class="strategy-summary-title">
+              📈 판단 흐름 추세
+            </div>
+
+            <p>
+              ${generateStrategyTrendInsight(
+                window.currentLogs || []
+              )}
+            </p>
+          </div>
+
         </div>
       `;
     }
