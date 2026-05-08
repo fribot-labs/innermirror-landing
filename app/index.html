@@ -2700,6 +2700,8 @@
       const performanceList = getCoachingTypePerformanceList();
       const strategySummaryHtml = renderStrategySummaryPanel(window.currentLogs || []);
       const riskSummaryHtml = renderRiskSummaryPanel(window.currentLogs || []);
+      const strategyEvolutionTimelineHtml =
+        renderStrategyEvolutionTimeline(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
@@ -2733,6 +2735,7 @@
 
         ${strategySummaryHtml}
         ${riskSummaryHtml}
+        ${strategyEvolutionTimelineHtml}
 
         <div class="strategy-summary-insight">
           <div class="strategy-summary-title">
@@ -3399,6 +3402,170 @@
                   ${summary[risk.label] || 0}개
                 </div>
               </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    function buildStrategyEvolutionTimeline(logs = window.currentLogs || []) {
+      if (!logs || logs.length === 0) return [];
+
+      return logs
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+        .map((log, index) => {
+          const recommendation = recommendationCache[log.id];
+          const strategy = recommendation?.strategy || "record-next-result";
+          const visual = getStrategyStateVisual(strategy);
+          const risk = getStrategyRiskLevel(strategy);
+
+          return {
+            id: log.id,
+            version: log.version || index + 1,
+            topic: log.topicTitle || log.topic || "미분류",
+            strategy,
+            label: visual.label,
+            icon: visual.icon,
+            color: visual.color,
+            riskLabel: risk.label,
+            riskColor: risk.color,
+            createdAt: log.createdAt
+          };
+        });
+    }
+
+    function renderStrategyEvolutionTimeline(logs = window.currentLogs || []) {
+      const timeline = buildStrategyEvolutionTimeline(logs);
+
+      if (!timeline || timeline.length === 0) {
+        return `
+          <div
+            style="
+              margin-top:18px;
+              padding:16px;
+              border-radius:16px;
+              border:1px solid rgba(255,255,255,0.08);
+              background:rgba(15,23,42,0.35);
+            "
+          >
+            <div
+              style="
+                font-size:15px;
+                font-weight:800;
+                margin-bottom:10px;
+                color:#f8fafc;
+              "
+            >
+              🧬 판단 상태 진화
+            </div>
+
+            <p style="margin:0;color:#94a3b8;font-size:13px;">
+              아직 판단 상태 진화를 표시할 기록이 없습니다.
+            </p>
+          </div>
+        `;
+      }
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,0.08);
+            background:rgba(15,23,42,0.35);
+          "
+        >
+          <div
+            style="
+              font-size:15px;
+              font-weight:800;
+              margin-bottom:14px;
+              color:#f8fafc;
+            "
+          >
+            🧬 판단 상태 진화
+          </div>
+
+          <div style="display:grid; gap:10px;">
+            ${timeline.map((item, index) => `
+              <div
+                style="
+                  display:grid;
+                  grid-template-columns:auto 1fr auto;
+                  gap:10px;
+                  align-items:center;
+                  padding:10px 12px;
+                  border-radius:12px;
+                  background:rgba(255,255,255,0.03);
+                  border:1px solid rgba(255,255,255,0.04);
+                "
+              >
+                <div
+                  style="
+                    width:28px;
+                    height:28px;
+                    border-radius:999px;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    background:${item.color}22;
+                    border:1px solid ${item.color}55;
+                    color:${item.color};
+                    font-size:14px;
+                    font-weight:900;
+                  "
+                >
+                  ${item.icon}
+                </div>
+
+                <div>
+                  <div
+                    style="
+                      color:${item.color};
+                      font-size:13px;
+                      font-weight:800;
+                    "
+                  >
+                    V${escapeHtml(String(item.version))} · ${escapeHtml(item.label)}
+                  </div>
+
+                  <div
+                    style="
+                      margin-top:2px;
+                      color:#94a3b8;
+                      font-size:12px;
+                    "
+                  >
+                    ${escapeHtml(item.topic)} · ${escapeHtml(item.createdAt || "")}
+                  </div>
+                </div>
+
+                <div
+                  style="
+                    padding:3px 8px;
+                    border-radius:999px;
+                    background:${item.riskColor}22;
+                    border:1px solid ${item.riskColor}55;
+                    color:${item.riskColor};
+                    font-size:11px;
+                    font-weight:800;
+                  "
+                >
+                  ${escapeHtml(item.riskLabel)}
+                </div>
+              </div>
+
+              ${index < timeline.length - 1 ? `
+                <div
+                  style="
+                    margin-left:13px;
+                    height:14px;
+                    border-left:2px dashed rgba(148,163,184,0.35);
+                  "
+                ></div>
+              ` : ""}
             `).join("")}
           </div>
         </div>
