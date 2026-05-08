@@ -2702,6 +2702,8 @@
       const riskSummaryHtml = renderRiskSummaryPanel(window.currentLogs || []);
       const strategyEvolutionTimelineHtml =
         renderStrategyEvolutionTimeline(window.currentLogs || []);
+      const strategyStabilityHtml =
+        renderStrategyStabilityPanel(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
@@ -2736,6 +2738,7 @@
         ${strategySummaryHtml}
         ${riskSummaryHtml}
         ${strategyEvolutionTimelineHtml}
+        ${strategyStabilityHtml}
 
         <div class="strategy-summary-insight">
           <div class="strategy-summary-title">
@@ -3501,6 +3504,84 @@
       return 1;
     }
 
+    function calculateStrategyStabilityScore(
+      logs = window.currentLogs || []
+    ) {
+      if (!logs || logs.length === 0) {
+        return {
+          score: 0,
+          label: "분석중",
+          color: "#64748b",
+          description: "분석할 기록이 없습니다."
+        };
+      }
+
+      const recentLogs = logs.slice(0, 5);
+
+      const strategies = recentLogs.map(log => {
+        const recommendation = recommendationCache[log.id];
+        return recommendation?.strategy || "record-next-result";
+      });
+
+      const uniqueStrategies = [...new Set(strategies)];
+
+      let score = 100;
+
+      score -= (uniqueStrategies.length - 1) * 15;
+
+      if (strategies.includes("change-perspective")) {
+        score -= 20;
+      }
+
+      if (strategies.includes("improve-execution-quality")) {
+        score -= 10;
+      }
+
+      if (strategies.includes("reduce-action-size")) {
+        score -= 8;
+      }
+
+      score = Math.max(0, Math.min(100, score));
+
+      if (score >= 80) {
+        return {
+          score,
+          label: "매우 안정",
+          color: "#22c55e",
+          description:
+            "판단 흐름이 안정적으로 유지되고 있습니다."
+        };
+      }
+
+      if (score >= 60) {
+        return {
+          score,
+          label: "안정",
+          color: "#84cc16",
+          description:
+            "대체로 안정적인 판단 흐름입니다."
+        };
+      }
+
+      if (score >= 40) {
+        return {
+          score,
+          label: "주의",
+          color: "#f59e0b",
+          description:
+            "판단 흐름 변화가 증가하고 있습니다."
+        };
+      }
+
+      return {
+        score,
+        label: "불안정",
+        color: "#ef4444",
+        description:
+          "판단 구조 변화가 커지고 있습니다."
+      };
+    }
+
     function renderStrategyEvolutionTimeline(logs = window.currentLogs || []) {
       const timeline = buildStrategyEvolutionTimeline(logs);
 
@@ -3689,6 +3770,97 @@
               현재 판단 구조가 얼마나 안정 또는 위험 방향으로
               이동했는지를 의미합니다.
             </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderStrategyStabilityPanel(
+      logs = window.currentLogs || []
+    ) {
+      const stability =
+        calculateStrategyStabilityScore(logs);
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,0.08);
+            background:rgba(15,23,42,0.35);
+          "
+        >
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              margin-bottom:12px;
+            "
+          >
+            <div
+              style="
+                font-size:15px;
+                font-weight:800;
+                color:#f8fafc;
+              "
+            >
+              🧠 판단 안정성 점수
+            </div>
+
+            <div
+              style="
+                padding:4px 10px;
+                border-radius:999px;
+                background:${stability.color}22;
+                border:1px solid ${stability.color}55;
+                color:${stability.color};
+                font-size:12px;
+                font-weight:800;
+              "
+            >
+              ${stability.label}
+            </div>
+          </div>
+
+          <div
+            style="
+              font-size:32px;
+              font-weight:900;
+              color:${stability.color};
+              margin-bottom:12px;
+            "
+          >
+            ${stability.score}
+          </div>
+
+          <div
+            style="
+              height:10px;
+              border-radius:999px;
+              overflow:hidden;
+              background:rgba(255,255,255,0.08);
+              margin-bottom:12px;
+            "
+          >
+            <div
+              style="
+                width:${stability.score}%;
+                height:100%;
+                background:${stability.color};
+              "
+            ></div>
+          </div>
+
+          <div
+            style="
+              color:#cbd5e1;
+              font-size:13px;
+              line-height:1.6;
+            "
+          >
+            ${stability.description}
           </div>
         </div>
       `;
