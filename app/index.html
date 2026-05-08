@@ -3420,6 +3420,25 @@
           const visual = getStrategyStateVisual(strategy);
           const risk = getStrategyRiskLevel(strategy);
 
+          const previous =
+            index > 0
+              ? logs[index - 1]
+              : null;
+
+          const previousRecommendation =
+            previous
+              ? recommendationCache[previous.id]
+              : null;
+
+          const previousStrategy =
+            previousRecommendation?.strategy;
+
+          const transitionScore =
+            calculateStateTransitionScore(
+              previousStrategy,
+              strategy
+            );
+
           return {
             id: log.id,
             version: log.version || index + 1,
@@ -3430,9 +3449,56 @@
             color: visual.color,
             riskLabel: risk.label,
             riskColor: risk.color,
-            createdAt: log.createdAt
+            createdAt: log.createdAt,
+            transitionScore
           };
         });
+    }
+
+    function calculateStateTransitionScore(previousStrategy, currentStrategy) {
+      if (!previousStrategy || !currentStrategy) {
+        return 0;
+      }
+
+      if (previousStrategy === currentStrategy) {
+        return 0;
+      }
+
+      const positiveTransitions = [
+        ["change-perspective", "record-next-result"],
+        ["reduce-action-size", "record-next-result"],
+        ["improve-execution-quality", "reinforce-successful-pattern"],
+        ["record-next-result", "reinforce-successful-pattern"]
+      ];
+
+      const negativeTransitions = [
+        ["reinforce-successful-pattern", "change-perspective"],
+        ["reinforce-successful-pattern", "improve-execution-quality"],
+        ["record-next-result", "change-perspective"],
+        ["record-next-result", "reduce-action-size"]
+      ];
+
+      const isPositive = positiveTransitions.some(
+        ([from, to]) =>
+          from === previousStrategy &&
+          to === currentStrategy
+      );
+
+      if (isPositive) {
+        return 2;
+      }
+
+      const isNegative = negativeTransitions.some(
+        ([from, to]) =>
+          from === previousStrategy &&
+          to === currentStrategy
+      );
+
+      if (isNegative) {
+        return -2;
+      }
+
+      return 1;
     }
 
     function renderStrategyEvolutionTimeline(logs = window.currentLogs || []) {
@@ -3540,6 +3606,29 @@
                   >
                     ${escapeHtml(item.topic)} · ${escapeHtml(item.createdAt || "")}
                   </div>
+
+                  <div
+                    style="
+                      margin-top:4px;
+                      font-size:11px;
+                      font-weight:700;
+                      color:${
+                        item.transitionScore > 0
+                          ? "#22c55e"
+                          : item.transitionScore < 0
+                          ? "#ef4444"
+                          : "#94a3b8"
+                      };
+                    "
+                  >
+                    ${
+                      item.transitionScore > 0
+                        ? `▲ 상태 개선 +${item.transitionScore}`
+                        : item.transitionScore < 0
+                        ? `▼ 상태 악화 ${item.transitionScore}`
+                        : "● 상태 유지"
+                    }
+                  </div>
                 </div>
 
                 <div
@@ -3567,6 +3656,39 @@
                 ></div>
               ` : ""}
             `).join("")}
+          </div>
+
+          <div
+            style="
+              margin-top:16px;
+              padding:12px;
+              border-radius:12px;
+              background:rgba(59,130,246,0.08);
+              border:1px solid rgba(59,130,246,0.18);
+            "
+          >
+            <div
+              style="
+                font-size:12px;
+                font-weight:800;
+                color:#93c5fd;
+                margin-bottom:6px;
+              "
+            >
+              📈 상태 전이 분석
+            </div>
+
+            <div
+              style="
+                color:#dbeafe;
+                font-size:12px;
+                line-height:1.5;
+              "
+            >
+              상태 변화 점수는 이전 판단 흐름 대비
+              현재 판단 구조가 얼마나 안정 또는 위험 방향으로
+              이동했는지를 의미합니다.
+            </div>
           </div>
         </div>
       `;
