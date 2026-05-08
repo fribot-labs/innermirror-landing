@@ -2708,6 +2708,8 @@
         renderStrategyStabilityPanel(window.currentLogs || []);
       const coachingEvolutionExplanationHtml =
         renderCoachingEvolutionExplanationPanel(window.currentLogs || []);
+      const judgmentRecoverySignalHtml =
+        renderJudgmentRecoverySignalPanel(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
@@ -2745,6 +2747,7 @@
         ${strategyEvolutionTimelineHtml}
         ${strategyStabilityHtml}
         ${coachingEvolutionExplanationHtml}
+        ${judgmentRecoverySignalHtml}
 
         <div class="strategy-summary-insight">
           <div class="strategy-summary-title">
@@ -3545,6 +3548,94 @@
       return `현재 코칭은 '${dominantLabel}' 흐름을 중심으로 작동하고 있습니다. AI는 다음 기록에서 실제 실행 결과와 배운 점을 더 명확히 남기도록 코칭을 이어갑니다.`;
     }
 
+    function analyzeJudgmentRecoverySignal(logs = window.currentLogs || []) {
+      if (!logs || logs.length < 2) {
+        return {
+          level: "none",
+          label: "분석중",
+          color: "#64748b",
+          message: "회복 신호를 분석하려면 기록이 2개 이상 필요합니다."
+        };
+      }
+
+      const ordered = logs
+        .slice()
+        .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+
+      const riskScores = ordered.map(log => {
+        const recommendation = recommendationCache[log.id];
+        const strategy = recommendation?.strategy || "record-next-result";
+        const risk = getStrategyRiskLevel(strategy);
+
+        return getRiskScoreByLabel(risk.label);
+      });
+
+      const latestRisk = riskScores[riskScores.length - 1];
+      const previousRisk = riskScores[riskScores.length - 2];
+
+      const stability = calculateStrategyStabilityScore(logs);
+      const transitionTimeline = buildStrategyEvolutionTimeline(logs);
+
+      const recentTransitions = transitionTimeline
+        .slice(-3)
+        .map(item => item.transitionScore || 0);
+
+      const positiveTransitions = recentTransitions.filter(score => score > 0).length;
+      const negativeTransitions = recentTransitions.filter(score => score < 0).length;
+
+      if (
+        latestRisk < previousRisk &&
+        stability.score >= 70 &&
+        positiveTransitions >= negativeTransitions
+      ) {
+        return {
+          level: "strong",
+          label: "회복 강함",
+          color: "#22c55e",
+          message:
+            "최근 판단 흐름에서 위험도가 낮아지고 안정성이 회복되고 있습니다. 현재 방식은 유지하되, 다음 기록에서 실제 실행 결과를 확인해보세요."
+        };
+      }
+
+      if (latestRisk < previousRisk) {
+        return {
+          level: "partial",
+          label: "회복 진행",
+          color: "#84cc16",
+          message:
+            "최근 기록에서 위험도가 낮아지는 흐름이 보입니다. 다만 안정성이 충분히 고정되었는지는 다음 기록에서 확인이 필요합니다."
+        };
+      }
+
+      if (stability.score >= 80 && latestRisk <= 1) {
+        return {
+          level: "stable",
+          label: "안정 유지",
+          color: "#60a5fa",
+          message:
+            "현재 판단 흐름은 안정적으로 유지되고 있습니다. 회복이 필요한 위험 신호는 크지 않습니다."
+        };
+      }
+
+      if (latestRisk >= 3 || negativeTransitions > positiveTransitions) {
+        return {
+          level: "weak",
+          label: "회복 약함",
+          color: "#f59e0b",
+          message:
+            "아직 판단 회복 신호가 충분하지 않습니다. 다음 기록에서는 문제 정의를 줄이고 실행 단위를 작게 나누어보세요."
+        };
+      }
+
+      return {
+        level: "none",
+        label: "회복 관찰중",
+        color: "#64748b",
+        message:
+          "현재 판단 흐름에서 뚜렷한 회복 또는 악화 신호는 감지되지 않았습니다. 기록을 더 축적해보세요."
+      };
+    }
+
     function renderCoachingEvolutionExplanationPanel(logs = window.currentLogs || []) {
       const stability = calculateStrategyStabilityScore(logs);
       const riskTrend = analyzeRiskTrend(logs);
@@ -3613,6 +3704,68 @@
             "
           >
             ${escapeHtml(explanation)}
+          </p>
+        </div>
+      `;
+    }
+
+    function renderJudgmentRecoverySignalPanel(logs = window.currentLogs || []) {
+      const recovery = analyzeJudgmentRecoverySignal(logs);
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid ${recovery.color}55;
+            background:${recovery.color}14;
+          "
+        >
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              gap:10px;
+              margin-bottom:10px;
+            "
+          >
+            <div
+              style="
+                font-size:15px;
+                font-weight:900;
+                color:#f8fafc;
+              "
+            >
+              🌱 판단 회복 신호
+            </div>
+
+            <div
+              style="
+                padding:4px 10px;
+                border-radius:999px;
+                background:${recovery.color}22;
+                border:1px solid ${recovery.color}55;
+                color:${recovery.color};
+                font-size:12px;
+                font-weight:900;
+                white-space:nowrap;
+              "
+            >
+              ${escapeHtml(recovery.label)}
+            </div>
+          </div>
+
+          <p
+            style="
+              margin:0;
+              color:#e5e7eb;
+              font-size:13px;
+              line-height:1.7;
+            "
+          >
+            ${escapeHtml(recovery.message)}
           </p>
         </div>
       `;
