@@ -2699,6 +2699,7 @@
 
       const performanceList = getCoachingTypePerformanceList();
       const strategySummaryHtml = renderStrategySummaryPanel(window.currentLogs || []);
+      const riskSummaryHtml = renderRiskSummaryPanel(window.currentLogs || []);
 
       if (performanceList.length === 0) {
         container.innerHTML = `
@@ -2729,6 +2730,9 @@
             <span>실행률 ${item.executedRate}%</span>
           </div>
         `).join("")}
+
+        ${strategySummaryHtml}
+        ${riskSummaryHtml}
 
         <div class="strategy-summary-insight">
           <div class="strategy-summary-title">
@@ -3302,6 +3306,103 @@
             color: "#64748b"
           };
       }
+    }
+
+    function buildRiskSummary(logs = window.currentLogs || []) {
+      const summary = {
+        낮음: 0,
+        주의: 0,
+        중간: 0,
+        높음: 0,
+        분석중: 0
+      };
+
+      logs.forEach(log => {
+        const recommendation = recommendationCache[log.id];
+        const strategy = recommendation?.strategy || "record-next-result";
+        const risk = getStrategyRiskLevel(strategy);
+
+        if (summary[risk.label] !== undefined) {
+          summary[risk.label] += 1;
+        } else {
+          summary.분석중 += 1;
+        }
+      });
+
+      return summary;
+    }
+
+    function renderRiskSummaryPanel(logs = window.currentLogs || []) {
+      const summary = buildRiskSummary(logs);
+
+      const riskOrder = [
+        { label: "낮음", color: "#22c55e" },
+        { label: "주의", color: "#facc15" },
+        { label: "중간", color: "#a855f7" },
+        { label: "높음", color: "#ef4444" },
+        { label: "분석중", color: "#64748b" }
+      ];
+
+      return `
+        <div
+          style="
+            margin-top:18px;
+            padding:16px;
+            border-radius:16px;
+            border:1px solid rgba(255,255,255,0.08);
+            background:rgba(15,23,42,0.35);
+          "
+        >
+          <div
+            style="
+              font-size:15px;
+              font-weight:800;
+              margin-bottom:14px;
+              color:#f8fafc;
+            "
+          >
+            ⚠️ 위험도 요약
+          </div>
+
+          <div style="display:grid; gap:10px;">
+            ${riskOrder.map(risk => `
+              <div
+                style="
+                  display:flex;
+                  justify-content:space-between;
+                  align-items:center;
+                  padding:10px 12px;
+                  border-radius:12px;
+                  background:rgba(255,255,255,0.03);
+                "
+              >
+                <div
+                  style="
+                    display:flex;
+                    align-items:center;
+                    gap:8px;
+                    color:${risk.color};
+                    font-weight:700;
+                  "
+                >
+                  <span>●</span>
+                  <span>위험도 ${risk.label}</span>
+                </div>
+
+                <div
+                  style="
+                    color:#cbd5e1;
+                    font-size:13px;
+                    font-weight:700;
+                  "
+                >
+                  ${summary[risk.label] || 0}개
+                </div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
     }
 
     function getStrategyStateVisual(strategy) {
