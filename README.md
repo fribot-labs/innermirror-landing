@@ -92,3 +92,7 @@ InnerMirror helps you:
 
 > InnerMirror is not a note-taking tool.  
 > It is a system that helps your decisions evolve.
+
+## Release Checklist
+
+- [InnerMirror MVP Release Checklist](docs/MVP_RELEASE_CHECKLIST.md)
