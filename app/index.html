@@ -3192,7 +3192,10 @@
         source: "fallback",
         text: getFallbackRecommendation(context),
         confidence: "basic",
-        analysis: null
+        strategy: "record-next-result",
+        reason: "Private engine unavailable. Using safe fallback recommendation.",
+        analysis: null,
+        status: "fallback"
       };
     }
 
@@ -3221,13 +3224,18 @@
           source: result.source || "private-engine",
           text: result.recommendationText || getFallbackRecommendation(context),
           confidence: result.confidence || "medium",
-          strategy: result.strategy || "unknown",
+          strategy: result.strategy || "record-next-result",
           reason: result.reason || "",
-          analysis: result.analysis || null
+          analysis: result.analysis || null,
+          status: "connected"
         };
       } catch (error) {
         console.warn("Private engine unavailable. Using fallback.", error);
-        return requestFallbackRecommendation(context);
+        return {
+          ...requestFallbackRecommendation(context),
+          status: "fallback",
+          reason: "Private engine request failed. Using fallback recommendation."
+        };
       }
     }
 
@@ -3247,14 +3255,14 @@
     }
 
     async function requestRecommendation(context) {
-      // TODO: private engine 연결 예정
-      // return await callPrivateRecommendationEngine(context);
-
       return {
         source: "fallback",
         text: getFallbackRecommendation(context),
         confidence: "basic",
-        analysis: null
+        strategy: "record-next-result",
+        reason: "Private engine is not connected yet.",
+        analysis: null,
+        status: "fallback"
       };
     }
 
@@ -3352,6 +3360,42 @@
             color: "#64748b"
           };
       }
+    }
+
+    function getEngineStatusMeta(recommendation) {
+      if (!recommendation) {
+        return {
+          label: "분석 대기중",
+          color: "#64748b",
+          icon: "⏳",
+          message: "추천 분석을 준비하고 있습니다."
+        };
+      }
+
+      if (recommendation.status === "connected" || recommendation.source === "private-engine") {
+        return {
+          label: "Private engine 연결됨",
+          color: "#22c55e",
+          icon: "🟢",
+          message: "Private engine 분석 결과를 사용하고 있습니다."
+        };
+      }
+
+      if (recommendation.status === "fallback" || recommendation.source === "fallback") {
+        return {
+          label: "기본 추천 사용중",
+          color: "#f59e0b",
+          icon: "🟡",
+          message: "Private engine 연결이 불안정하여 기본 추천으로 안전 전환했습니다."
+        };
+      }
+
+      return {
+        label: "상태 확인중",
+        color: "#60a5fa",
+        icon: "🔵",
+        message: "추천 상태를 확인하고 있습니다."
+      };
     }
 
     function getRiskScoreByLabel(label) {
@@ -4450,6 +4494,8 @@
         ? getStrategyRiskLevel(aiRecommendation.strategy || "record-next-result")
         : null;
 
+      const engineStatus = getEngineStatusMeta(aiRecommendation);
+
       if (recommendationContext && !recommendationCache[log.id]) {
         setTimeout(() => {
           loadPrivateRecommendation(recommendationContext);
@@ -4576,6 +4622,29 @@
           ${aiRecommendation && aiRecommendation.text ? `
             <div class="ai-recommendation-box">
               🧠 InnerMirror 추천
+
+              ${engineStatus ? `
+                <div
+                  style="
+                    display:inline-flex;
+                    align-items:center;
+                    gap:6px;
+                    margin-top:8px;
+                    padding:4px 10px;
+                    border-radius:999px;
+                    background:${engineStatus.color}22;
+                    border:1px solid ${engineStatus.color}55;
+                    color:${engineStatus.color};
+                    font-size:11px;
+                    font-weight:800;
+                  "
+                  title="${escapeHtml(engineStatus.message)}"
+                >
+                  <span>${engineStatus.icon}</span>
+                  <span>${escapeHtml(engineStatus.label)}</span>
+                </div>
+              ` : ""}
+
               <p>${escapeHtml(aiRecommendation.text)}</p>
               <div
                 style="
@@ -4648,7 +4717,22 @@
                   · 안정성 ${escapeHtml(String(aiRecommendation.analysis.stabilityScore ?? "-"))}
                   · 회복 ${escapeHtml(aiRecommendation.analysis.recoverySignal || "-")}
                 </div>
-              ` : ""}
+              ` : `
+                <div
+                  style="
+                    margin-top:8px;
+                    padding:8px 10px;
+                    border-radius:10px;
+                    background:rgba(245,158,11,0.08);
+                    border:1px solid rgba(245,158,11,0.18);
+                    color:#fde68a;
+                    font-size:11px;
+                    line-height:1.5;
+                  "
+                >
+                  Private analysis 대기중 · 기본 추천으로 안전하게 표시됩니다.
+                </div>
+              `}
 
               <div
                 style="
