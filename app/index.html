@@ -831,6 +831,27 @@
       word-break: break-word;
     }
 
+    .record-content-expanded {
+      -webkit-line-clamp: unset;
+      line-clamp: unset;
+      overflow: visible;
+    }
+
+    .expand-toggle-button {
+      margin-top: 6px;
+      background: transparent;
+      border: none;
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .expand-toggle-button:hover {
+      opacity: 0.85;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -2012,6 +2033,17 @@
       document.getElementById("approach").value = "";
       document.getElementById("reason").value = "";
       document.getElementById("nextAction").value = "";
+    }
+
+    function toggleExpandContent(button) {
+      const targetId = button.dataset.target;
+      const target = document.getElementById(targetId);
+
+      if (!target) return;
+
+      const expanded = target.classList.toggle("record-content-expanded");
+
+      button.textContent = expanded ? "접기" : "더보기";
     }
 
     function startNewRecord() {
@@ -4805,18 +4837,71 @@
           </p>
 
           <p><b>문제:</b></p>
-          <div class="record-content-clamp">${escapeHtml(log.problem)}</div>
+          <div
+            id="problem-${log.id}"
+            class="record-content-clamp"
+          >
+            ${escapeHtml(log.problem)}
+          </div>
+
+          <button
+            class="expand-toggle-button"
+            data-target="problem-${log.id}"
+            onclick="toggleExpandContent(this)"
+          >
+            더보기
+          </button>
 
           <p><b>접근:</b></p>
-          <div class="record-content-clamp">${escapeHtml(log.approach)}</div>
+          <div
+            id="problem-${log.id}"
+            class="record-content-clamp"
+          >
+            ${escapeHtml(log.approach)}
+          </div>
+
+          <button
+            class="expand-toggle-button"
+            data-target="problem-${log.id}"
+            onclick="toggleExpandContent(this)"
+          >
+            더보기
+          </button>
 
           <p><b>판단 이유:</b></p>
-          <div class="record-content-clamp">${escapeHtml(log.reason)}</div>
+          <div
+            id="problem-${log.id}"
+            class="record-content-clamp"
+          >
+            ${escapeHtml(log.reason)}
+          </div>
+
+          <button
+            class="expand-toggle-button"
+            data-target="problem-${log.id}"
+            onclick="toggleExpandContent(this)"
+          >
+            더보기
+          </button>
 
           ${log.nextAction ? `
             <div class="next-action">
               <b>다음 실행</b>
-              <div class="record-content-clamp">${escapeHtml(log.nextAction)}</div>
+              <div
+                id="problem-${log.id}"
+                class="record-content-clamp"
+              >
+                ${escapeHtml(log.nextAction)}
+              </div>
+
+              <button
+                class="expand-toggle-button"
+                data-target="problem-${log.id}"
+                onclick="toggleExpandContent(this)"
+              >
+                더보기
+              </button>
+
             </div>
           ` : ""}
 
