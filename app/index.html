@@ -837,6 +837,50 @@
       overflow: visible;
     }
 
+    .record-detail-body {
+      margin-top: 14px;
+    }
+
+    .record-detail-body.collapsed {
+      display: none;
+    }
+
+    .record-summary-preview {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(15,23,42,0.35);
+      border: 1px solid rgba(148,163,184,0.14);
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+
+      display: -webkit-box;
+
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
+    .record-detail-toggle {
+      margin-top: 10px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(59,130,246,0.12);
+      border: 1px solid rgba(96,165,250,0.24);
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .record-detail-toggle:hover {
+      opacity: 0.86;
+    }
+
     .expand-toggle-button {
       margin-top: 6px;
       background: transparent;
@@ -1084,6 +1128,7 @@
     let showOnlyMilestones = false;
     let coachingFeedbackList = [];
     let recommendationCache = {};
+    let expandedRecordIds = new Set();
 
     async function initAuth() {
       try {
@@ -2035,6 +2080,8 @@
       document.getElementById("nextAction").value = "";
     }
 
+    const expandedContentIds = new Set();
+
     function toggleExpandContent(button) {
       const targetId = button.dataset.target;
       const target = document.getElementById(targetId);
@@ -2044,6 +2091,16 @@
       const expanded = target.classList.toggle("record-content-expanded");
 
       button.textContent = expanded ? "접기" : "더보기";
+    }
+
+    function toggleRecordDetail(recordId) {
+      if (expandedRecordIds.has(recordId)) {
+        expandedRecordIds.delete(recordId);
+      } else {
+        expandedRecordIds.add(recordId);
+      }
+
+      render();
     }
 
     function startNewRecord() {
@@ -4499,6 +4556,8 @@
     }
 
     function renderRecordCard(log) {
+      const isRecordExpanded = expandedRecordIds.has(log.id);
+
       let mergedInfoHtml = "";
       let mergedSourceHtml = "";
       let mergeSourceCardsHtml = "";
@@ -4836,80 +4895,94 @@
             주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
           </p>
 
-          <p><b>문제:</b></p>
-          <div
-            id="problem-${log.id}"
-            class="record-content-clamp"
-          >
-            ${escapeHtml(log.problem)}
+          <div class="record-summary-preview">
+            ${escapeHtml(log.problem || "기록 없음")}
           </div>
 
           <button
-            class="expand-toggle-button"
-            data-target="problem-${log.id}"
-            onclick="toggleExpandContent(this)"
+            class="record-detail-toggle"
+            onclick="event.stopPropagation(); toggleRecordDetail('${log.id}')"
           >
-            더보기
+            ${isRecordExpanded ? "요약 보기" : "전체 보기"}
           </button>
 
-          <p><b>접근:</b></p>
-          <div
-            id="approach-${log.id}"
-            class="record-content-clamp"
-          >
-            ${escapeHtml(log.approach)}
-          </div>
+          <div class="record-detail-body ${isRecordExpanded ? "" : "collapsed"}">
 
-          <button
-            class="expand-toggle-button"
-            data-target="approach-${log.id}"
-            onclick="toggleExpandContent(this)"
-          >
-            더보기
-          </button>
-
-          <p><b>판단 이유:</b></p>
-          <div
-            id="reason-${log.id}"
-            class="record-content-clamp"
-          >
-            ${escapeHtml(log.reason)}
-          </div>
-
-          <button
-            class="expand-toggle-button"
-            data-target="reason-${log.id}"
-            onclick="toggleExpandContent(this)"
-          >
-            더보기
-          </button>
-
-          ${log.nextAction ? `
-            <div class="next-action">
-              <b>다음 실행</b>
-              <div
-                id="nextAction-${log.id}"
-                class="record-content-clamp"
-              >
-                ${escapeHtml(log.nextAction)}
-              </div>
-
-              <button
-                class="expand-toggle-button"
-                data-target="nextAction-${log.id}"
-                onclick="toggleExpandContent(this)"
-              >
-                더보기
-              </button>
-
+            <p><b>문제:</b></p>
+            <div
+              id="problem-${log.id}"
+              class="record-content-clamp"
+            >
+              ${escapeHtml(log.problem)}
             </div>
-          ` : ""}
 
-          ${mergedInfoHtml}
-          ${mergeSourceCardsHtml}
-          ${mergedSourceHtml}
+            <button
+              class="expand-toggle-button"
+              data-target="problem-${log.id}"
+              onclick="toggleExpandContent(this)"
+            >
+              더보기
+            </button>
 
-          ${renderDiff(log)}
+            <p><b>접근:</b></p>
+            <div
+              id="approach-${log.id}"
+              class="record-content-clamp"
+            >
+              ${escapeHtml(log.approach)}
+            </div>
+
+            <button
+              class="expand-toggle-button"
+              data-target="approach-${log.id}"
+              onclick="toggleExpandContent(this)"
+            >
+              더보기
+            </button>
+
+            <p><b>판단 이유:</b></p>
+            <div
+              id="reason-${log.id}"
+              class="record-content-clamp"
+            >
+              ${escapeHtml(log.reason)}
+            </div>
+
+            <button
+              class="expand-toggle-button"
+              data-target="reason-${log.id}"
+              onclick="toggleExpandContent(this)"
+            >
+              더보기
+            </button>
+
+            ${log.nextAction ? `
+              <div class="next-action">
+                <b>다음 실행</b>
+                <div
+                  id="nextAction-${log.id}"
+                  class="record-content-clamp"
+                >
+                  ${escapeHtml(log.nextAction)}
+                </div>
+
+                <button
+                  class="expand-toggle-button"
+                  data-target="nextAction-${log.id}"
+                  onclick="toggleExpandContent(this)"
+                >
+                  더보기
+                </button>
+
+              </div>
+            ` : ""}
+
+            ${mergedInfoHtml}
+            ${mergeSourceCardsHtml}
+            ${mergedSourceHtml}
+
+            ${renderDiff(log)}
+          </div>
         </div>
       `;
     }
