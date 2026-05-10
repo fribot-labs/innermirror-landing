@@ -4854,7 +4854,7 @@
 
           <p><b>접근:</b></p>
           <div
-            id="problem-${log.id}"
+            id="approach-${log.id}"
             class="record-content-clamp"
           >
             ${escapeHtml(log.approach)}
@@ -4862,7 +4862,7 @@
 
           <button
             class="expand-toggle-button"
-            data-target="problem-${log.id}"
+            data-target="approach-${log.id}"
             onclick="toggleExpandContent(this)"
           >
             더보기
@@ -4870,7 +4870,7 @@
 
           <p><b>판단 이유:</b></p>
           <div
-            id="problem-${log.id}"
+            id="reason-${log.id}"
             class="record-content-clamp"
           >
             ${escapeHtml(log.reason)}
@@ -4878,7 +4878,7 @@
 
           <button
             class="expand-toggle-button"
-            data-target="problem-${log.id}"
+            data-target="reason-${log.id}"
             onclick="toggleExpandContent(this)"
           >
             더보기
@@ -4888,7 +4888,7 @@
             <div class="next-action">
               <b>다음 실행</b>
               <div
-                id="problem-${log.id}"
+                id="nextAction-${log.id}"
                 class="record-content-clamp"
               >
                 ${escapeHtml(log.nextAction)}
@@ -4896,7 +4896,7 @@
 
               <button
                 class="expand-toggle-button"
-                data-target="problem-${log.id}"
+                data-target="nextAction-${log.id}"
                 onclick="toggleExpandContent(this)"
               >
                 더보기
