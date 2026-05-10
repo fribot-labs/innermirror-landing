@@ -1186,19 +1186,22 @@
     async function ensureDefaultTopic() {
       if (!currentUser) return null;
 
-      const { data: existing, error: selectError } = await supabaseClient
+      const { data: existingList, error: selectError } = await supabaseClient
         .from("topics")
         .select("*")
         .eq("user_id", currentUser.id)
         .eq("title", "미분류")
-        .maybeSingle();
+        .order("created_at", { ascending: true })
+        .limit(1);
 
       if (selectError) {
         console.error("ensureDefaultTopic select error:", selectError);
         return null;
       }
 
-      if (existing) return existing;
+      if (existingList && existingList.length > 0) {
+        return existingList[0];
+      }
 
       const { data, error } = await supabaseClient
         .from("topics")
@@ -1996,7 +1999,6 @@
     function clearForm() {
       document.getElementById("topicSelect").value = "";
       document.getElementById("newTopicTitle").value = "";
-      document.getElementById("newTopicTitle").style.display = "none";
       document.getElementById("problem").value = "";
       document.getElementById("approach").value = "";
       document.getElementById("reason").value = "";
