@@ -822,6 +822,15 @@
       margin-top: 18px;
     }
 
+    .record-content-clamp {
+      display: -webkit-box;
+      line-clamp: 4;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      word-break: break-word;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -895,7 +904,7 @@
 
       <label>새 주제명</label>
       <div class="topic-create-row">
-        <input id="newTopicTitle" placeholder="예: 초음파 센서 탐색" />
+        <input id="newTopicTitle" maxlength="40" placeholder="예: 초음파 센서 탐색" />
         <button class="secondary" onclick="createTopicOnly()">+ 주제 만들기</button>
       </div>
 
@@ -975,16 +984,16 @@
       </div>
 
       <label>문제 정의</label>
-      <textarea id="problem" placeholder="무슨 문제가 있었나요? 예: 로봇이 한쪽으로 쏠린다."></textarea>
+      <textarea id="problem" maxlength="280" placeholder="무슨 문제가 있었나요? 예: 로봇이 한쪽으로 쏠린다."></textarea>
 
       <label>접근 방식</label>
-      <textarea id="approach" placeholder="어떻게 해결하려고 했나요? 예: 좌우 모터 값을 조정했다."></textarea>
+      <textarea id="approach" maxlength="280" placeholder="어떻게 해결하려고 했나요? 예: 좌우 모터 값을 조정했다."></textarea>
 
       <label>판단 이유</label>
-      <textarea id="reason" placeholder="왜 그렇게 판단했나요? 예: 모터 특성이 서로 달랐기 때문이다."></textarea>
+      <textarea id="reason" maxlength="280" placeholder="왜 그렇게 판단했나요? 예: 모터 특성이 서로 달랐기 때문이다."></textarea>
 
       <label>다음 실행</label>
-      <input id="nextAction" placeholder="다음에는 무엇을 해볼 예정인가요?" />
+      <input id="nextAction" maxlength="160" placeholder="다음에는 무엇을 해볼 예정인가요?" />
 
       <div class="button-row">
         <button id="saveButton" onclick="saveRecord()">✔ 저장하기</button>
@@ -4795,14 +4804,19 @@
             주제: ${escapeHtml(log.topicTitle || log.topic || "미분류")}
           </p>
 
-          <p><b>문제:</b> ${escapeHtml(log.problem)}</p>
-          <p><b>접근:</b> ${escapeHtml(log.approach)}</p>
-          <p><b>판단 이유:</b> ${escapeHtml(log.reason)}</p>
+          <p><b>문제:</b></p>
+          <div class="record-content-clamp">${escapeHtml(log.problem)}</div>
+
+          <p><b>접근:</b></p>
+          <div class="record-content-clamp">${escapeHtml(log.approach)}</div>
+
+          <p><b>판단 이유:</b></p>
+          <div class="record-content-clamp">${escapeHtml(log.reason)}</div>
 
           ${log.nextAction ? `
             <div class="next-action">
               <b>다음 실행</b>
-              <p>${escapeHtml(log.nextAction)}</p>
+              <div class="record-content-clamp">${escapeHtml(log.nextAction)}</div>
             </div>
           ` : ""}
 
