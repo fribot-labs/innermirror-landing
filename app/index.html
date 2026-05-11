@@ -872,6 +872,31 @@
       opacity: 0.86;
     }
 
+    .record-top-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .record-left-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .record-right-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .record-archive-button {
+      padding: 8px 12px;
+      font-size: 12px;
+    }
+
     .expand-toggle-button {
       margin-top: 6px;
       background: transparent;
@@ -972,6 +997,39 @@
     @media (max-width: 640px) {
       .sub-button-group {
         flex-direction: column;
+      }
+
+      .record-top-row {
+        align-items: flex-start;
+      }
+
+      .record-left-actions {
+        padding-top: 4px;
+      }
+
+      .record-right-actions {
+        flex: 1;
+        justify-content: flex-end;
+        gap: 6px;
+      }
+
+      .topic-move-select {
+        min-width: 0;
+        width: 100%;
+        max-width: 190px;
+        font-size: 12px;
+        padding: 8px 10px;
+      }
+
+      .record-archive-button {
+        padding: 7px 10px;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .record strong {
+        font-size: 18px;
+        line-height: 1.35;
       }
     }
   </style>
@@ -4698,8 +4756,8 @@
 
       return `
         <div id="record-${log.id}" class="record" onclick="loadVersionToForm('${log.id}')" style="cursor:pointer;">
-          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-            <div style="display:flex; align-items:center; gap:8px;">
+          <div class="record-top-row">
+            <div class="record-left-actions">
               ${selectionMode ? `
                 <input
                   type="checkbox"
@@ -4712,7 +4770,7 @@
               <span class="badge">V${log.version}</span>
             </div>
 
-            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <div class="record-right-actions">
               <select
                 class="topic-move-select"
                 onclick="event.stopPropagation();"
@@ -4727,7 +4785,7 @@
 
               ${log.status === "active" ? `
                 <button
-                  class="secondary small"
+                  class="secondary small record-archive-button"
                   onclick="event.stopPropagation(); archiveRecord('${log.id}')"
                 >
                   📦 보관
