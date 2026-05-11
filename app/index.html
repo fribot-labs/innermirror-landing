@@ -907,12 +907,17 @@
       color: #fde68a;
       font-size: 12px;
       line-height: 1.5;
+    }
+
+    .summary-next-action-text {
+      margin-top: 4px;
 
       display: -webkit-box;
       line-clamp: 2;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      word-break: break-word;
     }
 
     .summary-meta-row {
@@ -4949,8 +4954,10 @@
 
             ${log.nextAction ? `
               <div class="summary-next-action">
-                <strong>다음 실행</strong><br />
-                ${escapeHtml(log.nextAction)}
+                <strong>다음 실행</strong>
+                <div class="summary-next-action-text">
+                  ${escapeHtml(log.nextAction)}
+                </div>
               </div>
             ` : ""}
 
