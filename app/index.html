@@ -896,6 +896,55 @@
       opacity: 0.85;
     }
 
+    .summary-problem {
+      margin-bottom: 10px;
+    }
+
+    .summary-next-action {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(250,204,21,0.08);
+      border: 1px solid rgba(250,204,21,0.16);
+      color: #fde68a;
+      font-size: 12px;
+      line-height: 1.5;
+
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .summary-meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .summary-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .summary-badge-change {
+      background: rgba(96,165,250,0.12);
+      border: 1px solid rgba(96,165,250,0.24);
+      color: #93c5fd;
+    }
+
+    .summary-badge-ai {
+      background: rgba(74,222,128,0.12);
+      border: 1px solid rgba(74,222,128,0.24);
+      color: #86efac;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -4896,7 +4945,30 @@
           </p>
 
           <div class="record-summary-preview">
-            ${escapeHtml(log.problem || "기록 없음")}
+            <div class="summary-problem">
+              ${escapeHtml(log.problem || "기록 없음")}
+            </div>
+
+            ${log.nextAction ? `
+              <div class="summary-next-action">
+                <strong>다음 실행</strong><br />
+                ${escapeHtml(log.nextAction)}
+              </div>
+            ` : ""}
+
+            <div class="summary-meta-row">
+              ${changeSignalScore > 0 ? `
+                <span class="summary-badge summary-badge-change">
+                  변화 ${changeSignalScore}
+                </span>
+              ` : ""}
+
+              ${aiRecommendation?.text ? `
+                <span class="summary-badge summary-badge-ai">
+                  AI 추천 있음
+                </span>
+              ` : ""}
+            </div>
           </div>
 
           <button
