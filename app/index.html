@@ -1981,9 +1981,7 @@
         return [];
       }
 
-      const visibleRows = showMergedRecords
-        ? data.filter(row => row.status === "active" || row.status === "merged")
-        : data.filter(row => row.status === "active");
+      const visibleRows = data;
 
       const mapped = visibleRows.map(row => {
         const safeTopicId = topicExists(row.topic_id) ? row.topic_id : "";
@@ -2000,9 +1998,10 @@
           reason: row.reason,
           nextAction: row.next_action || "",
           changes: row.changes || [],
-          status: row.status,
+          status: row.status || "active",
           mergedInto: row.merged_into || null,
-          mergedAt: row.merged_at || null
+          mergedAt: row.merged_at || null,
+          archivedAt: row.archived_at || null
         };
       });
 
