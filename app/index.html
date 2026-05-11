@@ -1239,6 +1239,7 @@
     let coachingFeedbackList = [];
     let recommendationCache = {};
     let expandedRecordIds = new Set();
+    let showArchivedRecords = false;
 
     async function initAuth() {
       try {
@@ -2310,6 +2311,30 @@
       await render();
     }
 
+    function toggleArchivedRecords() {
+      showArchivedRecords = !showArchivedRecords;
+      render();
+    }
+
+    async function restoreRecord(recordId) {
+      const { error } = await supabaseClient
+        .from("decision_versions")
+        .update({
+          status: "active",
+          archived_at: null
+        })
+        .eq("id", recordId)
+        .eq("user_id", currentUser.id);
+
+      if (error) {
+        console.error(error);
+        alert("복구 실패");
+        return;
+      }
+
+      await render();
+    }
+
     async function getMergedSources(mergedId) {
       const { data, error } = await supabaseClient
         .from("decision_versions")
@@ -2586,7 +2611,16 @@
         coachingFeedbackList = await getCoachingFeedback();
 
         const logs = await getLogs();
-        const visibleLogs = filterMilestoneLogs(logs);
+
+        const statusFilteredLogs = logs.filter(log => {
+          if (showArchivedRecords) {
+            return log.status === "archived";
+          }
+
+          return log.status !== "archived";
+        });
+
+        const visibleLogs = filterMilestoneLogs(statusFilteredLogs);
 
         renderTopicTree(topicList, visibleLogs);
 
@@ -2724,6 +2758,10 @@
 
           <button class="secondary small" onclick="toggleMilestoneFilter()">
             ${showOnlyMilestones ? "전체 기록 보기" : "⭐ 전환점만 보기"}
+          </button>
+
+          <button class="secondary small" onclick="toggleArchivedRecords()">
+            ${showArchivedRecords ? "📂 일반 기록 보기" : "📦 보관 기록 보기"}
           </button>
 
           ${selectionMode ? `
@@ -4784,12 +4822,21 @@
               </select>
 
               ${log.status === "active" ? `
-                <button
-                  class="secondary small record-archive-button"
-                  onclick="event.stopPropagation(); archiveRecord('${log.id}')"
-                >
-                  📦 보관
-                </button>
+                ${log.status === "archived" ? `
+                  <button
+                    class="secondary small record-archive-button"
+                    onclick="event.stopPropagation(); restoreRecord('${log.id}')"
+                  >
+                    ♻ 복구
+                  </button>
+                ` : `
+                  <button
+                    class="secondary small record-archive-button"
+                    onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+                  >
+                    📦 보관
+                  </button>
+                `}
               ` : ""}
             </div>
           </div>
