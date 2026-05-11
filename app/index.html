@@ -2612,15 +2612,14 @@
 
         const logs = await getLogs();
 
-        const statusFilteredLogs = logs.filter(log => {
-          if (showArchivedRecords) {
-            return log.status === "archived";
-          }
+        const activeLogs = logs.filter(log => log.status !== "archived");
+        const archivedLogs = logs.filter(log => log.status === "archived");
 
-          return log.status !== "archived";
-        });
+        const baseLogs = showArchivedRecords ? archivedLogs : activeLogs;
 
-        const visibleLogs = filterMilestoneLogs(statusFilteredLogs);
+        const visibleLogs = showArchivedRecords
+          ? baseLogs
+          : filterMilestoneLogs(baseLogs);
 
         renderTopicTree(topicList, visibleLogs);
 
@@ -2734,18 +2733,6 @@
         return;
       }
 
-      if (!logs || logs.length === 0) {
-        history.innerHTML = `
-          <div class="empty">
-            아직 기록이 없습니다.<br />
-            첫 번째 판단 기록을 저장해보세요.
-          </div>
-        `;
-        return;
-      }
-
-      const grouped = groupLogsByTopic(logs);
-
       const selectionToolbar = `
         <div class="selection-toolbar">
           <button class="secondary small" onclick="toggleSelectionMode()">
@@ -2775,10 +2762,26 @@
 
       const selectionHelp = selectionMode ? `
         <div class="selection-help">
-            📌 여러 기록을 선택해서 하나로 통합할 수 있습니다.<br/>
-            통합하면 기존 기록은 사라지지 않고 숨겨집니다.
+          📌 여러 기록을 선택해서 하나로 통합할 수 있습니다.<br/>
+          통합하면 기존 기록은 사라지지 않고 숨겨집니다.
         </div>
       ` : "";
+
+      if (!logs || logs.length === 0) {
+        history.innerHTML = `
+          ${selectionToolbar}
+          ${selectionHelp}
+          <div class="empty">
+            ${showArchivedRecords
+              ? "아직 보관된 기록이 없습니다.<br />일반 기록 보기로 돌아갈 수 있습니다."
+              : "아직 기록이 없습니다.<br />첫 번째 판단 기록을 저장해보세요."}
+          </div>
+        `;
+        renderSelectionStatus();
+        return;
+      }
+
+      const grouped = groupLogsByTopic(logs);
 
       history.innerHTML = selectionToolbar + selectionHelp + Object.entries(grouped).map(([topicTitle, items]) => `
         <div class="topic-group">
