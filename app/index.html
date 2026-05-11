@@ -973,6 +973,64 @@
       color: #86efac;
     }
 
+    .archived-record-panel {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(15,23,42,0.42);
+      border: 1px solid rgba(148,163,184,0.18);
+    }
+
+    .archived-record-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .archived-record-panel-header strong {
+      color: #e5e7eb;
+      font-size: 15px;
+    }
+
+    .archived-record-panel-header span {
+      margin-left: 8px;
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .archived-record-item {
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(2,6,23,0.35);
+      border: 1px solid rgba(148,163,184,0.14);
+      margin-top: 10px;
+    }
+
+    .archived-record-item > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #93c5fd;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .archived-record-item p {
+      margin: 8px 0 10px;
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.5;
+
+      display: -webkit-box;
+      line-clamp: 2;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -2612,14 +2670,10 @@
 
         const logs = await getLogs();
 
-        const activeLogs = logs.filter(log => log.status !== "archived");
-        const archivedLogs = logs.filter(log => log.status === "archived");
+        const activeLogs = logs.filter(log => (log.status || "active") !== "archived");
+        const archivedLogs = logs.filter(log => (log.status || "active") === "archived");
 
-        const baseLogs = showArchivedRecords ? archivedLogs : activeLogs;
-
-        const visibleLogs = showArchivedRecords
-          ? baseLogs
-          : filterMilestoneLogs(baseLogs);
+        const visibleLogs = filterMilestoneLogs(activeLogs);
 
         renderTopicTree(topicList, visibleLogs);
 
@@ -2640,8 +2694,9 @@
 
         renderTimeline(visibleLogs);
         renderHistory(visibleLogs);
+        renderArchivedRecordsPanel(archivedLogs);
 
-        window.currentLogs = visibleLogs;
+        window.currentLogs = logs;
 
         renderCoachingPerformance();
         renderTopicGraph();
@@ -2748,7 +2803,7 @@
           </button>
 
           <button class="secondary small" onclick="toggleArchivedRecords()">
-            ${showArchivedRecords ? "📂 일반 기록 보기" : "📦 보관 기록 보기"}
+            ${showArchivedRecords ? "📦 보관 기록 숨기기" : "📦 보관 기록 보기"}
           </button>
 
           ${selectionMode ? `
@@ -2795,6 +2850,57 @@
       `).join("");
 
       renderSelectionStatus();
+    }
+
+    function renderArchivedRecordsPanel(archivedLogs) {
+      const history = document.getElementById("history");
+      if (!history || !showArchivedRecords) return;
+
+      const panelHtml = `
+        <div class="archived-record-panel">
+          <div class="archived-record-panel-header">
+            <div>
+              <strong>📦 보관 기록</strong>
+              <span>${archivedLogs.length}개</span>
+            </div>
+
+            <button
+              class="secondary small"
+              onclick="toggleArchivedRecords()"
+            >
+              닫기
+            </button>
+          </div>
+
+          ${archivedLogs.length === 0 ? `
+            <div class="empty">
+              아직 보관된 기록이 없습니다.
+            </div>
+          ` : `
+            ${archivedLogs.map(log => `
+              <div class="archived-record-item">
+                <div>
+                  <strong>V${escapeHtml(String(log.version || "-"))}</strong>
+                  <span>${escapeHtml(log.createdAt || "")}</span>
+                </div>
+
+                <p>
+                  ${escapeHtml(log.problem || "문제 정의 없음")}
+                </p>
+
+                <button
+                  class="secondary small"
+                  onclick="restoreRecord('${log.id}')"
+                >
+                  ♻ 일반 기록으로 복구
+                </button>
+              </div>
+            `).join("")}
+          `}
+        </div>
+      `;
+
+      history.insertAdjacentHTML("beforeend", panelHtml);
     }
 
     function buildStrategySummary(logs) {
@@ -4825,21 +4931,12 @@
               </select>
 
               ${log.status === "active" ? `
-                ${log.status === "archived" ? `
-                  <button
-                    class="secondary small record-archive-button"
-                    onclick="event.stopPropagation(); restoreRecord('${log.id}')"
-                  >
-                    ♻ 복구
-                  </button>
-                ` : `
-                  <button
-                    class="secondary small record-archive-button"
-                    onclick="event.stopPropagation(); archiveRecord('${log.id}')"
-                  >
-                    📦 보관
-                  </button>
-                `}
+                <button
+                  class="secondary small record-archive-button"
+                  onclick="event.stopPropagation(); archiveRecord('${log.id}')"
+                >
+                  📦 보관
+                </button>
               ` : ""}
             </div>
           </div>
