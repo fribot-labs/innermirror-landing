@@ -1057,6 +1057,50 @@
       overflow: hidden;
     }
 
+    .archive-status-message {
+      margin: 12px 0;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.28);
+      color: #bbf7d0;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .record-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .record-status-active {
+      background: rgba(34,197,94,0.10);
+      border: 1px solid rgba(34,197,94,0.28);
+      color: #86efac;
+    }
+
+    .record-status-archived {
+      background: rgba(251,191,36,0.10);
+      border: 1px solid rgba(251,191,36,0.28);
+      color: #fde68a;
+    }
+
+    .record-status-merged {
+      background: rgba(168,85,247,0.10);
+      border: 1px solid rgba(168,85,247,0.28);
+      color: #d8b4fe;
+    }
+
+    .archived-record-item.restored-highlight {
+      border-color: rgba(34,197,94,0.45);
+      box-shadow: 0 0 0 1px rgba(34,197,94,0.18);
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -1332,6 +1376,8 @@
     let recommendationCache = {};
     let expandedRecordIds = new Set();
     let showArchivedRecords = false;
+    let archiveStatusMessage = "";
+    let recentlyRestoredRecordId = null;
 
     async function initAuth() {
       try {
@@ -2399,6 +2445,8 @@
         return;
       }
 
+      archiveStatusMessage = "기록이 보관되었습니다.";
+      recentlyRestoredRecordId = null;
       await render();
     }
 
@@ -2423,6 +2471,8 @@
         return;
       }
 
+      archiveStatusMessage = "기록이 일반 상태로 복구되었습니다.";
+      recentlyRestoredRecordId = recordId;
       await render();
     }
 
@@ -2921,13 +2971,19 @@
             </button>
           </div>
 
+          ${archiveStatusMessage ? `
+            <div class="archive-status-message">
+              ${escapeHtml(archiveStatusMessage)}
+            </div>
+          ` : ""}
+
           ${archivedLogs.length === 0 ? `
             <div class="empty">
               아직 보관된 기록이 없습니다.
             </div>
           ` : `
             ${archivedLogs.map(log => `
-              <div class="archived-record-item">
+              <div class="archived-record-item ${recentlyRestoredRecordId === log.id ? "restored-highlight" : ""}">
                 <div>
                   <strong>V${escapeHtml(String(log.version || "-"))}</strong>
                   <span>${escapeHtml(log.createdAt || "")}</span>
@@ -3735,6 +3791,30 @@
         default:
           return "판단 추천형";
       }
+    }
+
+    function getRecordStatusMeta(status) {
+      if (status === "archived") {
+        return {
+          label: "보관됨",
+          icon: "📦",
+          className: "record-status-archived"
+        };
+      }
+
+      if (status === "merged") {
+        return {
+          label: "통합 원본",
+          icon: "🧩",
+          className: "record-status-merged"
+        };
+      }
+
+      return {
+        label: "일반 기록",
+        icon: "✅",
+        className: "record-status-active"
+      };
     }
 
     function getStrategyReasonLabel(strategy) {
@@ -4913,6 +4993,7 @@
       }
 
       const impact = getChangeImpact(log);
+      const recordStatusMeta = getRecordStatusMeta(log.status || "active");
 
       const topicLogs = (window.currentLogs || []).filter(
         item => item.topicId === log.topicId
@@ -4964,6 +5045,9 @@
               ` : ""}
 
               <span class="badge">V${log.version}</span>
+              <span class="record-status-badge ${recordStatusMeta.className}">
+                ${recordStatusMeta.icon} ${recordStatusMeta.label}
+              </span>
             </div>
 
             <div class="record-right-actions">
