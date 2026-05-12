@@ -1378,6 +1378,18 @@
     let showArchivedRecords = false;
     let archiveStatusMessage = "";
     let recentlyRestoredRecordId = null;
+    let renderScheduled = false;
+
+    function scheduleRender() {
+      if (renderScheduled) return;
+
+      renderScheduled = true;
+
+      requestAnimationFrame(async () => {
+        renderScheduled = false;
+        await render();
+      });
+    }
 
     async function initAuth() {
       try {
@@ -2447,12 +2459,13 @@
 
       archiveStatusMessage = "기록이 보관되었습니다.";
       recentlyRestoredRecordId = null;
-      await render();
+
+      scheduleRender();
     }
 
     function toggleArchivedRecords() {
       showArchivedRecords = !showArchivedRecords;
-      render();
+      scheduleRender();
     }
 
     async function restoreRecord(recordId) {
@@ -2474,7 +2487,8 @@
       archiveStatusMessage = "기록이 일반 상태로 복구되었습니다.";
       recentlyRestoredRecordId = recordId;
       showArchivedRecords = false;
-      await render();
+
+      scheduleRender();
     }
 
     async function getMergedSources(mergedId) {
