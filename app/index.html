@@ -1101,6 +1101,29 @@
       box-shadow: 0 0 0 1px rgba(34,197,94,0.18);
     }
 
+    .inline-confirm-box {
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 14px;
+      background: rgba(250,204,21,0.10);
+      border: 1px solid rgba(250,204,21,0.28);
+      color: #fde68a;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .inline-confirm-box p {
+      margin: 6px 0 10px;
+      color: #fef3c7;
+      font-size: 12px;
+    }
+
+    .inline-confirm-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
     footer {
       padding: 24px 7%;
       color: #64748b;
@@ -1379,6 +1402,7 @@
     let archiveStatusMessage = "";
     let recentlyRestoredRecordId = null;
     let renderScheduled = false;
+    let pendingArchiveRecordId = null;
 
     function scheduleRender() {
       if (renderScheduled) return;
@@ -2432,16 +2456,18 @@
       await render();
     }
 
-    async function archiveRecord(logId) {
+    function archiveRecord(logId) {
       if (!currentUser) {
         alert("먼저 로그인해주세요.");
         return;
       }
 
-      const ok = confirm("이 기록을 보관하시겠습니까?\n보관된 기록은 기본 화면에서 숨겨집니다.");
+      pendingArchiveRecordId = logId;
 
-      if (!ok) return;
+      render();
+    }
 
+    async function confirmArchiveRecord(logId) {
       const { error } = await supabaseClient
         .from("decision_versions")
         .update({
@@ -2457,10 +2483,17 @@
         return;
       }
 
+      pendingArchiveRecordId = null;
+
       archiveStatusMessage = "기록이 보관되었습니다.";
       recentlyRestoredRecordId = null;
 
       scheduleRender();
+    }
+
+    function cancelArchiveRecord() {
+      pendingArchiveRecordId = null;
+      render();
     }
 
     function toggleArchivedRecords() {
@@ -5096,6 +5129,29 @@
                 >
                   📦 보관
                 </button>
+              ` : ""}
+
+              ${pendingArchiveRecordId === log.id ? `
+                <div class="inline-confirm-box">
+                  <strong>이 기록을 보관하시겠습니까?</strong>
+                  <p>보관된 기록은 기본 화면에서 숨겨지고, 보관 기록에서 복구할 수 있습니다.</p>
+
+                  <div class="inline-confirm-actions">
+                    <button
+                      class="secondary small"
+                      onclick="event.stopPropagation(); confirmArchiveRecord('${log.id}')"
+                    >
+                      확인
+                    </button>
+
+                    <button
+                      class="secondary small"
+                      onclick="event.stopPropagation(); cancelArchiveRecord()"
+                    >
+                      취소
+                    </button>
+                  </div>
+                </div>
               ` : ""}
             </div>
           </div>
