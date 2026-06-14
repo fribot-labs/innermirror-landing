@@ -2,97 +2,131 @@
   <img src="assets/logo/fribot-logo.png" width="96" />
 </p>
 
-<h1 align="center">InnerMirror</h1>
+<h1 align="center">InnerMirror Landing</h1>
 
 <p align="center">
-  Track your decisions. See how your thinking evolves.
-</p>
-
-<p align="center">
-  <a href="https://innermirror.net/app">
-    <img src="https://img.shields.io/badge/🚀%20Start%20Now-Try%20InnerMirror-blue?style=for-the-badge" />
-  </a>
-</p>
-
-<p align="center">
-  <sub>No signup required • Instant access</sub>
+  Public product narrative and workflow UX surface for the InnerMirror + Fribot PBL ecosystem.
 </p>
 
 ---
 
-## 🧠 What is InnerMirror?
+## What is this repository?
 
-InnerMirror is a **decision evolution system**.
+`innermirror-landing` is the public-facing landing and workflow UX repository for InnerMirror.
 
-Most tools help you write things down.  
-InnerMirror helps you **see how your thinking changes over time**.
+This repository focuses on:
+
+- product narrative
+- public onboarding
+- workflow reflection UX
+- lightweight interaction surfaces
+- public timeline and reflection previews
+- runtime adapter interface
+
+It does **not** contain private cognitive runtime logic.
 
 ---
 
-## 🔥 Core Idea
+## Architecture Principle
+
+```text
+Public Workflow UX
+        ↓
+Runtime Adapter Interface
+        ↓
+Private Cognitive Runtime
+````
+
+Public workflow UX may be open.
+Private cognitive orchestration remains protected.
+
+---
+
+## Public Scope
+
+This repository may include:
+
+* landing page
+* onboarding flow
+* reflection input UX
+* public workflow preview
+* timeline interaction surface
+* design system
+* runtime adapter client
+
+---
+
+## Private Runtime Boundary
+
+The following logic belongs in `innermirror-engine-private`:
+
+* adaptive orchestration
+* scoring logic
+* weighting systems
+* recommendation runtime
+* continuity intelligence
+* trajectory analysis
+* Cognitive OS internals
+
+---
+
+## Current PR Scope
+
+### PR-L01: Reset and Public App Rebuild
+
+This PR resets the previous test-level implementation and rebuilds this repository as a React/Vite public app skeleton.
+
+Included:
+
+* React/Vite app structure
+* public landing page skeleton
+* component-based layout
+* public/private runtime boundary notice
+* runtime adapter placeholder
+* updated repository README
+
+---
+
+## Built with
+
+* React
+* TypeScript
+* Vite
+* CSS
+
+---
+
+## Development
+
+```bash
+npm install
+npm run dev
 ```
-Record → Version → Compare → Evolve
+
+Build:
+
+```bash
+npm run build
 ```
 
-- Record your decision
-- Create versions over time
-- Compare changes
-- Understand how your thinking evolves
+---
+
+## Repository Role
+
+```text
+innermirror-landing
+= Public Product Narrative + Public Workflow UX Layer
+
+innermirror-engine-private
+= Private Cognitive Runtime Layer
+
+fribot-flow-timeline
+= Original full working source / internal reference repository
+```
 
 ---
 
-## ✨ What you can do
+## Final Principle
 
-- Define a problem
-- Record your approach
-- Explain your reasoning
-- Save multiple versions
-- See what changed
+InnerMirror grows strongest when workflow openness and cognition protection remain intentionally balanced.
 
----
-
-## 🧪 Try it
-
-👉 https://innermirror.net/app
-
----
-
-## 🧭 Why it matters
-
-In the AI era:
-
-- Knowledge is accessible
-- But **judgment is personal**
-
-InnerMirror helps you:
-
-👉 understand your own decision patterns  
-👉 improve how you think  
-
----
-
-## 🧱 Built with
-
-- HTML / CSS / Vanilla JS
-- LocalStorage (MVP)
-- Vercel deployment
-
----
-
-## 🚀 Roadmap
-
-- [ ] Supabase integration
-- [ ] Multi-user support
-- [ ] Decision scoring (ΔV)
-- [ ] AI coaching engine
-
----
-
-## 💬 One line
-
-> InnerMirror is not a note-taking tool.  
-> It is a system that helps your decisions evolve.
-
-## Release Checklist
-
-- [InnerMirror MVP Release Checklist](docs/MVP_RELEASE_CHECKLIST.md)
