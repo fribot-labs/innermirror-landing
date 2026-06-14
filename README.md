@@ -129,3 +129,4 @@ fribot-flow-timeline
 ## Final Principle
 
 InnerMirror grows strongest when workflow openness and cognition protection remain intentionally balanced.
+
