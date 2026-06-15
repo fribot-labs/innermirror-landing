@@ -1,11 +1,11 @@
 import { useState } from "react";
 
 import {
-    submitReflectionToRuntime,
+  submitReflectionToRuntime,
 } from "../runtime-adapter/publicRuntimeAdapter";
 
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 export function ReflectionRuntimePanel() {
@@ -16,6 +16,8 @@ export function ReflectionRuntimePanel() {
     useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] =
     useState(false);
+
+  const session = result?.session;
 
   const handleSubmit = async () => {
     setError(null);
@@ -119,6 +121,18 @@ export function ReflectionRuntimePanel() {
             </strong>
             <p>{result.nextQuestion.reason}</p>
           </div>
+
+          {session !== undefined && (
+            <div className="result-card">
+              <span>Session</span>
+              <strong>
+                {session.reflectionCount} reflections in session
+              </strong>
+              <p>
+                Session ID: {session.sessionId}
+              </p>
+            </div>
+          )}
         </div>
       )}
     </section>
