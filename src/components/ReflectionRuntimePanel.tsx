@@ -18,6 +18,7 @@ export function ReflectionRuntimePanel() {
     useState(false);
 
   const session = result?.session;
+  const adaptivePacing = session?.adaptivePacing;
 
   const handleSubmit = async () => {
     setError(null);
@@ -129,12 +130,27 @@ export function ReflectionRuntimePanel() {
                 {session.reflectionCount} reflections · Score{" "}
                 {session.continuityScore}
               </strong>
+
               <p>
                 Evolution: {session.continuityEvolution}
               </p>
+
               <p>
-                Drift: {session.driftStrength} · {session.driftDirection}
+                Drift: {session.driftStrength} ·{" "}
+                {session.driftDirection}
               </p>
+
+              {adaptivePacing !== undefined && (
+                <>
+                  <p>
+                    Adaptive Pacing: {adaptivePacing.mode}
+                  </p>
+                  <p>
+                    {adaptivePacing.guidance}
+                  </p>
+                </>
+              )}
+
               <p>
                 Session ID: {session.sessionId}
               </p>
