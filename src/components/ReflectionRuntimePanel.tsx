@@ -133,6 +133,9 @@ export function ReflectionRuntimePanel() {
                 Evolution: {session.continuityEvolution}
               </p>
               <p>
+                Drift: {session.driftStrength} · {session.driftDirection}
+              </p>
+              <p>
                 Session ID: {session.sessionId}
               </p>
             </div>
