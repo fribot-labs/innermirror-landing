@@ -126,8 +126,12 @@ export function ReflectionRuntimePanel() {
             <div className="result-card">
               <span>Session</span>
               <strong>
-                {session.reflectionCount} reflections in session
+                {session.reflectionCount} reflections · Score{" "}
+                {session.continuityScore}
               </strong>
+              <p>
+                Evolution: {session.continuityEvolution}
+              </p>
               <p>
                 Session ID: {session.sessionId}
               </p>
