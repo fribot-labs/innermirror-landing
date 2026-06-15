@@ -1,19 +1,39 @@
-export type PublicReflectionInput = {
-  content: string;
-  createdAt: string;
-};
+import type {
+  LandingReflectionInput,
+  RuntimeApiResponse,
+  RuntimeReflectionResult,
+} from "./runtimeAdapterTypes";
 
-export type PublicReflectionResult = {
-  summary: string;
-  publicGuidance: string;
-};
+const RUNTIME_BASE_URL =
+  import.meta.env.VITE_INNERMIRROR_RUNTIME_URL ??
+  "http://localhost:4000";
 
-export async function analyzeReflectionPublicly(
-  input: PublicReflectionInput
-): Promise<PublicReflectionResult> {
-  return {
-    summary: "Your reflection has been captured.",
-    publicGuidance:
-      "This public adapter is a placeholder. Private cognitive orchestration remains outside this repository.",
+export async function submitReflectionToRuntime(
+  content: string
+): Promise<RuntimeApiResponse<RuntimeReflectionResult>> {
+  const input: LandingReflectionInput = {
+    content,
+    createdAt: new Date().toISOString(),
+    source: "landing",
   };
+
+  const response = await fetch(
+    `${RUNTIME_BASE_URL}/runtime/reflection`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+    }
+  );
+
+  const data =
+    (await response.json()) as RuntimeApiResponse<RuntimeReflectionResult>;
+
+  if (!response.ok) {
+    return data;
+  }
+
+  return data;
 }
