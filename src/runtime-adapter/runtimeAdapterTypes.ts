@@ -75,6 +75,7 @@ export type RuntimeSessionSnapshot = {
   driftStrength: DriftStrength;
   driftDirection: DriftDirection;
   driftSnapshot: ReflectionDriftSnapshot;
+  adaptivePacing?: AdaptivePacingSnapshot;
   latestMemoryId?: string;
   updatedAt: string;
 };
@@ -114,4 +115,28 @@ export type ReflectionDriftSnapshot = {
   comparedReflectionCount: number;
   generatedAt: string;
   note: string;
+};
+
+export type AdaptivePacingMode =
+  | "clarify"
+  | "continue"
+  | "deepen"
+  | "stabilize"
+  | "recover";
+
+export type AdaptivePacingReason =
+  | "brief-reflection"
+  | "stable-continuity"
+  | "deepening-continuity"
+  | "minor-drift"
+  | "strong-drift"
+  | "fragmented-flow";
+
+export type AdaptivePacingSnapshot = {
+  mode: AdaptivePacingMode;
+  reason: AdaptivePacingReason;
+  label: string;
+  guidance: string;
+  confidence: number;
+  generatedAt: string;
 };
