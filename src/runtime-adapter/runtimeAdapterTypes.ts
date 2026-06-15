@@ -69,6 +69,25 @@ export type RuntimeSessionSnapshot = {
   status: "active" | "paused" | "closed";
   reflectionCount: number;
   continuityStrength: "none" | "weak" | "emerging" | "strong";
+  continuityScore: number;
+  continuityEvolution: SessionContinuityEvolution;
+  continuityScoreSnapshot: SessionContinuityScoreSnapshot;
   latestMemoryId?: string;
   updatedAt: string;
+};
+
+export type SessionContinuityEvolution =
+  | "insufficient"
+  | "forming"
+  | "deepening"
+  | "stable"
+  | "fragmented";
+
+export type SessionContinuityScoreSnapshot = {
+  score: number;
+  evolution: SessionContinuityEvolution;
+  reflectionCount: number;
+  averageStrengthScore: number;
+  generatedAt: string;
+  note: string;
 };
