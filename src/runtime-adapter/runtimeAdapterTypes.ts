@@ -72,6 +72,9 @@ export type RuntimeSessionSnapshot = {
   continuityScore: number;
   continuityEvolution: SessionContinuityEvolution;
   continuityScoreSnapshot: SessionContinuityScoreSnapshot;
+  driftStrength: DriftStrength;
+  driftDirection: DriftDirection;
+  driftSnapshot: ReflectionDriftSnapshot;
   latestMemoryId?: string;
   updatedAt: string;
 };
@@ -88,6 +91,27 @@ export type SessionContinuityScoreSnapshot = {
   evolution: SessionContinuityEvolution;
   reflectionCount: number;
   averageStrengthScore: number;
+  generatedAt: string;
+  note: string;
+};
+
+export type DriftStrength =
+  | "none"
+  | "minor"
+  | "moderate"
+  | "strong";
+
+export type DriftDirection =
+  | "stable"
+  | "branching"
+  | "fragmenting"
+  | "resetting";
+
+export type ReflectionDriftSnapshot = {
+  strength: DriftStrength;
+  direction: DriftDirection;
+  keywordOverlapRatio: number;
+  comparedReflectionCount: number;
   generatedAt: string;
   note: string;
 };
