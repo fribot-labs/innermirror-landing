@@ -1,4 +1,5 @@
 import { HeroSection } from "../components/HeroSection";
+import { ReflectionRuntimePanel } from "../components/ReflectionRuntimePanel";
 import { RuntimeBoundaryNotice } from "../components/RuntimeBoundaryNotice";
 
 export function LandingPage() {
@@ -6,6 +7,7 @@ export function LandingPage() {
     <main className="landing-page">
       <HeroSection />
       <RuntimeBoundaryNotice />
+      <ReflectionRuntimePanel />
     </main>
   );
 }
