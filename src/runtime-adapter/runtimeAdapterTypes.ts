@@ -39,6 +39,7 @@ export type RuntimeReflectionResult = {
   continuitySignal: ContinuitySignal;
   pacingHint: PacingHint;
   nextQuestion: RuntimeQuestion;
+  session?: RuntimeSessionSnapshot;
 };
 
 export type RuntimeSuccessResponse<T> = {
@@ -62,3 +63,12 @@ export type RuntimeErrorResponse = {
 export type RuntimeApiResponse<T> =
   | RuntimeSuccessResponse<T>
   | RuntimeErrorResponse;
+
+export type RuntimeSessionSnapshot = {
+  sessionId: string;
+  status: "active" | "paused" | "closed";
+  reflectionCount: number;
+  continuityStrength: "none" | "weak" | "emerging" | "strong";
+  latestMemoryId?: string;
+  updatedAt: string;
+};
