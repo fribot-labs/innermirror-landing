@@ -273,6 +273,72 @@ h1 {
   line-height: 1.7;
 }
 
+.runtime-loading-state,
+.runtime-error-state,
+.runtime-reflection-result {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(120, 120, 120, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.runtime-loading-state {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.runtime-loading-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: currentColor;
+  animation: runtimePulse 1.2s ease-in-out infinite;
+}
+
+.runtime-error-state {
+  border-color: rgba(255, 80, 80, 0.35);
+}
+
+.runtime-error-state button {
+  margin-top: 0.5rem;
+}
+
+.runtime-reflection-result {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.runtime-result-block {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.runtime-result-label {
+  font-size: 0.75rem;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@keyframes runtimePulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
+  }
+}
+
 @media (max-width: 720px) {
   .runtime-panel {
     padding: 28px;
