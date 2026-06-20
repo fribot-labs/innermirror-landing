@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "check:boundary": "node scripts/check-public-boundary.mjs"
   },
 
   "dependencies": {

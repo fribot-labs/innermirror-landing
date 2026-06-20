@@ -11,7 +11,7 @@ export function RuntimeBoundaryNotice() {
       </p>
 
       <p>
-        Adaptive orchestration, continuity intelligence, and cognitive runtime
+        Runtime connection active.
         systems remain protected in a separate private repository.
       </p>
     </section>
