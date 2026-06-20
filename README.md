@@ -58,15 +58,17 @@ This repository may include:
 
 ## Private Runtime Boundary
 
-The following logic belongs in `innermirror-engine-private`:
+Private runtime orchestration is maintained outside this repository.
 
-* adaptive orchestration
-* scoring logic
-* weighting systems
-* recommendation runtime
-* continuity intelligence
-* trajectory analysis
-* Cognitive OS internals
+This public repository may communicate with the private runtime through a stable runtime adapter layer, but does not include private runtime internals.
+
+Examples of private runtime responsibilities include:
+
+* orchestration execution
+* continuity analysis
+* adaptive runtime processing
+* runtime diagnostics
+* long-term memory processing
 
 ---
 
@@ -117,7 +119,7 @@ npm run build
 innermirror-landing
 = Public Product Narrative + Public Workflow UX Layer
 
-innermirror-engine-private
+innermirror-runtime-private
 = Private Cognitive Runtime Layer
 
 fribot-flow-timeline

@@ -9,18 +9,19 @@ import {
 } from "./runtimeAdapterErrors";
 
 const RUNTIME_BASE_URL =
-  import.meta.env.VITE_RUNTIME_API_URL ??
-  "http://localhost:4000";
+  getRuntimeBaseUrl();
 
-const REQUEST_TIMEOUT_MS = Number(
-  import.meta.env
-    .VITE_RUNTIME_REQUEST_TIMEOUT_MS ?? 8000
-);
+const REQUEST_TIMEOUT_MS =
+  getRuntimeNumberEnv(
+    "VITE_RUNTIME_REQUEST_TIMEOUT_MS",
+    90000
+  );
 
-const RETRY_COUNT = Number(
-  import.meta.env
-    .VITE_RUNTIME_RETRY_COUNT ?? 1
-);
+const RETRY_COUNT =
+  getRuntimeNumberEnv(
+    "VITE_RUNTIME_RETRY_COUNT",
+    0
+  );
 
 export async function submitReflectionToRuntime(
   content: string
@@ -276,4 +277,35 @@ function normalizeRuntimeErrorCode(
   }
 
   return "RUNTIME_SERVER_ERROR";
+}
+
+function getRuntimeBaseUrl(): string {
+  const value =
+    import.meta.env.VITE_RUNTIME_API_URL;
+
+  if (
+    typeof value === "string" &&
+    value.trim().length > 0
+  ) {
+    return value;
+  }
+
+  return "http://localhost:4000";
+}
+
+function getRuntimeNumberEnv(
+  key: string,
+  fallback: number
+): number {
+  const value =
+    import.meta.env[key];
+
+  const parsed =
+    Number(value);
+
+  if (Number.isFinite(parsed)) {
+    return parsed;
+  }
+
+  return fallback;
 }
