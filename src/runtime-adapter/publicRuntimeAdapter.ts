@@ -334,6 +334,9 @@ function normalizeRuntimeReflectionResult(
         result.continuitySignal
           .bridgeKind ??
         "weak-signal",
+
+      longGapDays:
+        result.continuitySignal.longGapDays ?? 0,
     },
   };
 }
