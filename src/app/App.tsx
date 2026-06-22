@@ -6,11 +6,13 @@ import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
+import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
 import { createReturningThemeSurfaceData } from "../runtime/createReturningThemeSurfaceData";
+import { useRuntimeMemoryTimeline } from "../runtime/useRuntimeMemoryTimeline";
 
 export function App() {
   const [content, setContent] =
@@ -40,6 +42,11 @@ export function App() {
 
   const identityDriftSurfaceData =
     createIdentityDriftSurfaceData(
+      result
+    );
+
+  const runtimeMemoryTimelineData =
+    useRuntimeMemoryTimeline(
       result
     );
 
@@ -101,6 +108,10 @@ export function App() {
 
           <IdentityDriftSurface
             data={identityDriftSurfaceData}
+          />
+
+          <RuntimeMemoryTimeline
+            data={runtimeMemoryTimelineData}
           />
         </>
       ) : null}
