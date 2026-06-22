@@ -337,6 +337,22 @@ function normalizeRuntimeReflectionResult(
 
       longGapDays:
         result.continuitySignal.longGapDays ?? 0,
+
+      driftStrength:
+        result.continuitySignal.driftStrength ?? "none",
+
+      driftDirection:
+        result.continuitySignal.driftDirection ?? "stable",
+
+      driftFromLabel:
+        result.continuitySignal
+          .driftFromLabel ??
+        "기존 생각 흐름",
+
+      driftToLabel:
+        result.continuitySignal
+          .driftToLabel ??
+        "현재 생각 흐름",
     },
   };
 }

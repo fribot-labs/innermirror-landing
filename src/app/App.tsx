@@ -2,10 +2,12 @@ import { useState } from "react";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
+import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
 import { createReturningThemeSurfaceData } from "../runtime/createReturningThemeSurfaceData";
@@ -33,6 +35,11 @@ export function App() {
 
   const longGapRecoverySurfaceData =
     createLongGapRecoverySurfaceData(
+      result
+    );
+
+  const identityDriftSurfaceData =
+    createIdentityDriftSurfaceData(
       result
     );
 
@@ -90,6 +97,10 @@ export function App() {
 
           <LongGapRecoverySurface
             data={longGapRecoverySurfaceData}
+          />
+
+          <IdentityDriftSurface
+            data={identityDriftSurfaceData}
           />
         </>
       ) : null}

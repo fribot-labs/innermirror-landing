@@ -29,6 +29,20 @@ export type RuntimeContinuitySignal = {
   relatedSummary?: string;
   relatedTimeLabel?: string;
   bridgeKind?: "direct-theme" | "weak-signal" | "long-gap" | "returning-theme";
+  driftStrength?:
+    | "none"
+    | "minor"
+    | "moderate"
+    | "strong";
+
+  driftDirection?:
+    | "stable"
+    | "branching"
+    | "fragmenting"
+    | "resetting";
+
+  driftFromLabel?: string;
+  driftToLabel?: string;
 };
 
 export type RuntimeReflectionResult = {
