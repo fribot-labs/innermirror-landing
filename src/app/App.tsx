@@ -3,6 +3,7 @@ import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
+import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
@@ -22,6 +23,8 @@ export function App() {
     isLoading,
     result,
     error,
+    isOptimistic,
+    immediateFeedback,
     submitReflection,
   } = useRuntimeReflection();
 
@@ -77,6 +80,10 @@ export function App() {
         {isLoading ? "Reading..." : "Reflect"}
       </button>
 
+      <ImmediateReflectionFeedback
+        data={immediateFeedback}
+      />
+
       {isLoading ? (
         <RuntimeLoadingState />
       ) : null}
@@ -90,6 +97,12 @@ export function App() {
 
       {result !== null ? (
         <>
+          {isOptimistic ? (
+            <div className="optimistic-result-note">
+              임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로 갱신됩니다.
+            </div>
+          ) : null}
+          
           <RuntimeReflectionResultView
             result={result}
           />

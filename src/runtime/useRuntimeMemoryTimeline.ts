@@ -1,20 +1,20 @@
 import {
-    useEffect,
-    useMemo,
-    useState,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 
 import {
-    createRuntimeMemoryTimelineItem,
+  createRuntimeMemoryTimelineItem,
 } from "./createRuntimeMemoryTimelineItem";
 
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 import type {
-    RuntimeMemoryTimelineData,
-    RuntimeMemoryTimelineItem,
+  RuntimeMemoryTimelineData,
+  RuntimeMemoryTimelineItem,
 } from "../types/runtimeMemoryTimeline";
 
 const STORAGE_KEY =
@@ -44,7 +44,8 @@ export function useRuntimeMemoryTimeline(
       if (
         currentItems.some(
           (item) =>
-            item.id === nextItem.id
+            item.id === nextItem.id ||
+            item.summary === nextItem.summary
         )
       ) {
         return currentItems;
