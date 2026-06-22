@@ -25,6 +25,9 @@ export type RuntimeContinuitySignal = {
   status: "new" | "weak" | "forming" | "strong";
   strength: number;
   message: string;
+  relatedSummary?: string;
+  relatedTimeLabel?: string;
+  bridgeKind?: "direct-theme" | "weak-signal" | "long-gap" | "returning-theme";
 };
 
 export type RuntimeReflectionResult = {

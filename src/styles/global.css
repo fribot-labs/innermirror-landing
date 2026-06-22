@@ -322,6 +322,74 @@ h1 {
   letter-spacing: 0.08em;
 }
 
+.reflection-continuity-surface {
+  margin-top: 24px;
+  padding: 18px;
+  border-radius: 16px;
+
+  background:
+    rgba(255,255,255,0.04);
+
+  border:
+    1px solid
+    rgba(255,255,255,0.08);
+
+  backdrop-filter: blur(12px);
+}
+
+.reflection-continuity-header {
+  font-size: 14px;
+  font-weight: 700;
+
+  color:
+    rgba(255,255,255,0.92);
+
+  margin-bottom: 10px;
+}
+
+.reflection-continuity-message {
+  font-size: 15px;
+  line-height: 1.6;
+
+  color:
+    rgba(255,255,255,0.82);
+}
+
+.reflection-continuity-related {
+  margin-top: 16px;
+
+  padding-top: 14px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,0.08);
+}
+
+.reflection-continuity-related-label {
+  font-size: 12px;
+
+  color:
+    rgba(255,255,255,0.5);
+
+  margin-bottom: 6px;
+}
+
+.reflection-continuity-related-summary {
+  font-size: 14px;
+
+  color:
+    rgba(255,255,255,0.9);
+}
+
+.reflection-continuity-related-time {
+  margin-top: 6px;
+
+  font-size: 12px;
+
+  color:
+    rgba(255,255,255,0.45);
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;

@@ -89,7 +89,9 @@ async function submitReflectionOnce(
       data.result
     );
 
-    return data.result;
+    return normalizeRuntimeReflectionResult(
+      data.result
+    );
   } catch (error) {
     if (
       error instanceof DOMException &&
@@ -308,4 +310,30 @@ function getRuntimeNumberEnv(
   }
 
   return fallback;
+}
+
+function normalizeRuntimeReflectionResult(
+  result: RuntimeReflectionResult
+): RuntimeReflectionResult {
+  return {
+    ...result,
+    continuitySignal: {
+      ...result.continuitySignal,
+
+      relatedSummary:
+        result.continuitySignal
+          .relatedSummary ??
+        "이전에 비슷한 reflection 흐름이 있었습니다.",
+
+      relatedTimeLabel:
+        result.continuitySignal
+          .relatedTimeLabel ??
+        "최근 흐름",
+
+      bridgeKind:
+        result.continuitySignal
+          .bridgeKind ??
+        "weak-signal",
+    },
+  };
 }
