@@ -2,7 +2,9 @@ import { useState } from "react";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
+import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
 
 export function App() {
   const [content, setContent] =
@@ -14,6 +16,11 @@ export function App() {
     error,
     submitReflection,
   } = useRuntimeReflection();
+
+  const continuitySurfaceData =
+    createReflectionContinuitySurfaceData(
+      result
+    );
 
   const handleSubmit =
     async () => {
@@ -54,9 +61,15 @@ export function App() {
       ) : null}
 
       {result !== null ? (
-        <RuntimeReflectionResultView
-          result={result}
-        />
+        <>
+          <RuntimeReflectionResultView
+            result={result}
+          />
+
+          <ReflectionContinuitySurface
+            data={continuitySurfaceData}
+          />
+        </>
       ) : null}
     </main>
   );
