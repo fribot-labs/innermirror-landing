@@ -2,9 +2,11 @@ import { useState } from "react";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
+import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
 import { createReturningThemeSurfaceData } from "../runtime/createReturningThemeSurfaceData";
 
@@ -26,6 +28,11 @@ export function App() {
 
   const returningThemeSurfaceData =
     createReturningThemeSurfaceData(
+      result
+    );
+
+  const longGapRecoverySurfaceData =
+    createLongGapRecoverySurfaceData(
       result
     );
 
@@ -79,6 +86,10 @@ export function App() {
 
           <ReturningThemeSurface
             data={returningThemeSurfaceData}
+          />
+
+          <LongGapRecoverySurface
+            data={longGapRecoverySurfaceData}
           />
         </>
       ) : null}
