@@ -8,7 +8,9 @@ import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySur
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
+import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
+import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
@@ -27,6 +29,13 @@ export function App() {
     immediateFeedback,
     submitReflection,
   } = useRuntimeReflection();
+
+  const {
+    isMerging,
+    events: streamingMergeEvents,
+    startMerge,
+    resetMerge,
+  } = useRuntimeStreamingMerge();
 
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
@@ -59,7 +68,13 @@ export function App() {
         return;
       }
 
+      resetMerge();
+
       await submitReflection(content);
+
+      void startMerge({
+        content,
+      });
     };
 
   return (
@@ -82,6 +97,11 @@ export function App() {
 
       <ImmediateReflectionFeedback
         data={immediateFeedback}
+      />
+
+      <RuntimeStreamingMergeSurface
+        events={streamingMergeEvents}
+        isMerging={isMerging}
       />
 
       {isLoading ? (
