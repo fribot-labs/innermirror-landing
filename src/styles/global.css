@@ -777,6 +777,85 @@ h1 {
   border: 1px solid rgba(255, 255, 255, 0.07);
 }
 
+.runtime-streaming-merge {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(125, 211, 252, 0.075);
+  border: 1px solid rgba(125, 211, 252, 0.16);
+}
+
+.runtime-streaming-merge-header {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.runtime-streaming-merge-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: rgba(125, 211, 252, 0.95);
+  box-shadow:
+    0 0 0 4px rgba(125, 211, 252, 0.12);
+}
+
+.runtime-streaming-merge-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.runtime-streaming-merge h2 {
+  margin: 4px 0 0;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.runtime-streaming-merge-events {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.runtime-streaming-merge-event {
+  display: flex;
+  gap: 10px;
+  padding: 11px 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.runtime-streaming-merge-event-index {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.95);
+  background: rgba(125, 211, 252, 0.92);
+}
+
+.runtime-streaming-merge-event strong {
+  display: block;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.runtime-streaming-merge-event p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.62);
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;
