@@ -8,8 +8,10 @@ import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySur
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
+import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
+import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
 import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
@@ -44,6 +46,14 @@ export function App() {
     health: runtimeBoundaryHealth,
     checkHealth,
   } = useRuntimeBoundaryHealth();
+
+  const runtimeUxMode =
+    resolveRuntimeUxMode({
+      health:
+        runtimeBoundaryHealth,
+      isChecking:
+        isCheckingBoundary,
+    });
 
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
@@ -80,9 +90,13 @@ export function App() {
 
       await submitReflection(content);
 
-      void startMerge({
-        content,
-      });
+      if (
+        runtimeUxMode.canUseStreamingMerge
+      ) {
+        void startMerge({
+          content,
+        });
+      }
     };
 
   return (
@@ -91,6 +105,10 @@ export function App() {
         health={runtimeBoundaryHealth}
         isChecking={isCheckingBoundary}
         onRefresh={checkHealth}
+      />
+
+      <RuntimeFallbackModeNotice
+        uxMode={runtimeUxMode}
       />
 
       <textarea
@@ -113,10 +131,12 @@ export function App() {
         data={immediateFeedback}
       />
 
-      <RuntimeStreamingMergeSurface
-        events={streamingMergeEvents}
-        isMerging={isMerging}
-      />
+      {runtimeUxMode.canUseStreamingMerge ? (
+        <RuntimeStreamingMergeSurface
+          events={streamingMergeEvents}
+          isMerging={isMerging}
+        />
+      ) : null}
 
       {isLoading ? (
         <RuntimeLoadingState />
@@ -136,30 +156,36 @@ export function App() {
               임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로 갱신됩니다.
             </div>
           ) : null}
-          
+
           <RuntimeReflectionResultView
             result={result}
           />
 
-          <ReflectionContinuitySurface
-            data={continuitySurfaceData}
-          />
+          {runtimeUxMode.canUseContinuitySurfaces ? (
+            <>
+              <ReflectionContinuitySurface
+                data={continuitySurfaceData}
+              />
 
-          <ReturningThemeSurface
-            data={returningThemeSurfaceData}
-          />
+              <ReturningThemeSurface
+                data={returningThemeSurfaceData}
+              />
 
-          <LongGapRecoverySurface
-            data={longGapRecoverySurfaceData}
-          />
+              <LongGapRecoverySurface
+                data={longGapRecoverySurfaceData}
+              />
 
-          <IdentityDriftSurface
-            data={identityDriftSurfaceData}
-          />
+              <IdentityDriftSurface
+                data={identityDriftSurfaceData}
+              />
+            </>
+          ) : null}
 
-          <RuntimeMemoryTimeline
-            data={runtimeMemoryTimelineData}
-          />
+          {runtimeUxMode.canUseMemoryTimeline ? (
+            <RuntimeMemoryTimeline
+              data={runtimeMemoryTimelineData}
+            />
+          ) : null}
         </>
       ) : null}
     </main>
