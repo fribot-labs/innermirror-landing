@@ -4,6 +4,8 @@ import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
+import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
+import { LocalReflectionPersistenceNotice } from "../components/runtime/LocalReflectionPersistenceNotice";
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
@@ -15,6 +17,7 @@ import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
 import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
+import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
@@ -55,6 +58,15 @@ export function App() {
         isCheckingBoundary,
     });
 
+  const isLocalOnlyMode =
+    runtimeUxMode.mode === "local-only";
+
+  const {
+    snapshot: localReflectionSnapshot,
+    saveLocalReflection,
+    clearLocalReflectionMemory,
+  } = useLocalReflectionPersistence();
+
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
       result
@@ -82,19 +94,35 @@ export function App() {
 
   const handleSubmit =
     async () => {
-      if (content.trim().length === 0) {
+      const trimmedContent =
+        content.trim();
+
+      if (trimmedContent.length === 0) {
         return;
       }
 
       resetMerge();
 
-      await submitReflection(content);
+      if (isLocalOnlyMode) {
+        saveLocalReflection(
+          trimmedContent
+        );
+
+        setContent("");
+
+        return;
+      }
+
+      await submitReflection(
+        trimmedContent
+      );
 
       if (
         runtimeUxMode.canUseStreamingMerge
       ) {
         void startMerge({
-          content,
+          content:
+            trimmedContent,
         });
       }
     };
@@ -109,6 +137,11 @@ export function App() {
 
       <RuntimeFallbackModeNotice
         uxMode={runtimeUxMode}
+      />
+
+      <LocalReflectionPersistenceNotice
+        snapshot={localReflectionSnapshot}
+        isLocalOnlyMode={isLocalOnlyMode}
       />
 
       <textarea
@@ -187,6 +220,13 @@ export function App() {
             />
           ) : null}
         </>
+      ) : null}
+
+      {localReflectionSnapshot.totalCount > 0 ? (
+        <LocalReflectionList
+          snapshot={localReflectionSnapshot}
+          onClear={clearLocalReflectionMemory}
+        />
       ) : null}
     </main>
   );
