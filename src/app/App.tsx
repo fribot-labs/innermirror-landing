@@ -7,8 +7,10 @@ import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateRefl
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
+import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
+import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
@@ -36,6 +38,12 @@ export function App() {
     startMerge,
     resetMerge,
   } = useRuntimeStreamingMerge();
+
+  const {
+    isChecking: isCheckingBoundary,
+    health: runtimeBoundaryHealth,
+    checkHealth,
+  } = useRuntimeBoundaryHealth();
 
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
@@ -79,6 +87,12 @@ export function App() {
 
   return (
     <main>
+      <RuntimeBoundaryStatusBanner
+        health={runtimeBoundaryHealth}
+        isChecking={isCheckingBoundary}
+        onRefresh={checkHealth}
+      />
+
       <textarea
         value={content}
         onChange={(event) =>
