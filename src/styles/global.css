@@ -856,6 +856,56 @@ h1 {
   color: rgba(255, 255, 255, 0.62);
 }
 
+.runtime-boundary-banner {
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.runtime-boundary-banner strong {
+  display: block;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.runtime-boundary-banner p {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.runtime-boundary-banner button {
+  margin-top: 10px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.86);
+  cursor: pointer;
+}
+
+.runtime-boundary-banner-checking {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.runtime-boundary-banner-healthy {
+  border-color: rgba(74, 222, 128, 0.22);
+  background: rgba(74, 222, 128, 0.075);
+}
+
+.runtime-boundary-banner-degraded {
+  border-color: rgba(250, 204, 21, 0.28);
+  background: rgba(250, 204, 21, 0.075);
+}
+
+.runtime-boundary-banner-unavailable {
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(248, 113, 113, 0.075);
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;
