@@ -22,6 +22,7 @@ import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/create
 import { resolveRuntimeFailureRecovery } from "../runtime-adapter/resolveRuntimeFailureRecovery";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
 import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
+import { useRuntimeFailureRecoveryDismiss } from "../runtime-adapter/useRuntimeFailureRecoveryDismiss";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
 import { useServerRuntimeMemoryTimeline } from "../runtime-adapter/useServerRuntimeMemoryTimeline";
@@ -123,6 +124,14 @@ export function App() {
         localReflectionSnapshot.pendingCount,
     });
 
+  const runtimeFailureRecoveryDismiss =
+    useRuntimeFailureRecoveryDismiss({
+      recovery:
+        runtimeFailureRecovery,
+      isRuntimeHealthy:
+        runtimeUxMode.mode === "full-runtime",
+    });
+
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
       result
@@ -212,9 +221,22 @@ export function App() {
 
       <RuntimeFailureRecoveryNotice
         recovery={runtimeFailureRecovery}
+        visible={runtimeFailureRecoveryDismiss.visible}
+        isRecoveryComplete={
+          runtimeFailureRecoveryDismiss.isRecoveryComplete
+        }
+        displayTitle={
+          runtimeFailureRecoveryDismiss.title
+        }
+        displayMessage={
+          runtimeFailureRecoveryDismiss.message
+        }
         onRetryRuntime={checkHealth}
         onRetryTimeline={serverMemoryTimeline.refresh}
         onSyncLocal={offlineSyncRecovery.syncPendingReflections}
+        onDismiss={
+          runtimeFailureRecoveryDismiss.dismiss
+        }
       />
 
       <textarea
