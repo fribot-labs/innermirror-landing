@@ -7,6 +7,7 @@ import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateRefl
 import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
 import { LocalReflectionPersistenceNotice } from "../components/runtime/LocalReflectionPersistenceNotice";
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
+import { OfflineSyncRecoveryPanel } from "../components/runtime/OfflineSyncRecoveryPanel";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
@@ -18,6 +19,7 @@ import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryH
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
 import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
+import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
@@ -65,7 +67,15 @@ export function App() {
     snapshot: localReflectionSnapshot,
     saveLocalReflection,
     clearLocalReflectionMemory,
+    refreshLocalReflectionMemory,
   } = useLocalReflectionPersistence();
+
+  const offlineSyncRecovery =
+    useOfflineSyncRecovery({
+      runtimeUxMode,
+      onLocalSnapshotChanged:
+        refreshLocalReflectionMemory,
+    });
 
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
@@ -142,6 +152,17 @@ export function App() {
       <LocalReflectionPersistenceNotice
         snapshot={localReflectionSnapshot}
         isLocalOnlyMode={isLocalOnlyMode}
+      />
+
+      <OfflineSyncRecoveryPanel
+        snapshot={localReflectionSnapshot}
+        syncState={offlineSyncRecovery}
+        canSync={
+          runtimeUxMode.mode === "full-runtime"
+        }
+        onSync={
+          offlineSyncRecovery.syncPendingReflections
+        }
       />
 
       <textarea

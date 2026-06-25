@@ -1,5 +1,5 @@
 import type {
-    LocalReflectionPersistenceSnapshot,
+  LocalReflectionPersistenceSnapshot,
 } from "../../runtime-local/localReflectionTypes";
 
 type Props = {
@@ -71,6 +71,10 @@ function createStatusText(
 
   if (status === "sync-pending") {
     return "동기화 대기";
+  }
+
+  if (status === "syncing") {
+    return "동기화 중";
   }
 
   return "로컬 저장";
