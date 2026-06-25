@@ -1085,6 +1085,22 @@ h1 {
   background: rgba(248, 113, 113, 0.065);
 }
 
+.runtime-failure-recovery-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.runtime-failure-recovery-notice-complete {
+  border-color: rgba(52, 211, 153, 0.24);
+  background: rgba(52, 211, 153, 0.065);
+}
+
+.runtime-failure-recovery-notice-complete
+.runtime-failure-recovery-reassurance {
+  color: rgba(167, 243, 208, 0.9) !important;
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;
@@ -1174,5 +1190,9 @@ h1 {
 
   .runtime-failure-recovery-notice button {
     width: fit-content;
+  }
+
+  .runtime-failure-recovery-actions {
+    flex-wrap: wrap;
   }
 }

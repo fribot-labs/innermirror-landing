@@ -1,21 +1,31 @@
 import type {
-    RuntimeFailureRecoveryState,
+  RuntimeFailureRecoveryState,
 } from "../../runtime-adapter/runtimeFailureRecoveryTypes";
 
 type Props = {
   recovery: RuntimeFailureRecoveryState;
+  visible: boolean;
+  isRecoveryComplete: boolean;
+  displayTitle: string;
+  displayMessage: string;
   onRetryRuntime: () => void;
   onRetryTimeline: () => void;
   onSyncLocal: () => void;
+  onDismiss: () => void;
 };
 
 export function RuntimeFailureRecoveryNotice({
   recovery,
+  visible,
+  isRecoveryComplete,
+  displayTitle,
+  displayMessage,
   onRetryRuntime,
   onRetryTimeline,
   onSyncLocal,
+  onDismiss,
 }: Props) {
-  if (!recovery.visible) {
+  if (!visible) {
     return null;
   }
 
@@ -24,15 +34,20 @@ export function RuntimeFailureRecoveryNotice({
       className={[
         "runtime-failure-recovery-notice",
         `runtime-failure-recovery-notice-${recovery.severity}`,
+        isRecoveryComplete
+          ? "runtime-failure-recovery-notice-complete"
+          : "",
       ].join(" ")}
     >
       <div>
         <div className="runtime-failure-recovery-eyebrow">
-          Recovery
+          {isRecoveryComplete
+            ? "Recovery Complete"
+            : "Recovery"}
         </div>
 
         <strong>
-          {recovery.title}
+          {displayTitle}
         </strong>
 
         <p>
@@ -40,32 +55,43 @@ export function RuntimeFailureRecoveryNotice({
         </p>
 
         <p className="runtime-failure-recovery-reassurance">
-          {recovery.reassurance}
+          {displayMessage}
         </p>
       </div>
 
-      {recovery.action !== "none" ? (
+      <div className="runtime-failure-recovery-actions">
+        {!isRecoveryComplete &&
+        recovery.action !== "none" ? (
+          <button
+            type="button"
+            onClick={() => {
+              if (recovery.action === "retry-runtime") {
+                onRetryRuntime();
+              }
+
+              if (recovery.action === "retry-timeline") {
+                onRetryTimeline();
+              }
+
+              if (recovery.action === "sync-local") {
+                onSyncLocal();
+              }
+            }}
+          >
+            {createActionLabel(
+              recovery.action
+            )}
+          </button>
+        ) : null}
+
         <button
           type="button"
-          onClick={() => {
-            if (recovery.action === "retry-runtime") {
-              onRetryRuntime();
-            }
-
-            if (recovery.action === "retry-timeline") {
-              onRetryTimeline();
-            }
-
-            if (recovery.action === "sync-local") {
-              onSyncLocal();
-            }
-          }}
+          onClick={onDismiss}
+          aria-label="Dismiss recovery notice"
         >
-          {createActionLabel(
-            recovery.action
-          )}
+          닫기
         </button>
-      ) : null}
+      </div>
     </section>
   );
 }
