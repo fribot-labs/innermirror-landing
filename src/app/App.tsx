@@ -1,4 +1,7 @@
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
@@ -14,17 +17,18 @@ import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBounda
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
+import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
 import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
 import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreamingMerge";
+import { useServerRuntimeMemoryTimeline } from "../runtime-adapter/useServerRuntimeMemoryTimeline";
 import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
 import { createReturningThemeSurfaceData } from "../runtime/createReturningThemeSurfaceData";
-import { useRuntimeMemoryTimeline } from "../runtime/useRuntimeMemoryTimeline";
 
 export function App() {
   const [content, setContent] =
@@ -60,6 +64,19 @@ export function App() {
         isCheckingBoundary,
     });
 
+  const serverMemoryTimeline =
+    useServerRuntimeMemoryTimeline({
+      enabled:
+        runtimeUxMode.canUseMemoryTimeline,
+      limit:
+        5,
+    });
+
+  const runtimeMemoryTimelineData =
+    createServerRuntimeMemoryTimelineData(
+      serverMemoryTimeline.timeline
+    );
+
   const isLocalOnlyMode =
     runtimeUxMode.mode === "local-only";
 
@@ -76,6 +93,19 @@ export function App() {
       onLocalSnapshotChanged:
         refreshLocalReflectionMemory,
     });
+
+  useEffect(() => {
+    if (
+      runtimeUxMode.canUseMemoryTimeline &&
+      offlineSyncRecovery.lastSyncedAt !== null
+    ) {
+      void serverMemoryTimeline.refresh();
+    }
+  }, [
+    runtimeUxMode.canUseMemoryTimeline,
+    offlineSyncRecovery.lastSyncedAt,
+    serverMemoryTimeline.refresh,
+  ]);
 
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
@@ -94,11 +124,6 @@ export function App() {
 
   const identityDriftSurfaceData =
     createIdentityDriftSurfaceData(
-      result
-    );
-
-  const runtimeMemoryTimelineData =
-    useRuntimeMemoryTimeline(
       result
     );
 
@@ -126,6 +151,10 @@ export function App() {
       await submitReflection(
         trimmedContent
       );
+
+      window.setTimeout(() => {
+        void serverMemoryTimeline.refresh();
+      }, 800);
 
       if (
         runtimeUxMode.canUseStreamingMerge
@@ -234,12 +263,26 @@ export function App() {
               />
             </>
           ) : null}
+        </>
+      ) : null}
 
-          {runtimeUxMode.canUseMemoryTimeline ? (
-            <RuntimeMemoryTimeline
-              data={runtimeMemoryTimelineData}
-            />
+      {runtimeUxMode.canUseMemoryTimeline ? (
+        <>
+          {serverMemoryTimeline.isLoading ? (
+            <div className="runtime-memory-source-note">
+              Runtime memory timeline을 불러오고 있습니다.
+            </div>
           ) : null}
+
+          {serverMemoryTimeline.error !== null ? (
+            <div className="runtime-memory-source-note runtime-memory-source-note-error">
+              Runtime memory timeline을 불러오지 못했습니다.
+            </div>
+          ) : null}
+
+          <RuntimeMemoryTimeline
+            data={runtimeMemoryTimelineData}
+          />
         </>
       ) : null}
 
