@@ -1,17 +1,17 @@
 import {
-    useCallback,
-    useState,
+  useCallback,
+  useState,
 } from "react";
 
 import {
-    appendLocalReflection,
-    clearLocalReflections,
-    getLocalReflectionSnapshot,
+  appendLocalReflection,
+  clearLocalReflections,
+  getLocalReflectionSnapshot,
 } from "./localReflectionStore";
 
 import type {
-    LocalReflectionPersistenceSnapshot,
-    LocalReflectionRecord,
+  LocalReflectionPersistenceSnapshot,
+  LocalReflectionRecord,
 } from "./localReflectionTypes";
 
 export function useLocalReflectionPersistence() {
@@ -21,6 +21,13 @@ export function useLocalReflectionPersistence() {
         getLocalReflectionSnapshot()
     );
 
+  const refreshLocalReflectionMemory =
+    useCallback(() => {
+      setSnapshot(
+        getLocalReflectionSnapshot()
+      );
+    }, []);
+
   const saveLocalReflection =
     useCallback(
       (content: string): LocalReflectionRecord => {
@@ -29,30 +36,19 @@ export function useLocalReflectionPersistence() {
             content
           );
 
-        setSnapshot(
-          getLocalReflectionSnapshot()
-        );
+        refreshLocalReflectionMemory();
 
         return record;
       },
-      []
+      [refreshLocalReflectionMemory]
     );
 
   const clearLocalReflectionMemory =
     useCallback(() => {
       clearLocalReflections();
 
-      setSnapshot(
-        getLocalReflectionSnapshot()
-      );
-    }, []);
-
-  const refreshLocalReflectionMemory =
-    useCallback(() => {
-      setSnapshot(
-        getLocalReflectionSnapshot()
-      );
-    }, []);
+      refreshLocalReflectionMemory();
+    }, [refreshLocalReflectionMemory]);
 
   return {
     snapshot,
