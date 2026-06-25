@@ -14,10 +14,12 @@ import { OfflineSyncRecoveryPanel } from "../components/runtime/OfflineSyncRecov
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
+import { RuntimeFailureRecoveryNotice } from "../components/runtime/RuntimeFailureRecoveryNotice";
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
+import { resolveRuntimeFailureRecovery } from "../runtime-adapter/resolveRuntimeFailureRecovery";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
 import { useRuntimeBoundaryHealth } from "../runtime-adapter/useRuntimeBoundaryHealth";
 import { useRuntimeReflection } from "../runtime-adapter/useRuntimeReflection";
@@ -107,6 +109,20 @@ export function App() {
     serverMemoryTimeline.refresh,
   ]);
 
+  const runtimeFailureRecovery =
+    resolveRuntimeFailureRecovery({
+      runtimeUxMode,
+      runtimeBoundaryHealth,
+      runtimeError:
+        error,
+      timelineError:
+        serverMemoryTimeline.error,
+      isStreamingMergeActive:
+        isMerging,
+      localPendingCount:
+        localReflectionSnapshot.pendingCount,
+    });
+
   const continuitySurfaceData =
     createReflectionContinuitySurfaceData(
       result
@@ -194,6 +210,13 @@ export function App() {
         }
       />
 
+      <RuntimeFailureRecoveryNotice
+        recovery={runtimeFailureRecovery}
+        onRetryRuntime={checkHealth}
+        onRetryTimeline={serverMemoryTimeline.refresh}
+        onSyncLocal={offlineSyncRecovery.syncPendingReflections}
+      />
+
       <textarea
         value={content}
         onChange={(event) =>
@@ -225,7 +248,8 @@ export function App() {
         <RuntimeLoadingState />
       ) : null}
 
-      {error !== null ? (
+      {error !== null &&
+      runtimeUxMode.mode !== "local-only" ? (
         <RuntimeErrorState
           error={error}
           onRetry={handleSubmit}
