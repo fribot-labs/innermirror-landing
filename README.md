@@ -128,6 +128,96 @@ fribot-flow-timeline
 
 ---
 
+## Repository Boundary
+
+`innermirror-landing` is the public user interface repository of the InnerMirror experience.
+
+This repository is responsible for:
+
+- Reflection input UI
+- GitHub connection UI
+- Repository selection UI
+- "Reflect + GitHub Analyze" button
+- Runtime API adapter
+- Runtime response mapping for UI
+- Coaching result display
+- Decision Review result display
+- Portfolio display
+- Temporary local UI cache
+
+This repository is **not** responsible for:
+
+- Reflection analysis
+- PBL Coaching generation
+- Decision Review logic
+- Memory processing
+- Continuity Intelligence
+- Runtime orchestration
+- Proprietary AI reasoning
+- Prompt engineering
+
+Private runtime intelligence belongs to `innermirror-runtime-private`.
+
+---
+
+## Runtime Boundary
+
+The landing app may call Runtime APIs and transform Runtime responses into UI-friendly data.
+
+Allowed:
+
+```text
+User Input
+
+↓
+
+Runtime Adapter
+
+↓
+
+Runtime API
+
+↓
+
+Runtime Response
+
+↓
+
+UI Mapping
+
+↓
+
+React Components
+```
+
+Not allowed:
+
+```text
+User Input
+
+↓
+
+Local AI Reasoning
+
+↓
+
+Local Coaching Generation
+
+↓
+
+Local Decision Review
+```
+
+In this repository:
+
+- `src/runtime-adapter/` means Runtime API communication.
+- `src/runtime/` means Runtime response mapping for UI.
+- `src/runtime-local/` means temporary local UI cache and offline recovery support.
+
+No folder in this repository should contain the private Runtime intelligence itself.
+
+---
+
 ## Final Principle
 
 InnerMirror grows strongest when workflow openness and cognition protection remain intentionally balanced.
