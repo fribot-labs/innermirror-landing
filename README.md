@@ -5,173 +5,36 @@
 <h1 align="center">InnerMirror Landing</h1>
 
 <p align="center">
-  Public product narrative and workflow UX surface for the InnerMirror + Fribot PBL ecosystem.
+  Public presentation layer for the InnerMirror + Fribot PBL ecosystem.
 </p>
 
 ---
 
-## What is this repository?
+## Purpose
 
-`innermirror-landing` is the public-facing landing and workflow UX repository for InnerMirror.
+This repository is the official public user interface of the Fribot ecosystem.
 
-This repository focuses on:
+It provides the learner experience by:
 
-- product narrative
-- public onboarding
-- workflow reflection UX
-- lightweight interaction surfaces
-- public timeline and reflection previews
-- runtime adapter interface
+- collecting learner input
+- communicating with the private Runtime
+- presenting Runtime intelligence
+- visualizing learning progress
 
-It does **not** contain private cognitive runtime logic.
+The Landing presents intelligence.
 
----
-
-## Architecture Principle
-
-```text
-Public Workflow UX
-        ↓
-Runtime Adapter Interface
-        ↓
-Private Cognitive Runtime
-````
-
-Public workflow UX may be open.
-Private cognitive orchestration remains protected.
+It does not generate intelligence.
 
 ---
 
-## Public Scope
+## Architecture Boundary
 
-This repository may include:
-
-* landing page
-* onboarding flow
-* reflection input UX
-* public workflow preview
-* timeline interaction surface
-* design system
-* runtime adapter client
-
----
-
-## Private Runtime Boundary
-
-Private runtime orchestration is maintained outside this repository.
-
-This public repository may communicate with the private runtime through a stable runtime adapter layer, but does not include private runtime internals.
-
-Examples of private runtime responsibilities include:
-
-* orchestration execution
-* continuity analysis
-* adaptive runtime processing
-* runtime diagnostics
-* long-term memory processing
-
----
-
-## Current PR Scope
-
-### PR-L01: Reset and Public App Rebuild
-
-This PR resets the previous test-level implementation and rebuilds this repository as a React/Vite public app skeleton.
-
-Included:
-
-* React/Vite app structure
-* public landing page skeleton
-* component-based layout
-* public/private runtime boundary notice
-* runtime adapter placeholder
-* updated repository README
-
----
-
-## Built with
-
-* React
-* TypeScript
-* Vite
-* CSS
-
----
-
-## Development
-
-```bash
-npm install
-npm run dev
 ```
-
-Build:
-
-```bash
-npm run build
-```
-
----
-
-## Repository Role
-
-```text
-innermirror-landing
-= Public Product Narrative + Public Workflow UX Layer
-
-innermirror-runtime-private
-= Private Cognitive Runtime Layer
-
-fribot-flow-timeline
-= Original full working source / internal reference repository
-```
-
----
-
-## Repository Boundary
-
-`innermirror-landing` is the public user interface repository of the InnerMirror experience.
-
-This repository is responsible for:
-
-- Reflection input UI
-- GitHub connection UI
-- Repository selection UI
-- "Reflect + GitHub Analyze" button
-- Runtime API adapter
-- Runtime response mapping for UI
-- Coaching result display
-- Decision Review result display
-- Portfolio display
-- Temporary local UI cache
-
-This repository is **not** responsible for:
-
-- Reflection analysis
-- PBL Coaching generation
-- Decision Review logic
-- Memory processing
-- Continuity Intelligence
-- Runtime orchestration
-- Proprietary AI reasoning
-- Prompt engineering
-
-Private runtime intelligence belongs to `innermirror-runtime-private`.
-
----
-
-## Runtime Boundary
-
-The landing app may call Runtime APIs and transform Runtime responses into UI-friendly data.
-
-Allowed:
-
-```text
-User Input
+Learner
 
 ↓
 
-Runtime Adapter
+InnerMirror Landing
 
 ↓
 
@@ -179,46 +42,174 @@ Runtime API
 
 ↓
 
-Runtime Response
+Private Runtime
 
 ↓
 
-UI Mapping
+Structured Runtime Response
 
 ↓
 
-React Components
+Landing Presentation
 ```
 
-Not allowed:
+The Landing is the presentation layer.
 
-```text
-User Input
-
-↓
-
-Local AI Reasoning
-
-↓
-
-Local Coaching Generation
-
-↓
-
-Local Decision Review
-```
-
-In this repository:
-
-- `src/runtime-adapter/` means Runtime API communication.
-- `src/runtime/` means Runtime response mapping for UI.
-- `src/runtime-local/` means temporary local UI cache and offline recovery support.
-
-No folder in this repository should contain the private Runtime intelligence itself.
+The Runtime remains completely independent from the user interface.
 
 ---
 
-## Final Principle
+## Repository Identity
 
-InnerMirror grows strongest when workflow openness and cognition protection remain intentionally balanced.
+The Landing owns:
 
+- Reflection Input
+- Reflection Editor
+- GitHub Connection
+- Repository Selection
+- Runtime API Adapter
+- Runtime Response Mapping
+- UI State Management
+- Progress Visualization
+- Portfolio Display
+- Coaching Presentation
+- Decision Review Presentation
+
+The Landing does **not** own:
+
+- Reflection Analysis
+- Reflection Summary Generation
+- Runtime Question Generation
+- Continuity Intelligence
+- Decision Review Generation
+- PBL Coaching Generation
+- Runtime Memory
+- Runtime Orchestration
+- Proprietary AI reasoning
+
+Runtime intelligence belongs exclusively to:
+
+```
+innermirror-runtime-private
+```
+
+---
+
+## Landing Architecture
+
+The Landing follows the architecture below.
+
+```
+Reflection Input
+
+↓
+
+Runtime API Adapter
+
+↓
+
+Runtime Response Mapping
+
+↓
+
+Presentation Components
+
+↓
+
+User Experience
+```
+
+Landing transforms Runtime responses into user experiences.
+
+It never interprets learner cognition locally.
+
+---
+
+## Architecture Governance
+
+The Landing follows a strict architectural governance model.
+
+Core principles include:
+
+- Landing owns presentation.
+- Runtime owns intelligence.
+- Learning Platform owns education.
+- Landing communicates only through Runtime contracts.
+- Runtime reasoning must never exist inside the Landing.
+- Presentation should remain independent from Runtime implementation.
+
+These governance rules preserve long-term architectural consistency.
+
+---
+
+## Architecture Documents
+
+Detailed Landing documentation is available under:
+
+```
+docs/architecture/
+
+REPOSITORY_BOUNDARY.md
+
+LANDING_RESPONSIBILITY_AUDIT.md
+
+LANDING_RESPONSIBILITY_MATRIX.md
+
+ARCHITECTURE_GOVERNANCE.md
+```
+
+Developers should review these documents before introducing new Landing functionality.
+
+---
+
+## Current Status
+
+Current Phase
+
+```
+Phase 0
+
+Repository Boundary
+
+↓
+
+Architecture Governance
+
+↓
+
+Responsibility Verification
+
+✓ Complete
+```
+
+Next Phase
+
+```
+Phase 1
+
+GitHub Learning Entry
+
+↓
+
+Repository Selection
+
+↓
+
+Reflection Workflow
+
+↓
+
+Runtime Integration
+```
+
+---
+
+## Foundation Principle
+
+The Learning Platform provides direction.
+
+The Landing provides experience.
+
+The Runtime provides understanding.
+
+Maintaining these responsibilities independently is the foundation of the long-term Fribot architecture.
