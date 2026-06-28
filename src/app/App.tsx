@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { RepositorySelector } from "../components/github/RepositorySelector";
 import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
+import { ProjectSummaryPanel } from "../components/project/ProjectSummaryPanel";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
 import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
@@ -32,12 +33,15 @@ import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSu
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
 import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
-import {
-  createLandingProjectDraft,
-  type GitHubConnectionState,
-  type GitHubRepositorySummary,
-  type LandingProjectDraft,
+import type {
+  GitHubConnectionState,
+  GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
+import {
+  addPblReflection,
+  createPblProject,
+  type PblProject,
+} from "../types/pblProject";
 
 export function App() {
   const [content, setContent] = useState("");
@@ -62,11 +66,11 @@ export function App() {
     useState<GitHubRepositorySummary | null>(null);
 
   const [currentStep, setCurrentStep] = useState(
-    "PR-005 GitHub Learning Entry"
+    "PR-006 Project Domain Model"
   );
 
-  const [projectDraft, setProjectDraft] =
-    useState<LandingProjectDraft | null>(null);
+  const [activeProject, setActiveProject] =
+    useState<PblProject | null>(null);
 
   const {
     isLoading,
@@ -166,10 +170,18 @@ export function App() {
       return;
     }
 
-    setProjectDraft({
-      ...createLandingProjectDraft(selectedRepository),
+    const nextProject = createPblProject({
+      name: selectedRepository.name,
+      repository: {
+        provider: "github",
+        owner: selectedRepository.owner,
+        name: selectedRepository.name,
+        defaultBranch: selectedRepository.defaultBranch,
+      },
       currentStep,
     });
+
+    setActiveProject(nextProject);
   };
 
   const handleSubmit = async () => {
@@ -177,6 +189,15 @@ export function App() {
 
     if (trimmedContent.length === 0) {
       return;
+    }
+
+    if (activeProject !== null) {
+      setActiveProject(
+        addPblReflection({
+          project: activeProject,
+          content: trimmedContent,
+        })
+      );
     }
 
     resetMerge();
@@ -219,11 +240,13 @@ export function App() {
 
       <ProjectStartPanel
         selectedRepository={selectedRepository}
-        projectDraft={projectDraft}
+        project={activeProject}
         currentStep={currentStep}
         onChangeCurrentStep={setCurrentStep}
         onStartProject={handleStartProject}
       />
+
+      <ProjectSummaryPanel project={activeProject} />
 
       <RuntimeBoundaryStatusBanner
         health={runtimeBoundaryHealth}
