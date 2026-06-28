@@ -1,10 +1,7 @@
-import {
-  useEffect,
-  useState,
-} from "react";
-import { RuntimeErrorState } from "../components/RuntimeErrorState";
-import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
-import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { useEffect, useState } from "react";
+import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
+import { RepositorySelector } from "../components/github/RepositorySelector";
+import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
 import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
@@ -18,6 +15,9 @@ import { RuntimeFailureRecoveryNotice } from "../components/runtime/RuntimeFailu
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
+import { RuntimeErrorState } from "../components/RuntimeErrorState";
+import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
+import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
 import { resolveRuntimeFailureRecovery } from "../runtime-adapter/resolveRuntimeFailureRecovery";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
@@ -32,10 +32,41 @@ import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSu
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
 import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
+import {
+  createLandingProjectDraft,
+  type GitHubConnectionState,
+  type GitHubRepositorySummary,
+  type LandingProjectDraft,
+} from "../types/githubLearningEntry";
 
 export function App() {
-  const [content, setContent] =
-    useState("");
+  const [content, setContent] = useState("");
+
+  const [githubConnectionState, setGithubConnectionState] =
+    useState<GitHubConnectionState>("disconnected");
+
+  const [repositories] = useState<GitHubRepositorySummary[]>([
+    {
+      owner: "fribot-labs",
+      name: "innermirror-landing",
+      defaultBranch: "main",
+    },
+    {
+      owner: "fribot-labs",
+      name: "innermirror-runtime-private",
+      defaultBranch: "main",
+    },
+  ]);
+
+  const [selectedRepository, setSelectedRepository] =
+    useState<GitHubRepositorySummary | null>(null);
+
+  const [currentStep, setCurrentStep] = useState(
+    "PR-005 GitHub Learning Entry"
+  );
+
+  const [projectDraft, setProjectDraft] =
+    useState<LandingProjectDraft | null>(null);
 
   const {
     isLoading,
@@ -59,29 +90,21 @@ export function App() {
     checkHealth,
   } = useRuntimeBoundaryHealth();
 
-  const runtimeUxMode =
-    resolveRuntimeUxMode({
-      health:
-        runtimeBoundaryHealth,
-      isChecking:
-        isCheckingBoundary,
-    });
+  const runtimeUxMode = resolveRuntimeUxMode({
+    health: runtimeBoundaryHealth,
+    isChecking: isCheckingBoundary,
+  });
 
-  const serverMemoryTimeline =
-    useServerRuntimeMemoryTimeline({
-      enabled:
-        runtimeUxMode.canUseMemoryTimeline,
-      limit:
-        5,
-    });
+  const serverMemoryTimeline = useServerRuntimeMemoryTimeline({
+    enabled: runtimeUxMode.canUseMemoryTimeline,
+    limit: 5,
+  });
 
-  const runtimeMemoryTimelineData =
-    createServerRuntimeMemoryTimelineData(
-      serverMemoryTimeline.timeline
-    );
+  const runtimeMemoryTimelineData = createServerRuntimeMemoryTimelineData(
+    serverMemoryTimeline.timeline
+  );
 
-  const isLocalOnlyMode =
-    runtimeUxMode.mode === "local-only";
+  const isLocalOnlyMode = runtimeUxMode.mode === "local-only";
 
   const {
     snapshot: localReflectionSnapshot,
@@ -90,12 +113,10 @@ export function App() {
     refreshLocalReflectionMemory,
   } = useLocalReflectionPersistence();
 
-  const offlineSyncRecovery =
-    useOfflineSyncRecovery({
-      runtimeUxMode,
-      onLocalSnapshotChanged:
-        refreshLocalReflectionMemory,
-    });
+  const offlineSyncRecovery = useOfflineSyncRecovery({
+    runtimeUxMode,
+    onLocalSnapshotChanged: refreshLocalReflectionMemory,
+  });
 
   useEffect(() => {
     if (
@@ -110,98 +131,107 @@ export function App() {
     serverMemoryTimeline.refresh,
   ]);
 
-  const runtimeFailureRecovery =
-    resolveRuntimeFailureRecovery({
-      runtimeUxMode,
-      runtimeBoundaryHealth,
-      runtimeError:
-        error,
-      timelineError:
-        serverMemoryTimeline.error,
-      isStreamingMergeActive:
-        isMerging,
-      localPendingCount:
-        localReflectionSnapshot.pendingCount,
+  const runtimeFailureRecovery = resolveRuntimeFailureRecovery({
+    runtimeUxMode,
+    runtimeBoundaryHealth,
+    runtimeError: error,
+    timelineError: serverMemoryTimeline.error,
+    isStreamingMergeActive: isMerging,
+    localPendingCount: localReflectionSnapshot.pendingCount,
+  });
+
+  const runtimeFailureRecoveryDismiss = useRuntimeFailureRecoveryDismiss({
+    recovery: runtimeFailureRecovery,
+    isRuntimeHealthy: runtimeUxMode.mode === "full-runtime",
+  });
+
+  const continuitySurfaceData = toReflectionContinuitySurfaceData(result);
+
+  const returningThemeSurfaceData = mapReturningThemeSurfaceData(result);
+
+  const longGapRecoverySurfaceData = createLongGapRecoverySurfaceData(result);
+
+  const identityDriftSurfaceData = createIdentityDriftSurfaceData(result);
+
+  const handleConnectGitHub = () => {
+    setGithubConnectionState("connecting");
+
+    window.setTimeout(() => {
+      setGithubConnectionState("connected");
+    }, 800);
+  };
+
+  const handleStartProject = () => {
+    if (selectedRepository === null) {
+      return;
+    }
+
+    setProjectDraft({
+      ...createLandingProjectDraft(selectedRepository),
+      currentStep,
     });
+  };
 
-  const runtimeFailureRecoveryDismiss =
-    useRuntimeFailureRecoveryDismiss({
-      recovery:
-        runtimeFailureRecovery,
-      isRuntimeHealthy:
-        runtimeUxMode.mode === "full-runtime",
-    });
+  const handleSubmit = async () => {
+    const trimmedContent = content.trim();
 
-  const continuitySurfaceData =
-    toReflectionContinuitySurfaceData(
-      result
-    );
+    if (trimmedContent.length === 0) {
+      return;
+    }
 
-  const returningThemeSurfaceData =
-    mapReturningThemeSurfaceData(
-      result
-    );
+    resetMerge();
 
-  const longGapRecoverySurfaceData =
-    createLongGapRecoverySurfaceData(
-      result
-    );
+    if (isLocalOnlyMode) {
+      saveLocalReflection(trimmedContent);
 
-  const identityDriftSurfaceData =
-    createIdentityDriftSurfaceData(
-      result
-    );
+      setContent("");
 
-  const handleSubmit =
-    async () => {
-      const trimmedContent =
-        content.trim();
+      return;
+    }
 
-      if (trimmedContent.length === 0) {
-        return;
-      }
+    await submitReflection(trimmedContent);
 
-      resetMerge();
+    window.setTimeout(() => {
+      void serverMemoryTimeline.refresh();
+    }, 800);
 
-      if (isLocalOnlyMode) {
-        saveLocalReflection(
-          trimmedContent
-        );
-
-        setContent("");
-
-        return;
-      }
-
-      await submitReflection(
-        trimmedContent
-      );
-
-      window.setTimeout(() => {
-        void serverMemoryTimeline.refresh();
-      }, 800);
-
-      if (
-        runtimeUxMode.canUseStreamingMerge
-      ) {
-        void startMerge({
-          content:
-            trimmedContent,
-        });
-      }
-    };
+    if (runtimeUxMode.canUseStreamingMerge) {
+      void startMerge({
+        content: trimmedContent,
+      });
+    }
+  };
 
   return (
     <main>
+      <GitHubLoginEntry
+        connectionState={githubConnectionState}
+        onConnect={handleConnectGitHub}
+      />
+
+      <RepositorySelector
+        repositories={
+          githubConnectionState === "connected" ? repositories : []
+        }
+        selectedRepository={selectedRepository}
+        onSelectRepository={setSelectedRepository}
+      />
+
+      <ProjectStartPanel
+        selectedRepository={selectedRepository}
+        projectDraft={projectDraft}
+        currentStep={currentStep}
+        onChangeCurrentStep={setCurrentStep}
+        onStartProject={handleStartProject}
+      />
+
       <RuntimeBoundaryStatusBanner
         health={runtimeBoundaryHealth}
         isChecking={isCheckingBoundary}
         onRefresh={checkHealth}
       />
 
-      <RuntimeFallbackModeNotice
-        uxMode={runtimeUxMode}
-      />
+      <RuntimeFallbackModeNotice uxMode={runtimeUxMode} />
 
       <LocalReflectionPersistenceNotice
         snapshot={localReflectionSnapshot}
@@ -211,53 +241,33 @@ export function App() {
       <OfflineSyncRecoveryPanel
         snapshot={localReflectionSnapshot}
         syncState={offlineSyncRecovery}
-        canSync={
-          runtimeUxMode.mode === "full-runtime"
-        }
-        onSync={
-          offlineSyncRecovery.syncPendingReflections
-        }
+        canSync={runtimeUxMode.mode === "full-runtime"}
+        onSync={offlineSyncRecovery.syncPendingReflections}
       />
 
       <RuntimeFailureRecoveryNotice
         recovery={runtimeFailureRecovery}
         visible={runtimeFailureRecoveryDismiss.visible}
-        isRecoveryComplete={
-          runtimeFailureRecoveryDismiss.isRecoveryComplete
-        }
-        displayTitle={
-          runtimeFailureRecoveryDismiss.title
-        }
-        displayMessage={
-          runtimeFailureRecoveryDismiss.message
-        }
+        isRecoveryComplete={runtimeFailureRecoveryDismiss.isRecoveryComplete}
+        displayTitle={runtimeFailureRecoveryDismiss.title}
+        displayMessage={runtimeFailureRecoveryDismiss.message}
         onRetryRuntime={checkHealth}
         onRetryTimeline={serverMemoryTimeline.refresh}
         onSyncLocal={offlineSyncRecovery.syncPendingReflections}
-        onDismiss={
-          runtimeFailureRecoveryDismiss.dismiss
-        }
+        onDismiss={runtimeFailureRecoveryDismiss.dismiss}
       />
 
       <textarea
         value={content}
-        onChange={(event) =>
-          setContent(event.target.value)
-        }
+        onChange={(event) => setContent(event.target.value)}
         placeholder="Write a reflection..."
       />
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={isLoading}
-      >
+      <button type="button" onClick={handleSubmit} disabled={isLoading}>
         {isLoading ? "Reading..." : "Reflect"}
       </button>
 
-      <ImmediateReflectionFeedback
-        data={immediateFeedback}
-      />
+      <ImmediateReflectionFeedback data={immediateFeedback} />
 
       {runtimeUxMode.canUseStreamingMerge ? (
         <RuntimeStreamingMergeSurface
@@ -266,47 +276,32 @@ export function App() {
         />
       ) : null}
 
-      {isLoading ? (
-        <RuntimeLoadingState />
-      ) : null}
+      {isLoading ? <RuntimeLoadingState /> : null}
 
-      {error !== null &&
-      runtimeUxMode.mode !== "local-only" ? (
-        <RuntimeErrorState
-          error={error}
-          onRetry={handleSubmit}
-        />
+      {error !== null && runtimeUxMode.mode !== "local-only" ? (
+        <RuntimeErrorState error={error} onRetry={handleSubmit} />
       ) : null}
 
       {result !== null ? (
         <>
           {isOptimistic ? (
             <div className="optimistic-result-note">
-              임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로 갱신됩니다.
+              임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로
+              갱신됩니다.
             </div>
           ) : null}
 
-          <RuntimeReflectionResultView
-            result={result}
-          />
+          <RuntimeReflectionResultView result={result} />
 
           {runtimeUxMode.canUseContinuitySurfaces ? (
             <>
-              <ReflectionContinuitySurface
-                data={continuitySurfaceData}
-              />
+              <ReflectionContinuitySurface data={continuitySurfaceData} />
 
-              <ReturningThemeSurface
-                data={returningThemeSurfaceData}
-              />
+              <ReturningThemeSurface data={returningThemeSurfaceData} />
 
-              <LongGapRecoverySurface
-                data={longGapRecoverySurfaceData}
-              />
+              <LongGapRecoverySurface data={longGapRecoverySurfaceData} />
 
-              <IdentityDriftSurface
-                data={identityDriftSurfaceData}
-              />
+              <IdentityDriftSurface data={identityDriftSurfaceData} />
             </>
           ) : null}
         </>
@@ -326,9 +321,7 @@ export function App() {
             </div>
           ) : null}
 
-          <RuntimeMemoryTimeline
-            data={runtimeMemoryTimelineData}
-          />
+          <RuntimeMemoryTimeline data={runtimeMemoryTimelineData} />
         </>
       ) : null}
 
