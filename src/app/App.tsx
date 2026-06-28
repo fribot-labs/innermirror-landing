@@ -30,8 +30,8 @@ import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflecti
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
-import { createReflectionContinuitySurfaceData } from "../runtime/createReflectionContinuitySurfaceData";
-import { createReturningThemeSurfaceData } from "../runtime/createReturningThemeSurfaceData";
+import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
+import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
 
 export function App() {
   const [content, setContent] =
@@ -133,12 +133,12 @@ export function App() {
     });
 
   const continuitySurfaceData =
-    createReflectionContinuitySurfaceData(
+    toReflectionContinuitySurfaceData(
       result
     );
 
   const returningThemeSurfaceData =
-    createReturningThemeSurfaceData(
+    mapReturningThemeSurfaceData(
       result
     );
 

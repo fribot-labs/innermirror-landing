@@ -1,12 +1,12 @@
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 import type {
-    ReturningThemeSurfaceData,
+  ReturningThemeSurfaceData,
 } from "../types/runtimeReturningTheme";
 
-export function createReturningThemeSurfaceData(
+export function mapReturningThemeSurfaceData(
   result: RuntimeReflectionResult | null
 ): ReturningThemeSurfaceData {
   if (result === null) {
