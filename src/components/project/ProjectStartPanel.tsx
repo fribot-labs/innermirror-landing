@@ -1,11 +1,10 @@
-import type {
-    GitHubRepositorySummary,
-    LandingProjectDraft,
-} from "../../types/githubLearningEntry";
+import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
+import type { PblProject } from "../../types/pblProject";
+import { getCurrentPblMilestone } from "../../types/pblProject";
 
 type ProjectStartPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
-  projectDraft: LandingProjectDraft | null;
+  project: PblProject | null;
   currentStep: string;
   onChangeCurrentStep: (value: string) => void;
   onStartProject: () => void;
@@ -13,13 +12,16 @@ type ProjectStartPanelProps = {
 
 export function ProjectStartPanel({
   selectedRepository,
-  projectDraft,
+  project,
   currentStep,
   onChangeCurrentStep,
   onStartProject,
 }: ProjectStartPanelProps) {
   const canStartProject =
     selectedRepository !== null && currentStep.trim().length > 0;
+
+  const currentMilestone =
+    project !== null ? getCurrentPblMilestone(project) : null;
 
   return (
     <section className="project-start-panel">
@@ -64,7 +66,7 @@ export function ProjectStartPanel({
               type="text"
               value={currentStep}
               onChange={(event) => onChangeCurrentStep(event.target.value)}
-              placeholder="Example: PR-005 GitHub Learning Entry"
+              placeholder="Example: PR-006 Project Domain Model"
             />
           </label>
 
@@ -74,25 +76,30 @@ export function ProjectStartPanel({
             onClick={onStartProject}
             disabled={!canStartProject}
           >
-            Start Project
+            {project === null ? "Start Project" : "Restart Project"}
           </button>
         </div>
       )}
 
-      {projectDraft !== null ? (
+      {project !== null ? (
         <div className="project-start-panel-result">
           <span className="project-start-panel-result-label">
             Active project
           </span>
 
-          <strong>{projectDraft.name}</strong>
+          <strong>{project.name}</strong>
 
           <p>
-            Current step: <b>{projectDraft.currentStep}</b>
+            Current milestone:{" "}
+            <b>{currentMilestone?.title ?? "No milestone selected"}</b>
+          </p>
+
+          <p>
+            Completion: <b>{project.completionRate}%</b>
           </p>
 
           <small>
-            Project ID: <code>{projectDraft.projectId}</code>
+            Project ID: <code>{project.id}</code>
           </small>
         </div>
       ) : null}
