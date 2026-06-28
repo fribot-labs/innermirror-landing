@@ -1,8 +1,8 @@
 import type {
-    ReflectionContinuitySurfaceData,
+  ReflectionContinuitySurfaceData,
 } from "../types/runtimeContinuity";
 
-export function createReflectionContinuitySurfaceData(
+export function toReflectionContinuitySurfaceData(
   runtimeResult: any
 ): ReflectionContinuitySurfaceData {
   const continuity =

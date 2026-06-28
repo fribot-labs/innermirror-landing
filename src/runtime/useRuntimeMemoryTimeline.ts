@@ -5,8 +5,8 @@ import {
 } from "react";
 
 import {
-  createRuntimeMemoryTimelineItem,
-} from "./createRuntimeMemoryTimelineItem";
+  mapRuntimeMemoryTimelineItem,
+} from "./mapRuntimeMemoryTimelineItem";
 
 import type {
   RuntimeReflectionResult,
@@ -36,7 +36,7 @@ export function useRuntimeMemoryTimeline(
     }
 
     const nextItem =
-      createRuntimeMemoryTimelineItem(
+      mapRuntimeMemoryTimelineItem(
         result
       );
 

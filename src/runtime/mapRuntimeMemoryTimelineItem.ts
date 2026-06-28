@@ -1,12 +1,12 @@
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 import type {
-    RuntimeMemoryTimelineItem,
+  RuntimeMemoryTimelineItem,
 } from "../types/runtimeMemoryTimeline";
 
-export function createRuntimeMemoryTimelineItem(
+export function mapRuntimeMemoryTimelineItem(
   result: RuntimeReflectionResult
 ): RuntimeMemoryTimelineItem {
   return {
