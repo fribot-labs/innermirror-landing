@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
+import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
 import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
 import { ProjectSummaryPanel } from "../components/project/ProjectSummaryPanel";
@@ -19,6 +20,7 @@ import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStrea
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
 import { resolveRuntimeFailureRecovery } from "../runtime-adapter/resolveRuntimeFailureRecovery";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
@@ -37,6 +39,9 @@ import type {
   GitHubConnectionState,
   GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
+import type {
+  GitHubSnapshotRepository,
+} from "../types/githubSnapshot";
 import {
   addPblReflection,
   createPblProject,
@@ -71,6 +76,12 @@ export function App() {
 
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
+
+  const {
+    snapshotState,
+    captureSnapshot,
+    resetSnapshot,
+  } = useGitHubSnapshot();
 
   const {
     isLoading,
@@ -182,6 +193,7 @@ export function App() {
     });
 
     setActiveProject(nextProject);
+    resetSnapshot();
   };
 
   const handleSubmit = async () => {
@@ -210,6 +222,16 @@ export function App() {
       return;
     }
 
+    resetMerge();
+    if (activeProject !== null) {
+      await captureSnapshot({
+        owner: activeProject.repository.owner,
+        name: activeProject.repository.name,
+        defaultBranch:
+          activeProject.repository.defaultBranch,
+      } satisfies GitHubSnapshotRepository);
+    }
+    
     await submitReflection(trimmedContent);
 
     window.setTimeout(() => {
@@ -248,6 +270,10 @@ export function App() {
 
       <ProjectSummaryPanel project={activeProject} />
 
+      {activeProject !== null ? (
+        <GitHubSnapshotPanel snapshotState={snapshotState} />
+      ) : null}
+
       <RuntimeBoundaryStatusBanner
         health={runtimeBoundaryHealth}
         isChecking={isCheckingBoundary}
@@ -283,11 +309,21 @@ export function App() {
       <textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
-        placeholder="Write a reflection..."
+        placeholder="Describe your recent development decision or learning..."
       />
 
-      <button type="button" onClick={handleSubmit} disabled={isLoading}>
-        {isLoading ? "Reading..." : "Reflect"}
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={
+          isLoading ||
+          activeProject === null ||
+          githubConnectionState !== "connected"
+        }
+      >
+        {isLoading
+          ? "Analyzing..."
+          : "Reflect + GitHub Analyze"}
       </button>
 
       <ImmediateReflectionFeedback data={immediateFeedback} />
