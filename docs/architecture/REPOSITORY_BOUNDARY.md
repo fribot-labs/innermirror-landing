@@ -2,19 +2,28 @@
 
 This document defines the official repository boundary of `innermirror-landing`.
 
-This repository is the public user interface layer of the InnerMirror experience.
+The Landing is the public Project-Based Learning interface of the Fribot ecosystem.
 
-It may communicate with the private Runtime, but it must not implement private Runtime intelligence.
+It owns learner interaction, GitHub communication, project workflow, and Runtime presentation.
+
+It never generates Runtime intelligence.
 
 ---
 
 # Repository Identity
 
-`innermirror-landing` is the official **User Interface Repository** of the Fribot ecosystem.
+`innermirror-landing` is the official **Project-Based Learning Presentation Repository**.
 
-Its responsibility is to collect user input, call Runtime APIs, and display returned results.
+Its responsibilities are:
 
-It is not responsible for generating the intelligence behind those results.
+- guide learners into project-based learning
+- capture learning context
+- communicate with the Runtime
+- present Runtime intelligence
+
+The Landing prepares learning context.
+
+The Runtime interprets learning context.
 
 ---
 
@@ -22,244 +31,355 @@ It is not responsible for generating the intelligence behind those results.
 
 `innermirror-landing` owns:
 
-- Reflection input UI
+## GitHub Learning Entry
+
 - GitHub connection UI
 - Repository selection UI
-- "Reflect + GitHub Analyze" button
+- Project creation UI
+- Project summary UI
+
+---
+
+## Reflection Workflow
+
+- Reflection input
+- Reflection editor
+- Reflect + GitHub Analyze workflow
+
+---
+
+## GitHub Snapshot
+
+- manual GitHub Snapshot capture
+- Snapshot presentation
+- Snapshot state management
+
+---
+
+## Runtime Communication
+
+- Runtime Contract submission
 - Runtime API adapter
 - Runtime response mapping
-- Runtime result display
-- Coaching result display
-- Decision Review result display
-- Portfolio display
-- Loading state
-- Error state
-- Temporary local UI cache
-- Offline recovery UI
+- Runtime loading state
+- Runtime error state
+
+---
+
+## Presentation
+
+- Coaching presentation
+- Decision Review presentation
+- Progress visualization
+- Portfolio presentation
+
+---
+
+## Local State
+
+- temporary local UI cache
+- offline recovery UI
+- local Reflection persistence
 
 ---
 
 # This Repository Does Not Own
 
-`innermirror-landing` does not own:
+`innermirror-landing` does **not** own:
 
 - Reflection analysis
-- GitHub Snapshot analysis
-- PBL Coaching generation
-- Decision Review logic
-- Memory processing
+- GitHub Snapshot interpretation
+- Runtime Context generation
+- Runtime Summary generation
+- Runtime Question generation
+- Runtime Coaching generation
+- Decision Review generation
 - Continuity Intelligence
+- Runtime Memory
 - Runtime orchestration
-- Proprietary AI reasoning
-- Prompt engineering
-- Internal recommendation logic
+- proprietary AI reasoning
+- prompt engineering
 
-These responsibilities belong to `innermirror-runtime-private`.
+These responsibilities belong to:
+
+```text
+innermirror-runtime-private
+```
 
 ---
 
-# Current Runtime-Related Folder Policy
+# Runtime-Related Folder Policy
 
-This repository currently contains Runtime-related folders.
+Landing contains Runtime-related folders.
 
-These folders are allowed only under strict responsibility boundaries.
+These folders exist only to support Runtime communication and presentation.
+
+They must never become Runtime intelligence.
 
 ---
 
 ## `src/runtime-adapter/`
 
-Purpose:
+Purpose
 
-Runtime API communication.
+Runtime communication.
 
-Allowed responsibilities:
+Allowed
 
-- call Runtime API endpoints
-- validate Runtime API responses
-- handle Runtime request failures
-- handle timeout recovery
-- provide adapter hooks
-- expose Runtime result data to UI components
+- Runtime Contract submission
+- Runtime API communication
+- Runtime response validation
+- timeout recovery
+- adapter hooks
 
-Not allowed:
+Not allowed
 
-- generate Reflection analysis locally
-- generate PBL Coaching locally
-- generate Decision Review locally
-- perform Runtime orchestration locally
+- Reflection analysis
+- Coaching generation
+- Decision Review generation
+- Runtime orchestration
 
 ---
 
 ## `src/runtime/`
 
-Purpose:
+Purpose
 
-Runtime response mapping for UI.
+Runtime presentation mapping.
 
-Allowed responsibilities:
+Allowed
 
-- transform Runtime result into UI surface data
-- prepare continuity surface display data
-- prepare memory timeline display data
-- prepare recovery surface display data
-- normalize Runtime result for presentation
+- Runtime response mapping
+- presentation data
+- timeline mapping
+- continuity surface data
+- memory presentation
+- recovery presentation
 
-Not allowed:
+Not allowed
 
-- infer hidden learner psychology
-- generate coaching logic
-- generate decision intelligence
-- replace private Runtime analysis
-
-This folder may derive UI labels from Runtime results.
-
-It must not become a local Runtime.
+- learner analysis
+- coaching generation
+- decision generation
+- Runtime reasoning
 
 ---
 
 ## `src/runtime-local/`
 
-Purpose:
+Purpose
 
-Temporary local UI cache and offline recovery support.
+Temporary presentation state.
 
-Allowed responsibilities:
+Allowed
 
-- temporarily store local reflections
-- support offline recovery UX
-- clear local reflection cache
-- refresh local reflection cache
-- prepare client-side recovery state
+- local Reflection cache
+- offline recovery
+- local synchronization state
 
-Not allowed:
+Not allowed
 
-- long-term memory intelligence
-- private cognitive processing
-- decision history analysis
-- coaching generation
-
-Local cache is not Runtime memory.
+- Runtime Memory
+- cognitive processing
+- learning intelligence
+- decision analysis
 
 ---
 
-# Allowed Runtime Interaction Pattern
+## `src/github/`
 
-Allowed pattern:
+Purpose
 
-```ts
-const result = await runtimeAdapter.analyzeReflectionWithGithub({
-  reflectionText,
-  projectId,
-  repositoryId,
-  githubSnapshot,
-});
+GitHub communication.
+
+Allowed
+
+- GitHub Snapshot capture
+- Snapshot preparation
+- Snapshot normalization
+- Snapshot state
+- Repository communication
+
+Not allowed
+
+- GitHub interpretation
+- learner evaluation
+- coaching generation
+- Runtime reasoning
+
+GitHub communication belongs to Landing.
+
+GitHub interpretation belongs to Runtime.
+
+---
+
+## `src/components/github/`
+
+Purpose
+
+GitHub presentation.
+
+Allowed
+
+- GitHub Learning Entry
+- Repository Selector
+- GitHub Snapshot Panel
+
+These components display GitHub information.
+
+They do not interpret GitHub information.
+
+---
+
+# Allowed Runtime Interaction
+
+Landing communicates through Runtime Contract V2.
+
+```text
+Reflection
+
++
+
+Project Context
+
++
+
+Repository Context
+
++
+
+GitHub Snapshot
+
++
+
+Learning Context
+
+↓
+
+Runtime Contract V2
+
+↓
+
+Runtime
 ```
 
-or equivalent Runtime API adapter calls.
+Landing prepares Runtime input.
 
-The landing app may then map the returned result into UI surfaces.
+Runtime performs analysis.
+
+Landing presents results.
 
 ---
 
 # Disallowed Pattern
 
-The following patterns are not allowed in `innermirror-landing`.
+The following logic must never exist inside the Landing.
 
 ```ts
-generateSummary(reflectionText);
-generateQuestion(reflectionText);
-analyzeDecision(reflectionText);
-calculateCoaching(reflectionText);
-detectContinuity(reflectionText);
-generateDecisionReview(reflectionText);
-generatePblCoaching(reflectionText);
+generateSummary(...)
+generateQuestion(...)
+generateCoaching(...)
+generateDecisionReview(...)
+analyzeReflection(...)
+analyzeGitHubSnapshot(...)
+detectContinuity(...)
 ```
 
-If logic generates coaching, analyzes decisions, or evaluates learner state, it belongs to `innermirror-runtime-private`.
+If code generates learning intelligence, it belongs to Runtime.
 
 ---
 
-# Boundary with `fribot-learning`
+# Manual GitHub Policy
 
-`fribot-learning` owns the education platform.
+GitHub Snapshot is captured only when the learner explicitly requests analysis.
 
-Examples:
+Official workflow:
 
-- PBL learning structure
+```text
+Reflect + GitHub Analyze
+
+↓
+
+Capture GitHub Snapshot
+
+↓
+
+Runtime
+```
+
+The MVP intentionally excludes:
+
+- Webhook
+- Scheduler
+- Polling
+- Background synchronization
+
+The learner remains in control of GitHub analysis.
+
+---
+
+# Repository Relationships
+
+## fribot-learning
+
+Owns:
+
+- curriculum
 - learning templates
-- public educational documentation
-- Foundation Documentation
-- MVP roadmap
-
-`innermirror-landing` may display learning-related UI, but it does not own the curriculum or long-term Foundation documentation.
+- educational documentation
+- roadmap
 
 ---
 
-# Boundary with `innermirror-runtime-private`
+## innermirror-runtime-private
 
-`innermirror-runtime-private` owns all private runtime intelligence.
+Owns:
 
-Examples:
-
+- Runtime Context
 - Reflection analysis
-- GitHub Snapshot analysis
-- PBL Coaching
+- GitHub interpretation
+- Summary
+- Question
+- Coaching
 - Decision Review
-- Senior Thinking Checkpoints
-- Memory
+- Runtime Memory
 - Continuity Intelligence
 
-Landing requests analysis.
-
-Runtime performs analysis.
-
-Landing displays results.
-
 ---
 
-# Boundary with `innermirror-engine-private`
+## fribot-flow-timeline
 
-`innermirror-engine-private` is a private research repository.
+Owns:
 
-It may contain experimental decision intelligence or recommendation logic.
+- historical implementation
+- UX experiments
+- development archive
 
-Landing should not depend directly on this repository.
-
-Any production intelligence should flow through `innermirror-runtime-private`.
-
----
-
-# Boundary with `fribot-flow-timeline`
-
-`fribot-flow-timeline` is a historical development archive and sandbox.
-
-Landing may reference UX ideas from it, but active MVP UI should be implemented in `innermirror-landing`.
+Landing may reference ideas but should never depend on archived code.
 
 ---
 
 # Feature Placement Guide
 
-| Feature Type | Correct Repository |
-|-------------|-------------------|
-| Learning template | fribot-learning |
-| Curriculum structure | fribot-learning |
-| Reflection input UI | innermirror-landing |
-| GitHub connection UI | innermirror-landing |
-| Repository selector UI | innermirror-landing |
-| Reflect + GitHub Analyze button | innermirror-landing |
-| Coaching result display | innermirror-landing |
-| Decision Review result display | innermirror-landing |
-| Portfolio display | innermirror-landing |
-| Runtime API adapter | innermirror-landing |
-| Runtime response UI mapping | innermirror-landing |
-| Temporary local UI cache | innermirror-landing |
-| Reflection analysis | innermirror-runtime-private |
-| GitHub Snapshot analysis | innermirror-runtime-private |
-| PBL Coaching generation | innermirror-runtime-private |
-| Decision Review generation | innermirror-runtime-private |
-| Memory processing | innermirror-runtime-private |
-| Experimental recommendation logic | innermirror-engine-private |
-| Historical prototype reference | fribot-flow-timeline |
+| Feature | Repository |
+|----------|------------|
+| GitHub Learning Entry | innermirror-landing |
+| Repository Selection | innermirror-landing |
+| Project Creation | innermirror-landing |
+| Project Summary | innermirror-landing |
+| Reflection Input | innermirror-landing |
+| Manual GitHub Snapshot | innermirror-landing |
+| Runtime API Adapter | innermirror-landing |
+| Runtime Response Mapping | innermirror-landing |
+| Coaching Presentation | innermirror-landing |
+| Decision Review Presentation | innermirror-landing |
+| Runtime Context | innermirror-runtime-private |
+| Reflection Analysis | innermirror-runtime-private |
+| GitHub Interpretation | innermirror-runtime-private |
+| Runtime Summary | innermirror-runtime-private |
+| Runtime Coaching | innermirror-runtime-private |
+| Decision Review | innermirror-runtime-private |
+| Runtime Memory | innermirror-runtime-private |
 
 ---
 
@@ -267,15 +387,15 @@ Landing may reference UX ideas from it, but active MVP UI should be implemented 
 
 `innermirror-landing` is public.
 
-Therefore, it must never contain:
+Therefore it must never contain:
 
 - proprietary prompts
-- private Runtime logic
+- Runtime intelligence
 - cognitive analysis algorithms
-- learner decision intelligence
+- learner evaluation logic
 - long-term memory processing
 
-Public UI is allowed.
+Public presentation is allowed.
 
 Private intelligence is not.
 
@@ -283,8 +403,10 @@ Private intelligence is not.
 
 # Foundation Principle
 
-`innermirror-landing` displays the learning experience.
+The Landing creates the learning experience.
 
-It does not generate the intelligence behind the learning experience.
+GitHub provides development evidence.
 
-Clear separation between UI, adapter, and Runtime protects security, maintainability, and long-term service identity.
+The Runtime creates learning intelligence.
+
+Keeping these responsibilities separated preserves the security, maintainability, and long-term evolution of the Fribot ecosystem.
