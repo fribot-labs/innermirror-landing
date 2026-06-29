@@ -2,7 +2,9 @@
 
 This directory contains the official architecture documentation of the **InnerMirror Landing** repository.
 
-These documents define how the Landing remains a public presentation layer while communicating with the private Runtime through stable boundaries.
+These documents define how the Landing provides the public Project-Based Learning experience while communicating with the private Runtime through stable Runtime Contracts.
+
+Together they define the architectural responsibilities, project workflow, GitHub integration boundary, and long-term governance of the Landing.
 
 ---
 
@@ -31,8 +33,18 @@ LANDING_RESPONSIBILITY_MATRIX.md
 
 ↓
 
+PBL_PROJECT_DOMAIN_MODEL.md
+
+↓
+
+GITHUB_SNAPSHOT_INTEGRATION.md
+
+↓
+
 ARCHITECTURE_GOVERNANCE.md
 ```
+
+Each document owns one architectural responsibility.
 
 ---
 
@@ -42,10 +54,10 @@ ARCHITECTURE_GOVERNANCE.md
 
 Defines what the Landing owns and what it must never own.
 
-Focus:
+Focus
 
 - repository identity
-- UI responsibilities
+- presentation responsibilities
 - Runtime boundary
 - public/private separation
 
@@ -55,24 +67,28 @@ Focus:
 
 Records the Runtime Adapter boundary audit.
 
-Focus:
+Focus
 
-- Runtime API adapter
+- Runtime API Adapter
 - Runtime response mapping
-- temporary local UI cache
-- confirmation that Runtime intelligence is not implemented locally
+- Runtime Contract communication
+- local presentation state
+- confirmation that Runtime intelligence is never implemented inside the Landing
 
 ---
 
 ## LANDING_RESPONSIBILITY_AUDIT.md
 
-Records the current Landing responsibility audit.
+Records the current Landing implementation.
 
-Focus:
+Focus
 
 - current implementation
-- Runtime intelligence separation
-- presentation responsibility review
+- presentation responsibility
+- Runtime separation
+- GitHub communication responsibility
+
+This document records the current implementation rather than long-term architectural rules.
 
 ---
 
@@ -80,11 +96,49 @@ Focus:
 
 Defines ownership of Landing responsibilities.
 
-Focus:
+Focus
 
+- GitHub Learning Entry
+- Project workflow
+- Runtime communication
 - presentation ownership
-- Runtime separation
 - repository responsibility allocation
+
+This document answers:
+
+> Who owns this responsibility?
+
+---
+
+## PBL_PROJECT_DOMAIN_MODEL.md
+
+Defines the Project-Based Learning domain model.
+
+Focus
+
+- Project
+- Milestone
+- Pull Request
+- Reflection ownership
+- Completion
+
+This document defines how learning is organized inside the Landing.
+
+---
+
+## GITHUB_SNAPSHOT_INTEGRATION.md
+
+Defines the GitHub Snapshot integration model.
+
+Focus
+
+- Manual GitHub Snapshot
+- Repository communication
+- Snapshot capture
+- Runtime Context preparation
+- MVP synchronization policy
+
+This document defines how GitHub becomes part of the learning context.
 
 ---
 
@@ -92,12 +146,17 @@ Focus:
 
 Defines the long-term architectural rules of the Landing.
 
-Focus:
+Focus
 
 - governance
 - presentation constraints
 - Runtime communication policy
+- GitHub boundary
 - long-term evolution principles
+
+This document answers:
+
+> How should the Landing continue to evolve?
 
 ---
 
@@ -122,20 +181,30 @@ Landing Responsibility Matrix
 
 ↓
 
+PBL Project Domain Model
+
+↓
+
+GitHub Snapshot Integration
+
+↓
+
 Architecture Governance
 ```
 
+This order moves from repository identity toward long-term governance.
+
 ---
 
-# Governance Philosophy
+# Documentation Philosophy
 
-The architecture documentation is divided into three categories.
+Landing architecture documentation is divided into four categories.
 
-## Structure
+## Boundary
 
 - Repository Boundary
 
-This document describes what the Landing is.
+Defines where the Landing begins and ends.
 
 ---
 
@@ -148,21 +217,36 @@ These documents describe the current implementation.
 
 ---
 
-## Governance
+## Structure
 
 - Landing Responsibility Matrix
+- PBL Project Domain Model
+- GitHub Snapshot Integration
+
+These documents describe how the Landing organizes learning.
+
+---
+
+## Governance
+
 - Architecture Governance
 
-These documents define how the Landing should continue to evolve.
+Defines how the Landing should continue to evolve while preserving architectural consistency.
 
 ---
 
 # Foundation Principle
 
-The Landing creates the user experience.
+The Learning Platform provides education.
 
-The Runtime creates the intelligence.
+The Landing provides project-based learning experiences.
 
-The Learning Platform creates the educational journey.
+GitHub provides development evidence.
 
-Architecture documentation exists to preserve this separation as the Fribot ecosystem evolves.
+The Runtime provides learning intelligence.
+
+The Landing never interprets learner cognition.
+
+The Runtime never presents learner experience.
+
+Architecture documentation exists to preserve these responsibilities as the Fribot ecosystem evolves.

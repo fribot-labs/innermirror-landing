@@ -2,27 +2,32 @@
 
 This document defines the long-term architectural governance of the **innermirror-landing** repository.
 
-Its purpose is to preserve the architectural responsibilities established by the Foundation Documentation.
-
-Rather than documenting the current implementation, this document defines the architectural rules that every future Landing implementation must continue to follow.
+Its purpose is to preserve the architectural responsibilities established by the Foundation Documentation while supporting the evolution of the Project-Based Learning (PBL) experience.
 
 Architecture evolves.
 
-Responsibilities do not.
+Responsibilities remain stable.
 
-This document exists to preserve those responsibilities throughout the lifetime of the Fribot ecosystem.
+This document defines those responsibilities.
 
 ---
 
 # Purpose
 
-The Landing is the public presentation layer of the Fribot ecosystem.
+The Landing is the public Project-Based Learning experience of the Fribot ecosystem.
 
-Its responsibility is to provide the learner experience.
+It guides learners through:
 
-It collects user input, communicates with the Runtime, and presents Runtime intelligence.
+- GitHub Learning Entry
+- Project creation
+- Reflection
+- Manual GitHub Snapshot
+- Runtime communication
+- Runtime result presentation
 
-It does not generate intelligence.
+The Landing owns the learner experience.
+
+The Runtime owns learning intelligence.
 
 ---
 
@@ -30,15 +35,17 @@ It does not generate intelligence.
 
 Repository
 
-```
+```text
 innermirror-landing
 ```
 
 Governance applies to:
 
-- presentation responsibilities
+- learner experience
+- project workflow
+- GitHub communication
 - Runtime communication
-- UI architecture
+- presentation architecture
 - repository boundaries
 - Foundation alignment
 
@@ -50,18 +57,55 @@ Every new Landing feature should comply with these governance rules.
 
 The Landing owns the following responsibilities.
 
-- Reflection Input
-- Reflection Editor
+## GitHub Learning
+
+- GitHub Learning Entry
 - GitHub Connection
 - Repository Selection
-- Runtime API Adapter
-- Runtime Response Mapping
-- UI State Management
+- Manual GitHub Snapshot Capture
+
+---
+
+## Project Workflow
+
+- Project Creation
+- Project Summary
+- Milestone Presentation
 - Progress Visualization
-- Portfolio Display
-- Coaching Presentation
-- Decision Review Presentation
-- Runtime Status Presentation
+
+---
+
+## Reflection Workflow
+
+- Reflection Input
+- Reflection Editor
+- Reflect + GitHub Analyze
+
+---
+
+## Runtime Communication
+
+- Runtime Contract submission
+- Runtime API Adapter
+- Runtime response mapping
+- Runtime loading state
+- Runtime error state
+
+---
+
+## Presentation
+
+- Coaching presentation
+- Decision Review presentation
+- Portfolio presentation
+
+---
+
+## Local State
+
+- temporary Reflection cache
+- offline recovery
+- local presentation state
 
 These responsibilities define the identity of the Landing.
 
@@ -72,33 +116,43 @@ These responsibilities define the identity of the Landing.
 The Landing does **not** own:
 
 - Reflection Analysis
-- Reflection Summary Generation
-- Runtime Question Generation
-- Continuity Intelligence
-- Decision Review Generation
-- PBL Coaching Generation
+- GitHub Snapshot interpretation
+- Runtime Context generation
+- Runtime Summary generation
+- Runtime Question generation
+- Runtime Coaching generation
+- Decision Review generation
 - Runtime Memory
-- Runtime Orchestration
-- Runtime Diagnostics
+- Continuity Intelligence
+- Runtime orchestration
+- Runtime diagnostics
+- proprietary AI reasoning
 
-These responsibilities belong to **innermirror-runtime-private**.
+These responsibilities belong exclusively to:
+
+```text
+innermirror-runtime-private
+```
 
 Landing should never gradually absorb Runtime intelligence.
 
 ---
 
-# Repository Relationship
+# Repository Relationships
 
-The Landing collaborates with the other repositories through stable contracts.
+The Landing collaborates with other repositories through stable Runtime Contracts.
+
+---
 
 ## fribot-learning
 
 Provides:
 
+- curriculum
 - educational structure
-- project context
-- roadmap
 - learning templates
+- educational documentation
+- roadmap
 
 Landing presents educational information.
 
@@ -110,36 +164,60 @@ It does not define educational policy.
 
 Provides:
 
+- Runtime Context
 - Reflection Analysis
-- Reflection Summary
-- Runtime Questions
+- GitHub interpretation
+- Summary
+- Question
+- Coaching
 - Decision Review
-- PBL Coaching
+- Runtime Memory
 - Continuity Intelligence
-- Runtime Memory Status
 
-Landing presents these Runtime results.
+Landing prepares Runtime input.
 
-It never generates them.
+Runtime generates learning intelligence.
+
+Landing presents Runtime output.
 
 ---
 
 ## fribot-flow-timeline
 
-Provides historical UX ideas and implementation history.
+Provides:
 
-Landing may reference previous UX concepts.
+- historical UX ideas
+- archived implementation
+- development history
 
-It should not depend on archived implementation.
+Landing may reference UX concepts.
+
+Landing should never depend on archived implementation.
 
 ---
 
 # Landing Architecture
 
-The Landing follows the architectural hierarchy below.
+The Landing follows the architecture below.
 
-```
-Reflection Input
+```text
+GitHub Learning Entry
+
+↓
+
+Project
+
+↓
+
+Reflection
+
+↓
+
+GitHub Snapshot
+
+↓
+
+Runtime Contract
 
 ↓
 
@@ -155,12 +233,12 @@ Presentation Components
 
 ↓
 
-User Experience
+Learner Experience
 ```
 
-Landing transforms Runtime responses into user experiences.
+Landing captures learning context.
 
-It does not interpret learner cognition.
+Runtime interprets learning context.
 
 ---
 
@@ -170,54 +248,77 @@ It does not interpret learner cognition.
 
 The Landing owns presentation.
 
-It never owns intelligence.
+The Runtime owns intelligence.
 
 ---
 
 ## Rule 2
 
-Every Landing component should have one primary responsibility.
+The Landing owns GitHub communication.
 
-Presentation components should remain presentation-focused.
+The Runtime owns GitHub interpretation.
+
+GitHub communication must never migrate into the Runtime.
 
 ---
 
 ## Rule 3
 
-Landing communicates with Runtime only through stable Runtime contracts.
+Reflection always belongs to a Project.
 
-Landing should never call internal Runtime modules directly.
+Reflection should never become an isolated workflow again.
 
 ---
 
 ## Rule 4
 
-Reflection Analysis belongs exclusively to the Runtime.
+GitHub Snapshot is always captured manually.
 
-Landing must never introduce:
+Official workflow:
 
-- Reflection Analysis
-- Decision Review generation
-- PBL Coaching generation
-- Runtime reasoning
+```text
+Reflect + GitHub Analyze
+
+↓
+
+Capture Snapshot
+
+↓
+
+Runtime
+```
+
+Automatic synchronization is prohibited during the MVP.
 
 ---
 
 ## Rule 5
 
-Educational content belongs to the Learning Platform.
+Landing communicates with Runtime only through Runtime Contracts.
 
-Landing may display educational information.
-
-It should not become responsible for educational policy.
+Landing must never call internal Runtime modules directly.
 
 ---
 
 ## Rule 6
 
+Landing must never generate:
+
+- Summary
+- Question
+- Coaching
+- Decision Review
+- Continuity Intelligence
+
+These belong to Runtime.
+
+---
+
+## Rule 7
+
 Presentation should remain independent.
 
-Changes to UI should not require Runtime modifications whenever possible.
+UI improvements should not require Runtime modifications whenever possible.
 
 ---
 
@@ -225,12 +326,13 @@ Changes to UI should not require Runtime modifications whenever possible.
 
 This document should be reviewed whenever:
 
-- presentation responsibilities change
-- Runtime API contracts change
+- Project workflow changes
+- Runtime Contract changes
+- GitHub integration changes
 - repository boundaries change
-- new UI architecture is introduced
+- new presentation architecture is introduced
 
-Routine UI implementation should not require changes to this document.
+Routine UI implementation should not require updates to this document.
 
 ---
 
@@ -241,6 +343,8 @@ This document complements:
 - REPOSITORY_BOUNDARY.md
 - LANDING_RESPONSIBILITY_AUDIT.md
 - LANDING_RESPONSIBILITY_MATRIX.md
+- PBL_PROJECT_DOMAIN_MODEL.md
+- GITHUB_SNAPSHOT_INTEGRATION.md
 
 These documents describe the Landing.
 
@@ -250,16 +354,16 @@ This document governs the Landing.
 
 # Foundation Principle
 
-The Landing exists to present.
+The Learning Platform provides education.
 
-The Runtime exists to understand.
+The Landing provides the Project-Based Learning experience.
 
-The Learning Platform exists to teach.
+GitHub provides development evidence.
 
-These responsibilities must remain independent regardless of how the Landing evolves.
+The Runtime provides learning intelligence.
 
-A beautiful interface is valuable.
+Projects organize learning.
 
-A well-governed architecture is sustainable.
+Reflection records learner thinking.
 
-The Landing should always prioritize architectural clarity over implementation convenience.
+Keeping these responsibilities independent preserves the architectural clarity, maintainability, and long-term evolution of the Fribot ecosystem.
