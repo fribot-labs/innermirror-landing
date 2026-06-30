@@ -31,8 +31,8 @@ export function ProjectStartPanel({
         <h2>Start a PBL coding project</h2>
 
         <p>
-          Create a learning project from the selected GitHub repository. This
-          project will connect Reflection, GitHub activity, and Runtime coaching.
+          Create a learning project from the selected GitHub repository. 
+          You can save your thinking, analyze project activity, or use both together.
         </p>
       </div>
 

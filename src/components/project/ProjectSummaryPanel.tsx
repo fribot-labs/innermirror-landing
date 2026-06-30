@@ -1,8 +1,8 @@
 import type { PblProject } from "../../types/pblProject";
 import {
-    countPblPullRequests,
-    countPblReflections,
-    getCurrentPblMilestone,
+  countPblPullRequests,
+  countPblReflections,
+  getCurrentPblMilestone,
 } from "../../types/pblProject";
 
 type ProjectSummaryPanelProps = {
@@ -39,7 +39,7 @@ export function ProjectSummaryPanel({
     <section className="project-summary-panel">
       <div className="project-summary-panel-header">
         <span className="project-summary-panel-eyebrow">
-          Active PBL Project
+          Current Project
         </span>
 
         <h2>{project.name}</h2>

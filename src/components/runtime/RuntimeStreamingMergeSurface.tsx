@@ -1,5 +1,5 @@
 import type {
-    RuntimeStreamingMergeEvent,
+  RuntimeStreamingMergeEvent,
 } from "../../types/runtimeStreamingMerge";
 
 type Props = {
@@ -28,7 +28,7 @@ export function RuntimeStreamingMergeSurface({
           <h2>
             {isMerging
               ? "InnerMirror가 흐름을 연결하고 있습니다."
-              : "Reflection 흐름이 갱신되었습니다."}
+              : "Project analysis completed."}
           </h2>
         </div>
       </div>

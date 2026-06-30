@@ -227,7 +227,7 @@ export function App() {
     resetSnapshot();
   };
 
-  const handleSubmit = async () => {
+  const handleReflect = async () => {
     const trimmedContent = content.trim();
 
     if (trimmedContent.length === 0) {
@@ -257,18 +257,8 @@ export function App() {
 
     setRuntimeV2Response(null);
 
-    let capturedSnapshot = null;
-
-    if (activeProject !== null) {
-      capturedSnapshot = await captureSnapshot({
-        owner: activeProject.repository.owner,
-        name: activeProject.repository.name,
-        defaultBranch: activeProject.repository.defaultBranch,
-      });
-    }
-
-    if (activeProject !== null && capturedSnapshot !== null) {
-      try {
+    try {
+      if (activeProject !== null) {
         const payload = createRuntimeContractV2Payload({
           reflectionText: trimmedContent,
 
@@ -284,32 +274,20 @@ export function App() {
             defaultBranch: activeProject.repository.defaultBranch,
           },
 
-          githubSnapshot: capturedSnapshot,
-
           learningContext: {
             currentStep,
             learnerLevel: "junior",
           },
+
+          trigger: "reflection",
         });
 
         const runtimeResponse = await analyzeRuntimeV2(payload);
 
         setRuntimeV2Response(runtimeResponse);
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : "Runtime V2 request failed.";
-
-        if (message.includes("GitHub session expired")) {
-          setGithubConnectionState("disconnected");
-          setSelectedRepository(null);
-          setActiveProject(null);
-          resetSnapshot();
-        }
-
-        console.error("Runtime V2 request failed.", error);
       }
+    } catch (error) {
+      console.error("Runtime V2 reflection request failed.", error);
     }
 
     await submitReflection(trimmedContent);
@@ -322,6 +300,78 @@ export function App() {
       void startMerge({
         content: trimmedContent,
       });
+    }
+  };
+
+  const handleGitHubAnalyze = async () => {
+    if (activeProject === null) {
+      return;
+    }
+
+    resetMerge();
+    setRuntimeV2Response(null);
+
+    let capturedSnapshot = null;
+
+    try {
+      capturedSnapshot = await captureSnapshot({
+        owner: activeProject.repository.owner,
+        name: activeProject.repository.name,
+        defaultBranch: activeProject.repository.defaultBranch,
+      });
+
+      if (capturedSnapshot === null) {
+        return;
+      }
+
+      const trimmedContent = content.trim();
+
+      const payload = createRuntimeContractV2Payload({
+        reflectionText:
+          trimmedContent.length > 0 ? trimmedContent : undefined,
+
+        project: {
+          projectId: activeProject.id,
+          name: activeProject.name,
+          currentStep,
+        },
+
+        repository: {
+          owner: activeProject.repository.owner,
+          name: activeProject.repository.name,
+          defaultBranch: activeProject.repository.defaultBranch,
+        },
+
+        githubSnapshot: capturedSnapshot,
+
+        learningContext: {
+          currentStep,
+          learnerLevel: "junior",
+        },
+
+        trigger:
+          trimmedContent.length > 0
+            ? "combined"
+            : "github-snapshot",
+      });
+
+      const runtimeResponse = await analyzeRuntimeV2(payload);
+
+      setRuntimeV2Response(runtimeResponse);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "GitHub Analyze request failed.";
+
+      if (message.includes("GitHub session expired")) {
+        setGithubConnectionState("disconnected");
+        setSelectedRepository(null);
+        setActiveProject(null);
+        resetSnapshot();
+      }
+
+      console.error("GitHub Analyze request failed.", error);
     }
   };
 
@@ -401,22 +451,34 @@ export function App() {
       <textarea
         value={content}
         onChange={(event) => setContent(event.target.value)}
-        placeholder="Describe your recent development decision or learning..."
+        placeholder="Describe your thinking (optional)"
       />
 
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={
-          isLoading ||
-          activeProject === null ||
-          githubConnectionState !== "connected"
-        }
-      >
-        {isLoading
-          ? "Analyzing..."
-          : "Reflect + GitHub Analyze"}
-      </button>
+      <div className="runtime-action-row">
+        <button
+          type="button"
+          onClick={handleReflect}
+          disabled={
+            isLoading ||
+            content.trim().length === 0 ||
+            activeProject === null
+          }
+        >
+          {isLoading ? "Analyzing..." : "Save Thought"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleGitHubAnalyze}
+          disabled={
+            isLoading ||
+            activeProject === null ||
+            githubConnectionState !== "connected"
+          }
+        >
+          {isLoading ? "Analyzing..." : "Project Analyze"}
+        </button>
+      </div>
 
       <ImmediateReflectionFeedback data={immediateFeedback} />
 
@@ -430,7 +492,7 @@ export function App() {
       {isLoading ? <RuntimeLoadingState /> : null}
 
       {error !== null && runtimeUxMode.mode !== "local-only" ? (
-        <RuntimeErrorState error={error} onRetry={handleSubmit} />
+        <RuntimeErrorState error={error} onRetry={handleReflect} />
       ) : null}
 
       {runtimeV2Response !== null ? (

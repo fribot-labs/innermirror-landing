@@ -14,14 +14,14 @@ export function GitHubSnapshotPanel({
       <section className="github-snapshot-panel github-snapshot-panel-idle">
         <div className="github-snapshot-panel-header">
           <span className="github-snapshot-panel-eyebrow">
-            GitHub Snapshot
+            Project Snapshot
           </span>
 
-          <h2>No GitHub snapshot yet</h2>
+          <h2>No Project snapshot yet</h2>
 
           <p>
-            Press <b>Reflect + GitHub Analyze</b> to manually capture recent
-            commits and pull requests for Runtime analysis.
+            Press <b>Project Analyze</b> to manually capture recent commits and pull
+            requests for Runtime analysis. Reflection is optional.
           </p>
         </div>
       </section>
@@ -33,14 +33,14 @@ export function GitHubSnapshotPanel({
       <section className="github-snapshot-panel github-snapshot-panel-loading">
         <div className="github-snapshot-panel-header">
           <span className="github-snapshot-panel-eyebrow">
-            GitHub Snapshot
+            Project Snapshot
           </span>
 
-          <h2>Capturing GitHub snapshot...</h2>
+          <h2>Capturing Project snapshot...</h2>
 
           <p>
-            Collecting the latest 10 commits and 3 pull requests from the
-            selected repository.
+            Collecting the latest 10 commits and 3 pull requests from the selected
+            repository for project-aware Runtime analysis.
           </p>
         </div>
       </section>
@@ -52,7 +52,7 @@ export function GitHubSnapshotPanel({
       <section className="github-snapshot-panel github-snapshot-panel-error">
         <div className="github-snapshot-panel-header">
           <span className="github-snapshot-panel-eyebrow">
-            GitHub Snapshot
+            Project Snapshot
           </span>
 
           <h2>Snapshot capture failed</h2>
@@ -71,7 +71,7 @@ export function GitHubSnapshotPanel({
     <section className="github-snapshot-panel">
       <div className="github-snapshot-panel-header">
         <span className="github-snapshot-panel-eyebrow">
-          GitHub Snapshot
+          Project Snapshot
         </span>
 
         <h2>
@@ -79,7 +79,7 @@ export function GitHubSnapshotPanel({
         </h2>
 
         <p>
-          Manually captured for <b>Reflect + GitHub Analyze</b>.
+          Manually captured through <b>Project Analyze</b>.
         </p>
 
         <small>

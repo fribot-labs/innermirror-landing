@@ -19,8 +19,7 @@ export function RuntimeV2ResultPanel({
         <h2>Project-aware Runtime analysis</h2>
 
         <p>
-          Runtime V2 analyzed the current Reflection together with Project
-          context and GitHub Snapshot.
+          Runtime analyzed your project using the information available for this analysis.
         </p>
 
         <div className="runtime-v2-result-panel-meta">
