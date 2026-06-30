@@ -17,10 +17,13 @@ import { RuntimeFailureRecoveryNotice } from "../components/runtime/RuntimeFailu
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
 import { RuntimeMemoryTimeline } from "../components/runtime/RuntimeMemoryTimeline";
 import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStreamingMergeSurface";
+import { RuntimeV2ResultPanel } from "../components/runtime/RuntimeV2ResultPanel";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
+import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
+import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
 import { resolveRuntimeFailureRecovery } from "../runtime-adapter/resolveRuntimeFailureRecovery";
 import { resolveRuntimeUxMode } from "../runtime-adapter/resolveRuntimeUxMode";
@@ -39,14 +42,12 @@ import type {
   GitHubConnectionState,
   GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
-import type {
-  GitHubSnapshotRepository,
-} from "../types/githubSnapshot";
 import {
   addPblReflection,
   createPblProject,
   type PblProject,
 } from "../types/pblProject";
+import type { RuntimeContractV2Response } from "../types/runtimeContractV2";
 
 export function App() {
   const [content, setContent] = useState("");
@@ -76,6 +77,9 @@ export function App() {
 
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
+
+  const [runtimeV2Response, setRuntimeV2Response] =
+    useState<RuntimeContractV2Response | null>(null);
 
   const {
     snapshotState,
@@ -223,17 +227,54 @@ export function App() {
     }
 
     resetMerge();
+
+    setRuntimeV2Response(null);
+
+    let capturedSnapshot = null;
+
     if (activeProject !== null) {
-      await captureSnapshot({
+      capturedSnapshot = await captureSnapshot({
         owner: activeProject.repository.owner,
         name: activeProject.repository.name,
-        defaultBranch:
-          activeProject.repository.defaultBranch,
-      } satisfies GitHubSnapshotRepository);
+        defaultBranch: activeProject.repository.defaultBranch,
+      });
     }
-    
-    await submitReflection(trimmedContent);
 
+    if (activeProject !== null && capturedSnapshot !== null) {
+      try {
+        const payload = createRuntimeContractV2Payload({
+          reflectionText: trimmedContent,
+
+          project: {
+            projectId: activeProject.id,
+            name: activeProject.name,
+            currentStep,
+          },
+
+          repository: {
+            owner: activeProject.repository.owner,
+            name: activeProject.repository.name,
+            defaultBranch: activeProject.repository.defaultBranch,
+          },
+
+          githubSnapshot: capturedSnapshot,
+
+          learningContext: {
+            currentStep,
+            learnerLevel: "junior",
+          },
+        });
+
+        const runtimeResponse = await analyzeRuntimeV2(payload);
+
+        setRuntimeV2Response(runtimeResponse);
+      } catch (error) {
+        console.error("Runtime V2 request failed.", error);
+      }
+    }
+
+    await submitReflection(trimmedContent);
+    
     window.setTimeout(() => {
       void serverMemoryTimeline.refresh();
     }, 800);
@@ -339,6 +380,12 @@ export function App() {
 
       {error !== null && runtimeUxMode.mode !== "local-only" ? (
         <RuntimeErrorState error={error} onRetry={handleSubmit} />
+      ) : null}
+
+      {runtimeV2Response !== null ? (
+        <RuntimeV2ResultPanel
+          response={runtimeV2Response}
+        />
       ) : null}
 
       {result !== null ? (

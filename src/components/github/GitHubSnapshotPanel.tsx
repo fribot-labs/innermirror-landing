@@ -108,8 +108,11 @@ export function GitHubSnapshotPanel({
         <h3>Recent commits</h3>
 
         <ol className="github-snapshot-panel-list">
-          {snapshot.recentCommits.map((commit) => (
-            <li key={commit.sha} className="github-snapshot-panel-list-item">
+          {snapshot.recentCommits.map((commit, index) => (
+            <li
+              key={`${commit.sha}-${index}`}
+              className="github-snapshot-panel-list-item"
+            >
               <div>
                 <strong>{commit.message}</strong>
 
@@ -130,9 +133,9 @@ export function GitHubSnapshotPanel({
         <h3>Recent pull requests</h3>
 
         <ol className="github-snapshot-panel-list">
-          {snapshot.recentPullRequests.map((pullRequest) => (
+          {snapshot.recentPullRequests.map((pullRequest, index) => (
             <li
-              key={pullRequest.id}
+              key={`${pullRequest.id}-${index}`}
               className="github-snapshot-panel-list-item"
             >
               <div>

@@ -3,20 +3,19 @@
   "version": "0.1.0",
   "private": false,
   "type": "module",
-
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "check:boundary": "node scripts/check-public-boundary.mjs"
   },
-
   "dependencies": {
+    "cors": "^2.8.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
-
   "devDependencies": {
+    "@types/cors": "^2.8.19",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^5.0.0",
