@@ -69,7 +69,15 @@ export function useGitHubRepositories({
         );
       }
 
-      setRepositories(result.data.repositories);
+      const sortedRepositories =
+          [...result.data.repositories].sort(
+              (a, b) =>
+                  new Date(b.updatedAt ?? 0).getTime() -
+                  new Date(a.updatedAt ?? 0).getTime()
+          );
+
+      setRepositories(sortedRepositories);
+
     } catch (error) {
       setRepositories([]);
 
