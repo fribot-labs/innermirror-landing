@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
 import {
-    createEmptyGitHubSnapshotState,
-    type GitHubSnapshotRepository,
-    type GitHubSnapshotState,
+  createEmptyGitHubSnapshotState,
+  type GitHubSnapshotRepository,
+  type GitHubSnapshotState,
 } from "../types/githubSnapshot";
-import { createMockGitHubSnapshot } from "./createMockGitHubSnapshot";
+import { fetchGitHubSnapshot } from "./fetchGitHubSnapshot";
 
 /**
  * Manual GitHub Snapshot Hook
@@ -36,7 +36,7 @@ export function useGitHubSnapshot() {
       });
 
       try {
-        const snapshot = await captureMockSnapshot(repository);
+        const snapshot = await fetchGitHubSnapshot(repository);
 
         setSnapshotState({
           status: "ready",
@@ -72,18 +72,4 @@ export function useGitHubSnapshot() {
     captureSnapshot,
     resetSnapshot,
   };
-}
-
-async function captureMockSnapshot(
-  repository: GitHubSnapshotRepository
-) {
-  await wait(500);
-
-  return createMockGitHubSnapshot(repository);
-}
-
-function wait(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => {
-    window.setTimeout(resolve, milliseconds);
-  });
 }

@@ -53,6 +53,20 @@ export function useGitHubRepositories({
 
       const response = await fetch(url.toString());
 
+      if (response.status === 401) {
+        window.localStorage.removeItem(
+          "innermirror.githubSessionId"
+        );
+
+        setRepositories([]);
+
+        setError(
+          "GitHub session expired. Please connect GitHub again."
+        );
+
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(
           `GitHub repositories request failed (${response.status}).`
@@ -69,15 +83,13 @@ export function useGitHubRepositories({
         );
       }
 
-      const sortedRepositories =
-          [...result.data.repositories].sort(
-              (a, b) =>
-                  new Date(b.updatedAt ?? 0).getTime() -
-                  new Date(a.updatedAt ?? 0).getTime()
-          );
+      const sortedRepositories = [...result.data.repositories].sort(
+        (a, b) =>
+          new Date(b.updatedAt ?? 0).getTime() -
+          new Date(a.updatedAt ?? 0).getTime()
+      );
 
       setRepositories(sortedRepositories);
-
     } catch (error) {
       setRepositories([]);
 
