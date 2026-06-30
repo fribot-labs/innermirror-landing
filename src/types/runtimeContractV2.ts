@@ -10,6 +10,15 @@ import type { GitHubSnapshot } from "./githubSnapshot";
  */
 
 /* ------------------------------------------------------------------ */
+/* Execution */
+/* ------------------------------------------------------------------ */
+
+export type RuntimeExecutionTrigger =
+  | "reflection"
+  | "github-snapshot"
+  | "combined";
+
+/* ------------------------------------------------------------------ */
 /* Reflection */
 /* ------------------------------------------------------------------ */
 
@@ -54,15 +63,17 @@ export type RuntimeLearningContext = {
 /* ------------------------------------------------------------------ */
 
 export type RuntimeContractV2Input = {
-  reflection: RuntimeReflection;
+  reflection?: RuntimeReflection;
 
   project: RuntimeProjectContext;
 
   repository: RuntimeRepositoryContext;
 
-  githubSnapshot: GitHubSnapshot;
+  githubSnapshot?: GitHubSnapshot;
 
   learningContext: RuntimeLearningContext;
+
+  trigger?: RuntimeExecutionTrigger;
 };
 
 /* ------------------------------------------------------------------ */

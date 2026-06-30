@@ -1850,6 +1850,17 @@ h1 {
   line-height: 1.5;
 }
 
+.runtime-action-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.runtime-action-row button {
+  flex: 1;
+  min-width: 180px;
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;
