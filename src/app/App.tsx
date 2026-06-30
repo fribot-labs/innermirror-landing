@@ -21,6 +21,7 @@ import { RuntimeV2ResultPanel } from "../components/runtime/RuntimeV2ResultPanel
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
+import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -55,18 +56,14 @@ export function App() {
   const [githubConnectionState, setGithubConnectionState] =
     useState<GitHubConnectionState>("disconnected");
 
-  const [repositories] = useState<GitHubRepositorySummary[]>([
-    {
-      owner: "fribot-labs",
-      name: "innermirror-landing",
-      defaultBranch: "main",
-    },
-    {
-      owner: "fribot-labs",
-      name: "innermirror-runtime-private",
-      defaultBranch: "main",
-    },
-  ]);
+  const {
+    repositories,
+    isLoading: isLoadingRepositories,
+    error: repositoryError,
+    refresh: refreshRepositories,
+  } = useGitHubRepositories({
+    enabled: githubConnectionState === "connected",
+  });
 
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
@@ -138,6 +135,24 @@ export function App() {
   });
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const githubSessionId = params.get("githubSessionId");
+
+    if (githubSessionId === null) {
+      return;
+    }
+
+    window.localStorage.setItem(
+      "innermirror.githubSessionId",
+      githubSessionId
+    );
+
+    setGithubConnectionState("connected");
+
+    window.history.replaceState({}, "", "/");
+  }, []);
+
+  useEffect(() => {
     if (
       runtimeUxMode.canUseMemoryTimeline &&
       offlineSyncRecovery.lastSyncedAt !== null
@@ -173,11 +188,8 @@ export function App() {
   const identityDriftSurfaceData = createIdentityDriftSurfaceData(result);
 
   const handleConnectGitHub = () => {
-    setGithubConnectionState("connecting");
-
-    window.setTimeout(() => {
-      setGithubConnectionState("connected");
-    }, 800);
+    window.location.href =
+      "http://localhost:4000/github/oauth/start";
   };
 
   const handleStartProject = () => {
@@ -300,6 +312,18 @@ export function App() {
         selectedRepository={selectedRepository}
         onSelectRepository={setSelectedRepository}
       />
+
+      {isLoadingRepositories ? (
+        <div className="github-repository-status">
+          Loading GitHub repositories...
+        </div>
+      ) : null}
+
+      {repositoryError !== null ? (
+        <div className="github-repository-status github-repository-status-error">
+          {repositoryError}
+        </div>
+      ) : null}
 
       <ProjectStartPanel
         selectedRepository={selectedRepository}
