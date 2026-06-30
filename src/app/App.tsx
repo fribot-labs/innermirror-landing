@@ -153,6 +153,21 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    if (repositoryError === null) {
+      return;
+    }
+
+    if (!repositoryError.includes("GitHub session expired")) {
+      return;
+    }
+
+    setGithubConnectionState("disconnected");
+    setSelectedRepository(null);
+    setActiveProject(null);
+    resetSnapshot();
+  }, [repositoryError, resetSnapshot]);
+
+  useEffect(() => {
     if (
       runtimeUxMode.canUseMemoryTimeline &&
       offlineSyncRecovery.lastSyncedAt !== null
@@ -281,6 +296,18 @@ export function App() {
 
         setRuntimeV2Response(runtimeResponse);
       } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Runtime V2 request failed.";
+
+        if (message.includes("GitHub session expired")) {
+          setGithubConnectionState("disconnected");
+          setSelectedRepository(null);
+          setActiveProject(null);
+          resetSnapshot();
+        }
+
         console.error("Runtime V2 request failed.", error);
       }
     }
