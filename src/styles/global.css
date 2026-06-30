@@ -1316,6 +1316,127 @@ h1 {
   margin-bottom: 0.35rem;
 }
 
+.repository-selector-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.repository-selector-search {
+  display: grid;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.repository-selector-search span {
+  color: #93c5fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-selector-search input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.repository-selector-summary {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.repository-selector-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.repository-selector-badge {
+  border-radius: 999px;
+  padding: 0.18rem 0.42rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-selector-badge-private {
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #facc15;
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.repository-selector-badge-public {
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.repository-selector-updated-at {
+  color: #94a3b8;
+}
+
+.repository-selector-empty-search {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.repository-selector-selected-label {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 0.45rem;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  background: rgba(37, 99, 235, 0.18);
+  color: #93c5fd;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.repository-selector-card-selected {
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(37, 99, 235, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.28);
+}
+
+.repository-selector-name-group {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.repository-selector-name-group strong {
+  color: #f8fafc;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.repository-selector-name-group span {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.repository-selector-meta {
+  display: block;
+  margin-top: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
 .project-start-panel {
   margin-bottom: 2rem;
   color: #f8fafc;

@@ -26,6 +26,11 @@ export type GitHubRepositorySummary = {
   owner: string;
   name: string;
   defaultBranch?: string;
+
+  fullName?: string;
+  private?: boolean;
+  htmlUrl?: string;
+  updatedAt?: string;
 };
 
 /**

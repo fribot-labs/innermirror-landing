@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
 
 type RepositorySelectorProps = {
@@ -11,7 +12,28 @@ export function RepositorySelector({
   selectedRepository,
   onSelectRepository,
 }: RepositorySelectorProps) {
-  const hasRepositories = repositories.length > 0;
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredRepositories = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (normalizedQuery.length === 0) {
+      return repositories;
+    }
+
+    return repositories.filter((repository) => {
+      const searchableText = [
+        repository.owner,
+        repository.name,
+        repository.fullName,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    });
+  }, [repositories, searchQuery]);
 
   return (
     <section className="repository-selector">
@@ -28,32 +50,84 @@ export function RepositorySelector({
         </p>
       </div>
 
-      {hasRepositories ? (
+      {repositories.length > 0 ? (
+        <div className="repository-selector-toolbar">
+          <label className="repository-selector-search">
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Search repositories..."
+            />
+          </label>
+
+          <div className="repository-selector-summary">
+            {searchQuery.trim().length > 0 ? (
+                <div className="repository-selector-summary">
+                    Showing {filteredRepositories.length} of {repositories.length}
+                </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {repositories.length === 0 ? (
+        <div className="repository-selector-empty">
+          <strong>No repositories available</strong>
+
+          <p>
+            Connect GitHub first. Repository selection will be available after
+            GitHub is connected.
+          </p>
+        </div>
+      ) : filteredRepositories.length === 0 ? (
+        <div className="repository-selector-empty-search">
+          <strong>No repositories match this search.</strong>
+
+          <p>Try another repository name or owner.</p>
+        </div>
+      ) : (
         <div className="repository-selector-list">
-          {repositories.map((repository) => {
-            const repositoryKey = `${repository.owner}/${repository.name}`;
+          {filteredRepositories.map((repository) => {
             const isSelected =
               selectedRepository?.owner === repository.owner &&
               selectedRepository?.name === repository.name;
 
             return (
               <button
-                key={repositoryKey}
+                key={`${repository.owner}/${repository.name}`}
                 className={
                   isSelected
-                    ? "repository-selector-item repository-selector-item-selected"
-                    : "repository-selector-item"
+                    ? "repository-selector-card repository-selector-card-selected"
+                    : "repository-selector-card"
                 }
                 type="button"
                 onClick={() => onSelectRepository(repository)}
               >
-                <span className="repository-selector-name">
-                  {repository.owner}/{repository.name}
-                </span>
+                <div className="repository-selector-card-main">
+                  <div className="repository-selector-name-group">
+                    <strong>{repository.name}</strong>
+                    <span>{repository.owner}</span>
+                  </div>
 
-                <span className="repository-selector-branch">
-                  Default branch: {repository.defaultBranch ?? "main"}
-                </span>
+                  <span
+                    className={
+                      repository.private
+                        ? "repository-selector-badge repository-selector-badge-private"
+                        : "repository-selector-badge repository-selector-badge-public"
+                    }
+                  >
+                    {repository.private ? "Private" : "Public"}
+                  </span>
+                </div>
+
+                <small className="repository-selector-meta">
+                  {repository.defaultBranch ?? "main"}
+
+                  {repository.updatedAt
+                    ? ` · ${formatRepositoryDate(repository.updatedAt)}`
+                    : ""}
+                </small>
 
                 {isSelected ? (
                   <span className="repository-selector-selected-label">
@@ -64,16 +138,14 @@ export function RepositorySelector({
             );
           })}
         </div>
-      ) : (
-        <div className="repository-selector-empty">
-          <strong>No repositories available</strong>
-
-          <p>
-            Connect GitHub first. Repository selection will be available after
-            GitHub is connected.
-          </p>
-        </div>
       )}
     </section>
   );
+}
+
+function formatRepositoryDate(value: string) {
+  return new Intl.DateTimeFormat("en", {
+    month: "short",
+    day: "numeric",
+  }).format(new Date(value));
 }
