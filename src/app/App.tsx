@@ -10,6 +10,7 @@ import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
 import { LocalReflectionPersistenceNotice } from "../components/runtime/LocalReflectionPersistenceNotice";
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { OfflineSyncRecoveryPanel } from "../components/runtime/OfflineSyncRecoveryPanel";
+import { ProjectAnalysisMemoryTimeline } from "../components/runtime/ProjectAnalysisMemoryTimeline";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
@@ -35,6 +36,7 @@ import { useRuntimeStreamingMerge } from "../runtime-adapter/useRuntimeStreaming
 import { useServerRuntimeMemoryTimeline } from "../runtime-adapter/useServerRuntimeMemoryTimeline";
 import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
+import { useProjectAnalysisMemory } from "../runtime-local/useProjectAnalysisMemory";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
@@ -128,6 +130,8 @@ export function App() {
     clearLocalReflectionMemory,
     refreshLocalReflectionMemory,
   } = useLocalReflectionPersistence();
+
+  const projectAnalysisMemory = useProjectAnalysisMemory();
 
   const offlineSyncRecovery = useOfflineSyncRecovery({
     runtimeUxMode,
@@ -358,6 +362,45 @@ export function App() {
       const runtimeResponse = await analyzeRuntimeV2(payload);
 
       setRuntimeV2Response(runtimeResponse);
+
+      projectAnalysisMemory.saveEvent({
+        id: crypto.randomUUID(),
+
+        source:
+          trimmedContent.length > 0
+            ? "combined"
+            : "project",
+
+        title:
+          trimmedContent.length > 0
+            ? "Thought and project analyzed"
+            : "Project analyzed",
+
+        summary: runtimeResponse.data.summary.text,
+
+        projectName: activeProject.name,
+
+        repositoryName:
+          `${activeProject.repository.owner}/${activeProject.repository.name}`,
+
+        commitCount:
+          capturedSnapshot.recentCommits.length,
+
+        pullRequestCount:
+          capturedSnapshot.recentPullRequests.length,
+
+        createdAt: new Date().toISOString(),
+
+        tags:
+          trimmedContent.length > 0
+            ? ["thought", "project", "github"]
+            : ["project", "github"],
+      });
+
+      if (trimmedContent.length > 0) {
+        setContent("");
+      }
+      
     } catch (error) {
       const message =
         error instanceof Error
@@ -525,6 +568,11 @@ export function App() {
           ) : null}
         </>
       ) : null}
+
+      <ProjectAnalysisMemoryTimeline
+          events={projectAnalysisMemory.events}
+          onClear={projectAnalysisMemory.clearEvents}
+      />
 
       {runtimeUxMode.canUseMemoryTimeline ? (
         <>
