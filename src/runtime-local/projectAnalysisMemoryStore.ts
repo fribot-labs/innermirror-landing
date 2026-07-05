@@ -28,7 +28,11 @@ export function saveProjectAnalysisMemoryEvent(
 ): ProjectAnalysisMemoryEvent[] {
   const currentEvents = readProjectAnalysisMemoryEvents();
 
-  const nextEvents = [event, ...currentEvents].slice(0, 30);
+  const deduplicatedEvents = currentEvents.filter(
+    (currentEvent) => !isDuplicateProjectAnalysisEvent(currentEvent, event)
+  );
+
+  const nextEvents = [event, ...deduplicatedEvents].slice(0, 20);
 
   window.localStorage.setItem(
     PROJECT_ANALYSIS_MEMORY_KEY,
@@ -36,6 +40,38 @@ export function saveProjectAnalysisMemoryEvent(
   );
 
   return nextEvents;
+}
+
+function isDuplicateProjectAnalysisEvent(
+  currentEvent: ProjectAnalysisMemoryEvent,
+  nextEvent: ProjectAnalysisMemoryEvent
+): boolean {
+  if (currentEvent.source !== nextEvent.source) {
+    return false;
+  }
+
+  if (currentEvent.repositoryName !== nextEvent.repositoryName) {
+    return false;
+  }
+
+  if (currentEvent.commitCount !== nextEvent.commitCount) {
+    return false;
+  }
+
+  if (currentEvent.pullRequestCount !== nextEvent.pullRequestCount) {
+    return false;
+  }
+
+  if (currentEvent.summary !== nextEvent.summary) {
+    return false;
+  }
+
+  const currentTime = new Date(currentEvent.createdAt).getTime();
+  const nextTime = new Date(nextEvent.createdAt).getTime();
+
+  const diff = Math.abs(nextTime - currentTime);
+
+  return diff < 5 * 60 * 1000;
 }
 
 export function clearProjectAnalysisMemoryEvents() {

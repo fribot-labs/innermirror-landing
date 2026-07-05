@@ -23,8 +23,8 @@ export function ProjectSummaryPanel({
           <h2>No active PBL project</h2>
 
           <p>
-            Start a project from a GitHub repository to connect Reflection,
-            Pull Requests, and Runtime coaching.
+            Start a project from a GitHub repository to save your thinking,
+            analyze project activity, and receive Runtime coaching.
           </p>
         </div>
       </section>
@@ -45,8 +45,8 @@ export function ProjectSummaryPanel({
         <h2>{project.name}</h2>
 
         <p>
-          This project connects GitHub development activity, Reflection, and
-          Runtime coaching.
+          This project connects your thinking, project activity, and Runtime 
+          coaching.
         </p>
       </div>
 
@@ -64,7 +64,7 @@ export function ProjectSummaryPanel({
         </div>
 
         <div className="project-summary-panel-card">
-          <span>Current milestone</span>
+          <span>Current Focus</span>
 
           <strong>
             {currentMilestone?.title ?? "No milestone selected"}
