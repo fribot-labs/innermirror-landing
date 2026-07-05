@@ -31,8 +31,8 @@ export function ProjectStartPanel({
         <h2>Start a PBL coding project</h2>
 
         <p>
-          Create a learning project from the selected GitHub repository. 
-          You can save your thinking, analyze project activity, or use both together.
+          Create a learning project from the selected GitHub repository. You can
+          save your thinking, analyze project activity, or use both together.
         </p>
       </div>
 
@@ -60,13 +60,13 @@ export function ProjectStartPanel({
           </div>
 
           <label className="project-start-panel-field">
-            <span>Current learning step</span>
+            <span>Current Focus</span>
 
             <input
               type="text"
               value={currentStep}
               onChange={(event) => onChangeCurrentStep(event.target.value)}
-              placeholder="Example: PR-006 Project Domain Model"
+              placeholder="What are you focusing on now?"
             />
           </label>
 
@@ -84,18 +84,19 @@ export function ProjectStartPanel({
       {project !== null ? (
         <div className="project-start-panel-result">
           <span className="project-start-panel-result-label">
-            Active project
+            Current project
           </span>
 
           <strong>{project.name}</strong>
 
           <p>
-            Current milestone:{" "}
-            <b>{currentMilestone?.title ?? "No milestone selected"}</b>
+            Current Focus:{" "}
+            <b>{currentMilestone?.title ?? "No focus selected"}</b>
           </p>
 
           <p>
-            Completion: <b>{project.completionRate}%</b>
+              Project Progress:
+              <b>{project.completionRate}%</b>
           </p>
 
           <small>

@@ -71,7 +71,7 @@ export function App() {
     useState<GitHubRepositorySummary | null>(null);
 
   const [currentStep, setCurrentStep] = useState(
-    "PR-006 Project Domain Model"
+    "Project Timeline UX Stabilization"
   );
 
   const [activeProject, setActiveProject] =

@@ -1,4 +1,8 @@
+import { useState } from "react";
 import type { ProjectAnalysisMemoryEvent } from "../../types/projectAnalysisMemory";
+
+const DEFAULT_VISIBLE_EVENT_COUNT = 5;
+const SUMMARY_MAX_LENGTH = 280;
 
 type ProjectAnalysisMemoryTimelineProps = {
   events: ProjectAnalysisMemoryEvent[];
@@ -9,9 +13,20 @@ export function ProjectAnalysisMemoryTimeline({
   events,
   onClear,
 }: ProjectAnalysisMemoryTimelineProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
   if (events.length === 0) {
     return null;
   }
+
+  const visibleEvents = isExpanded
+    ? events
+    : events.slice(0, DEFAULT_VISIBLE_EVENT_COUNT);
+
+  const hiddenEventCount = Math.max(
+    0,
+    events.length - visibleEvents.length
+  );
 
   return (
     <section className="project-analysis-memory-timeline">
@@ -19,25 +34,31 @@ export function ProjectAnalysisMemoryTimeline({
         <div>
           <span>Project Timeline</span>
           <h2>프로젝트 흐름</h2>
-          <p>Project Analyze로 기록된 프로젝트 활동 흐름입니다.</p>
+          <p>Project Analyze로 생성된 프로젝트 활동 기록입니다.</p>
         </div>
 
         <button type="button" onClick={onClear}>
-          모두 지우기
+          Clear project timeline
         </button>
       </div>
 
       <div className="project-analysis-memory-timeline-list">
-        {events.map((event) => (
+        {visibleEvents.map((event) => (
           <article
             key={event.id}
             className="project-analysis-memory-timeline-item"
           >
-            <span>{formatRelativeTime(event.createdAt)}</span>
+            <div className="project-analysis-memory-meta-row">
+              <span>{formatRelativeTime(event.createdAt)}</span>
+
+              <span className="project-analysis-memory-source">
+                {formatSourceLabel(event.source)}
+              </span>
+            </div>
 
             <h3>{event.title}</h3>
 
-            <p>{event.summary}</p>
+            <p>{truncateText(event.summary, SUMMARY_MAX_LENGTH)}</p>
 
             {event.repositoryName ? (
               <small>{event.repositoryName}</small>
@@ -59,6 +80,26 @@ export function ProjectAnalysisMemoryTimeline({
           </article>
         ))}
       </div>
+
+      {hiddenEventCount > 0 ? (
+        <button
+          type="button"
+          className="project-analysis-memory-expand-button"
+          onClick={() => setIsExpanded(true)}
+        >
+          Show {hiddenEventCount} more project events
+        </button>
+      ) : null}
+
+      {isExpanded && events.length > DEFAULT_VISIBLE_EVENT_COUNT ? (
+        <button
+          type="button"
+          className="project-analysis-memory-expand-button"
+          onClick={() => setIsExpanded(false)}
+        >
+          Show fewer project events
+        </button>
+      ) : null}
     </section>
   );
 }
@@ -84,4 +125,26 @@ function formatRelativeTime(value: string): string {
   const days = Math.floor(hours / 24);
 
   return `${days}일 전`;
+}
+
+function formatSourceLabel(
+  source: ProjectAnalysisMemoryEvent["source"]
+): string {
+  if (source === "combined") {
+    return "Thought + Project";
+  }
+
+  if (source === "project") {
+    return "Project";
+  }
+
+  return "Thought";
+}
+
+function truncateText(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, maxLength).trim()}...`;
 }
