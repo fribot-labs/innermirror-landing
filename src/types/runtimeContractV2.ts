@@ -92,10 +92,21 @@ export type RuntimeQuestion = {
   reason: string;
 };
 
+export type RuntimeCoachingMode =
+  | "reflection-needed"
+  | "project-review"
+  | "evolution-review"
+  | "next-implementation"
+  | "stabilization";
+
 export type RuntimeCoaching = {
   nextAction: string;
   rationale: string;
   suggestedFocus: string;
+
+  mode?: RuntimeCoachingMode;
+  adaptiveReason?: string;
+  confidence?: "low" | "medium" | "high";
 };
 
 export type RuntimeDecisionReview = {

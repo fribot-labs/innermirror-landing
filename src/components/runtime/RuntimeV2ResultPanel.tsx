@@ -1,4 +1,7 @@
-import type { RuntimeContractV2Response } from "../../types/runtimeContractV2";
+import type {
+  RuntimeCoaching,
+  RuntimeContractV2Response,
+} from "../../types/runtimeContractV2";
 
 type RuntimeV2ResultPanelProps = {
   response: RuntimeContractV2Response;
@@ -46,10 +49,14 @@ export function RuntimeV2ResultPanel({
         />
 
         <RuntimeV2ResultCard
-          title="Coaching"
+          title="Adaptive Coaching"
           label={data.coaching.suggestedFocus}
           body={data.coaching.nextAction}
-          footer={data.coaching.rationale}
+          footer={[
+            `Mode: ${formatCoachingMode(data.coaching.mode)}`,
+            `Reason: ${data.coaching.adaptiveReason ?? data.coaching.rationale}`,
+            `Confidence: ${data.coaching.confidence ?? "low"}`,
+          ]}
         />
 
         <RuntimeV2ResultCard
@@ -139,4 +146,30 @@ function formatDateTime(value: string): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
+}
+
+function formatCoachingMode(
+  mode: RuntimeCoaching["mode"]
+): string {
+  if (mode === "reflection-needed") {
+    return "Reflection needed";
+  }
+
+  if (mode === "project-review") {
+    return "Project review";
+  }
+
+  if (mode === "evolution-review") {
+    return "Evolution review";
+  }
+
+  if (mode === "next-implementation") {
+    return "Next implementation";
+  }
+
+  if (mode === "stabilization") {
+    return "Stabilization";
+  }
+
+  return "General coaching";
 }
