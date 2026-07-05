@@ -11,6 +11,7 @@ import { LocalReflectionPersistenceNotice } from "../components/runtime/LocalRef
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { OfflineSyncRecoveryPanel } from "../components/runtime/OfflineSyncRecoveryPanel";
 import { ProjectAnalysisMemoryTimeline } from "../components/runtime/ProjectAnalysisMemoryTimeline";
+import { ProjectContinuitySurface } from "../components/runtime/ProjectContinuitySurface";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
@@ -39,6 +40,7 @@ import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery"
 import { useProjectAnalysisMemory } from "../runtime-local/useProjectAnalysisMemory";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
+import { createProjectContinuityInsight } from "../runtime/createProjectContinuityInsight";
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
 import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
 import type {
@@ -132,6 +134,9 @@ export function App() {
   } = useLocalReflectionPersistence();
 
   const projectAnalysisMemory = useProjectAnalysisMemory();
+
+  const projectContinuityInsight =
+    createProjectContinuityInsight(projectAnalysisMemory.events);
 
   const offlineSyncRecovery = useOfflineSyncRecovery({
     runtimeUxMode,
@@ -568,6 +573,8 @@ export function App() {
           ) : null}
         </>
       ) : null}
+
+      <ProjectContinuitySurface insight={projectContinuityInsight} />
 
       <ProjectAnalysisMemoryTimeline
           events={projectAnalysisMemory.events}
