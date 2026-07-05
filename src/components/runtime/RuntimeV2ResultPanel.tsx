@@ -9,6 +9,8 @@ export function RuntimeV2ResultPanel({
 }: RuntimeV2ResultPanelProps) {
   const { meta, data } = response;
 
+  const result = response.data;
+
   return (
     <section className="runtime-v2-result-panel">
       <div className="runtime-v2-result-panel-header">
@@ -61,6 +63,37 @@ export function RuntimeV2ResultPanel({
           ]}
         />
       </div>
+
+      {data.projectEvolution ? (
+        <section className="runtime-v2-project-evolution">
+          <span>Project Evolution</span>
+
+          <h3>{data.projectEvolution.title}</h3>
+
+          <p>{data.projectEvolution.summary}</p>
+
+          {data.projectEvolution.shift ? (
+            <p>
+              <strong>Shift:</strong> {data.projectEvolution.shift}
+            </p>
+          ) : null}
+
+          {data.projectEvolution.evidence.length > 0 ? (
+            <ul>
+              {data.projectEvolution.evidence.map((item: string) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          {data.projectEvolution.suggestedNextFocus ? (
+            <p>
+              <strong>Suggested next focus:</strong>{" "}
+              {data.projectEvolution.suggestedNextFocus}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }

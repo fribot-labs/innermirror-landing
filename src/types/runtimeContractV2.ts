@@ -73,6 +73,8 @@ export type RuntimeContractV2Input = {
 
   learningContext: RuntimeLearningContext;
 
+  projectHistory?: RuntimeProjectHistory;
+
   trigger?: RuntimeExecutionTrigger;
 };
 
@@ -104,6 +106,33 @@ export type RuntimeDecisionReview = {
 };
 
 /* ------------------------------------------------------------------ */
+/* Project Response */
+/* ------------------------------------------------------------------ */
+
+export type RuntimeProjectHistoryEvent = {
+  source: "project" | "combined" | "thought";
+  title: string;
+  summary: string;
+  repositoryName?: string;
+  commitCount?: number;
+  pullRequestCount?: number;
+  tags: string[];
+  createdAt: string;
+};
+
+export type RuntimeProjectHistory = {
+  events: RuntimeProjectHistoryEvent[];
+};
+
+export type RuntimeProjectEvolution = {
+  title: string;
+  summary: string;
+  shift?: string;
+  evidence: string[];
+  suggestedNextFocus?: string;
+};
+
+/* ------------------------------------------------------------------ */
 /* Runtime Response */
 /* ------------------------------------------------------------------ */
 
@@ -123,6 +152,8 @@ export type RuntimeContractV2Output = {
   coaching: RuntimeCoaching;
 
   decisionReview: RuntimeDecisionReview;
+
+  projectEvolution?: RuntimeProjectEvolution;
 };
 
 export type RuntimeContractV2Response = {

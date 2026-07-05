@@ -2149,6 +2149,38 @@ h1 {
   min-width: 180px;
 }
 
+.runtime-v2-project-evolution {
+  margin-top: 1rem;
+  border: 1px solid rgba(125, 211, 252, 0.24);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(8, 47, 73, 0.36);
+}
+
+.runtime-v2-project-evolution > span {
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runtime-v2-project-evolution h3 {
+  margin: 0.35rem 0;
+  color: #f8fafc;
+}
+
+.runtime-v2-project-evolution p {
+  color: #dbeafe;
+  line-height: 1.55;
+}
+
+.runtime-v2-project-evolution ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+  color: #cbd5e1;
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;

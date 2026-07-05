@@ -363,6 +363,19 @@ export function App() {
           learnerLevel: "junior",
         },
 
+        projectHistory: {
+          events: projectAnalysisMemory.events.slice(0, 5).map((event) => ({
+            source: event.source,
+            title: event.title,
+            summary: event.summary,
+            repositoryName: event.repositoryName,
+            commitCount: event.commitCount,
+            pullRequestCount: event.pullRequestCount,
+            tags: event.tags,
+            createdAt: event.createdAt,
+          })),
+        },
+
         trigger:
           trimmedContent.length > 0
             ? "combined"

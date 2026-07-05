@@ -4,6 +4,7 @@ import type {
   RuntimeExecutionTrigger,
   RuntimeLearningContext,
   RuntimeProjectContext,
+  RuntimeProjectHistory,
   RuntimeReflection,
   RuntimeRepositoryContext,
 } from "../types/runtimeContractV2";
@@ -32,6 +33,8 @@ export type CreateRuntimeContractV2PayloadOptions = {
 
   learningContext?: RuntimeLearningContext;
 
+  projectHistory?: RuntimeProjectHistory;
+
   trigger?: RuntimeExecutionTrigger;
 };
 
@@ -51,7 +54,7 @@ export function createRuntimeContractV2Payload(
         }
       : undefined;
 
-  return {
+  const payload: RuntimeContractV2Input = {
     ...(reflection ? { reflection } : {}),
 
     project: options.project,
@@ -79,4 +82,10 @@ export function createRuntimeContractV2Payload(
 
     trigger: options.trigger,
   };
+
+  if (options.projectHistory !== undefined) {
+    payload.projectHistory = options.projectHistory;
+  }
+
+  return payload;
 }
