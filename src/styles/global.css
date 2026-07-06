@@ -2413,6 +2413,111 @@ h1 {
   color: #dcfce7;
 }
 
+.knowledge-compression-ratio {
+  margin-top: 0.85rem;
+  border: 1px solid rgba(134, 239, 172, 0.18);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: rgba(15, 23, 42, 0.36);
+}
+
+.knowledge-compression-ratio span {
+  display: block;
+  color: #86efac;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.knowledge-compression-ratio strong {
+  display: block;
+  margin-top: 0.25rem;
+  color: #f0fdf4;
+}
+
+.project-identity-panel {
+  margin-top: 1rem;
+  border: 1px solid rgba(14, 165, 233, 0.32);
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(12, 74, 110, 0.24);
+}
+
+.project-identity-panel-header > span {
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-identity-panel-header h3 {
+  margin: 0.35rem 0;
+  color: #e0f2fe;
+}
+
+.project-identity-panel-header p {
+  margin: 0;
+  color: #bae6fd;
+  line-height: 1.55;
+}
+
+.project-identity-panel-statement {
+  margin-top: 1rem;
+  border: 1px solid rgba(125, 211, 252, 0.22);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: rgba(15, 23, 42, 0.44);
+}
+
+.project-identity-panel-statement span,
+.project-identity-panel-grid span {
+  display: block;
+  color: #7dd3fc;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-identity-panel-statement strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #f0f9ff;
+}
+
+.project-identity-panel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+}
+
+.project-identity-panel-grid div {
+  border: 1px solid rgba(125, 211, 252, 0.18);
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.project-identity-panel-grid strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: #f0f9ff;
+}
+
+.project-identity-panel ul {
+  margin: 0.85rem 0 0;
+  padding-left: 1.25rem;
+  color: #bae6fd;
+}
+
+.project-identity-panel-action {
+  margin-top: 1rem;
+  color: #e0f2fe;
+}
+
 @keyframes runtimePulse {
   0% {
     opacity: 0.3;
@@ -2462,6 +2567,10 @@ h1 {
   }
 
   .runtime-v2-decision-evolution-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-identity-panel-grid {
     grid-template-columns: 1fr;
   }
 }

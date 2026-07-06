@@ -162,6 +162,7 @@ export type RuntimeContractV2Output = {
   projectEvolution?: RuntimeProjectEvolution;
   decisionEvolution?: RuntimeDecisionEvolution;
   knowledgeCompression?: RuntimeKnowledgeCompression;
+  projectIdentity?: RuntimeProjectIdentity;
 };
 
 export type RuntimeContractV2Response = {
@@ -203,4 +204,23 @@ export type RuntimeKnowledgeCompression = {
   compressionRatio: string;
   concepts: RuntimeCompressedConcept[];
   suggestedReflection?: string;
+};
+
+export type RuntimeProjectIdentityStage =
+  | "implementation-building"
+  | "ux-stabilization"
+  | "runtime-intelligence-building"
+  | "knowledge-compression"
+  | "project-structure-formation"
+  | "early-formation"
+  | "unclear";
+
+export type RuntimeProjectIdentity = {
+  title: string;
+  summary: string;
+  stage: RuntimeProjectIdentityStage;
+  confidence: "low" | "medium" | "high";
+  identitySignals: string[];
+  identityStatement: string;
+  suggestedNextIdentityAction?: string;
 };

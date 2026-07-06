@@ -16,7 +16,12 @@ export function KnowledgeCompressionPanel({
 
         <p>{knowledgeCompression.summary}</p>
 
-        <small>{knowledgeCompression.compressionRatio}</small>
+        <div className="knowledge-compression-ratio">
+          <span>Compression Ratio</span>
+          <strong>
+            {formatCompressionRatio(knowledgeCompression.compressionRatio)}
+          </strong>
+        </div>
       </div>
 
       {knowledgeCompression.concepts.length > 0 ? (
@@ -54,4 +59,8 @@ export function KnowledgeCompressionPanel({
       ) : null}
     </section>
   );
+}
+
+function formatCompressionRatio(value: string): string {
+  return value.replace("sources", "records");
 }
