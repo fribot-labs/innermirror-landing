@@ -1,6 +1,7 @@
 import type {
   RuntimeCoaching,
   RuntimeContractV2Response,
+  RuntimeDecisionEvolution,
 } from "../../types/runtimeContractV2";
 
 type RuntimeV2ResultPanelProps = {
@@ -101,6 +102,54 @@ export function RuntimeV2ResultPanel({
           ) : null}
         </section>
       ) : null}
+
+      {data.decisionEvolution ? (
+        <section className="runtime-v2-decision-evolution">
+          <span>Decision Evolution</span>
+
+          <h3>{data.decisionEvolution.title}</h3>
+
+          <p>{data.decisionEvolution.summary}</p>
+
+          {data.decisionEvolution.shift ? (
+            <p>
+              <strong>Shift:</strong> {data.decisionEvolution.shift}
+            </p>
+          ) : null}
+
+          <div className="runtime-v2-decision-evolution-grid">
+            <div>
+              <span>Previous Decision Style</span>
+              <strong>{formatDecisionStage(data.decisionEvolution.earlierStage)}</strong>
+            </div>
+
+            <div>
+              <span>Current Decision Style</span>
+              <strong>{formatDecisionStage(data.decisionEvolution.recentStage)}</strong>
+            </div>
+
+            <div>
+              <span>Emerging Decision Style</span>
+              <strong>{formatDecisionStage(data.decisionEvolution.currentStage)}</strong>
+            </div>
+          </div>
+
+          {data.decisionEvolution.evidence.length > 0 ? (
+            <ul>
+              {data.decisionEvolution.evidence.map((item: string) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : null}
+
+          {data.decisionEvolution.suggestedReflection ? (
+            <p>
+              <strong>Suggested reflection:</strong>{" "}
+              {data.decisionEvolution.suggestedReflection}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }
@@ -172,4 +221,26 @@ function formatCoachingMode(
   }
 
   return "General coaching";
+}
+
+function formatDecisionStage(
+  stage: RuntimeDecisionEvolution["currentStage"]
+): string {
+  if (stage === "implementation-centered") {
+    return "Implementation-centered";
+  }
+
+  if (stage === "structure-centered") {
+    return "Structure-centered";
+  }
+
+  if (stage === "user-experience-centered") {
+    return "User experience-centered";
+  }
+
+  if (stage === "runtime-intelligence-centered") {
+    return "Runtime intelligence-centered";
+  }
+
+  return "Unclear";
 }
