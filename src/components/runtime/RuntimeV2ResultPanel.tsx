@@ -5,6 +5,7 @@ import type {
 } from "../../types/runtimeContractV2";
 import { DecisionLandscape } from "./DecisionLandscape";
 import { KnowledgeCompressionPanel } from "./KnowledgeCompressionPanel";
+import { ProjectIdentityPanel } from "./ProjectIdentityPanel";
 
 type RuntimeV2ResultPanelProps = {
   response: RuntimeContractV2Response;
@@ -160,6 +161,12 @@ export function RuntimeV2ResultPanel({
           </section>
 
           <DecisionLandscape decisionEvolution={data.decisionEvolution} />
+
+          {data.projectIdentity ? (
+            <ProjectIdentityPanel
+              projectIdentity={data.projectIdentity}
+            />
+          ) : null}
 
           {data.knowledgeCompression ? (
             <KnowledgeCompressionPanel
