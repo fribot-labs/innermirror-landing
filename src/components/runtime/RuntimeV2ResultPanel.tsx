@@ -3,6 +3,7 @@ import type {
   RuntimeContractV2Response,
   RuntimeDecisionEvolution,
 } from "../../types/runtimeContractV2";
+import { DecisionLandscape } from "./DecisionLandscape";
 
 type RuntimeV2ResultPanelProps = {
   response: RuntimeContractV2Response;
@@ -104,51 +105,61 @@ export function RuntimeV2ResultPanel({
       ) : null}
 
       {data.decisionEvolution ? (
-        <section className="runtime-v2-decision-evolution">
-          <span>Decision Evolution</span>
+        <>
+          <section className="runtime-v2-decision-evolution">
+            <span>Decision Evolution</span>
 
-          <h3>{data.decisionEvolution.title}</h3>
+            <h3>{data.decisionEvolution.title}</h3>
 
-          <p>{data.decisionEvolution.summary}</p>
+            <p>{data.decisionEvolution.summary}</p>
 
-          {data.decisionEvolution.shift ? (
-            <p>
-              <strong>Shift:</strong> {data.decisionEvolution.shift}
-            </p>
-          ) : null}
+            {data.decisionEvolution.shift ? (
+              <p>
+                <strong>Shift:</strong> {data.decisionEvolution.shift}
+              </p>
+            ) : null}
 
-          <div className="runtime-v2-decision-evolution-grid">
-            <div>
-              <span>Previous Decision Style</span>
-              <strong>{formatDecisionStage(data.decisionEvolution.earlierStage)}</strong>
+            <div className="runtime-v2-decision-evolution-grid">
+              <div>
+                <span>Previous Decision Style</span>
+                <strong>
+                  {formatDecisionStage(data.decisionEvolution.earlierStage)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Current Decision Style</span>
+                <strong>
+                  {formatDecisionStage(data.decisionEvolution.recentStage)}
+                </strong>
+              </div>
+
+              <div>
+                <span>Emerging Decision Style</span>
+                <strong>
+                  {formatDecisionStage(data.decisionEvolution.currentStage)}
+                </strong>
+              </div>
             </div>
 
-            <div>
-              <span>Current Decision Style</span>
-              <strong>{formatDecisionStage(data.decisionEvolution.recentStage)}</strong>
-            </div>
+            {data.decisionEvolution.evidence.length > 0 ? (
+              <ul>
+                {data.decisionEvolution.evidence.map((item: string) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
 
-            <div>
-              <span>Emerging Decision Style</span>
-              <strong>{formatDecisionStage(data.decisionEvolution.currentStage)}</strong>
-            </div>
-          </div>
+            {data.decisionEvolution.suggestedReflection ? (
+              <p>
+                <strong>Suggested reflection:</strong>{" "}
+                {data.decisionEvolution.suggestedReflection}
+              </p>
+            ) : null}
+          </section>
 
-          {data.decisionEvolution.evidence.length > 0 ? (
-            <ul>
-              {data.decisionEvolution.evidence.map((item: string) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
-
-          {data.decisionEvolution.suggestedReflection ? (
-            <p>
-              <strong>Suggested reflection:</strong>{" "}
-              {data.decisionEvolution.suggestedReflection}
-            </p>
-          ) : null}
-        </section>
+          <DecisionLandscape decisionEvolution={data.decisionEvolution} />
+        </>
       ) : null}
     </section>
   );
