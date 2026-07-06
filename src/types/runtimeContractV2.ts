@@ -155,16 +155,12 @@ export type RuntimeResponseMeta = {
 
 export type RuntimeContractV2Output = {
   version: string;
-
   summary: RuntimeSummary;
-
   question: RuntimeQuestion;
-
   coaching: RuntimeCoaching;
-
   decisionReview: RuntimeDecisionReview;
-
   projectEvolution?: RuntimeProjectEvolution;
+  decisionEvolution?: RuntimeDecisionEvolution;
 };
 
 export type RuntimeContractV2Response = {
@@ -173,4 +169,22 @@ export type RuntimeContractV2Response = {
   meta: RuntimeResponseMeta;
 
   data: RuntimeContractV2Output;
+};
+
+export type RuntimeDecisionEvolutionStage =
+  | "implementation-centered"
+  | "structure-centered"
+  | "user-experience-centered"
+  | "runtime-intelligence-centered"
+  | "unclear";
+
+export type RuntimeDecisionEvolution = {
+  title: string;
+  summary: string;
+  earlierStage: RuntimeDecisionEvolutionStage;
+  recentStage: RuntimeDecisionEvolutionStage;
+  currentStage: RuntimeDecisionEvolutionStage;
+  shift?: string;
+  evidence: string[];
+  suggestedReflection?: string;
 };
