@@ -161,6 +161,7 @@ export type RuntimeContractV2Output = {
   decisionReview: RuntimeDecisionReview;
   projectEvolution?: RuntimeProjectEvolution;
   decisionEvolution?: RuntimeDecisionEvolution;
+  knowledgeCompression?: RuntimeKnowledgeCompression;
 };
 
 export type RuntimeContractV2Response = {
@@ -186,5 +187,20 @@ export type RuntimeDecisionEvolution = {
   currentStage: RuntimeDecisionEvolutionStage;
   shift?: string;
   evidence: string[];
+  suggestedReflection?: string;
+};
+
+export type RuntimeCompressedConcept = {
+  concept: string;
+  weight: number;
+  sourceCount: number;
+  evidence: string[];
+};
+
+export type RuntimeKnowledgeCompression = {
+  title: string;
+  summary: string;
+  compressionRatio: string;
+  concepts: RuntimeCompressedConcept[];
   suggestedReflection?: string;
 };
