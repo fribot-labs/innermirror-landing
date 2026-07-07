@@ -233,4 +233,15 @@ export type RuntimeInsightSynthesis = {
   supportingSignals: string[];
   recommendedFocus: string;
   confidence: "low" | "medium" | "high";
+  strategyRecommendation?: RuntimeStrategyRecommendation;
+};
+
+export type RuntimeStrategyRecommendation = {
+  title: string;
+  summary: string;
+  recommendedPrDirection: string;
+  recommendedNextPrs: string[];
+  rationale: string;
+  priority: "low" | "medium" | "high";
+  confidence: "low" | "medium" | "high";
 };
