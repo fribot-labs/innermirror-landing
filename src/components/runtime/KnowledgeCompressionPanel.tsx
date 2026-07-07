@@ -1,4 +1,7 @@
-import type { RuntimeKnowledgeCompression } from "../../types/runtimeContractV2";
+import type {
+  RuntimeCompressedConcept,
+  RuntimeKnowledgeCompression,
+} from "../../types/runtimeContractV2";
 
 type KnowledgeCompressionPanelProps = {
   knowledgeCompression: RuntimeKnowledgeCompression;
@@ -16,11 +19,55 @@ export function KnowledgeCompressionPanel({
 
         <p>{knowledgeCompression.summary}</p>
 
-        <div className="knowledge-compression-ratio">
-          <span>Compression Ratio</span>
-          <strong>
-            {formatCompressionRatio(knowledgeCompression.compressionRatio)}
-          </strong>
+        {knowledgeCompression.semanticSummary ? (
+          <div className="knowledge-compression-semantic-summary">
+            <span>Semantic Summary</span>
+
+            <strong>{knowledgeCompression.semanticSummary}</strong>
+          </div>
+        ) : null}
+
+        {knowledgeCompression.dominantConcept ||
+        knowledgeCompression.growingConcept ? (
+          <div className="knowledge-compression-key-concepts">
+            {knowledgeCompression.dominantConcept ? (
+              <div>
+                <span>Dominant Concept</span>
+
+                <strong>{knowledgeCompression.dominantConcept}</strong>
+              </div>
+            ) : null}
+
+            {knowledgeCompression.growingConcept ? (
+              <div>
+                <span>Growing Concept</span>
+
+                <strong>{knowledgeCompression.growingConcept}</strong>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+
+        <div className="knowledge-compression-overview-grid">
+          <div className="knowledge-compression-ratio">
+            <span>Compression Ratio</span>
+
+            <strong>
+              {formatCompressionRatio(
+                knowledgeCompression.compressionRatio
+              )}
+            </strong>
+          </div>
+
+          {knowledgeCompression.compressionQuality ? (
+            <div className="knowledge-compression-quality">
+              <span>Compression Quality</span>
+
+              <strong>
+                {knowledgeCompression.compressionQuality}
+              </strong>
+            </div>
+          ) : null}
         </div>
       </div>
 
@@ -33,8 +80,27 @@ export function KnowledgeCompressionPanel({
             >
               <div>
                 <span>{concept.concept}</span>
-                <strong>{concept.weight}</strong>
+
+                <strong>{concept.weight}%</strong>
               </div>
+
+              {concept.semanticRole || concept.trend ? (
+                <small>
+                  {concept.semanticRole
+                    ? `Role: ${formatConceptRole(
+                        concept.semanticRole
+                      )}`
+                    : ""}
+
+                  {concept.semanticRole && concept.trend
+                    ? " · "
+                    : ""}
+
+                  {concept.trend
+                    ? `Trend: ${formatConceptTrend(concept.trend)}`
+                    : ""}
+                </small>
+              ) : null}
 
               <div className="knowledge-compression-bar">
                 <div
@@ -43,9 +109,13 @@ export function KnowledgeCompressionPanel({
                 />
               </div>
 
-              <small>
-                {concept.sourceCount} source records
-              </small>
+              <small>{concept.sourceCount} source records</small>
+
+              {concept.explanation ? (
+                <p className="knowledge-compression-concept-explanation">
+                  {concept.explanation}
+                </p>
+              ) : null}
             </article>
           ))}
         </div>
@@ -63,4 +133,44 @@ export function KnowledgeCompressionPanel({
 
 function formatCompressionRatio(value: string): string {
   return value.replace("sources", "records");
+}
+
+function formatConceptRole(
+  role: RuntimeCompressedConcept["semanticRole"]
+): string {
+  if (role === "dominant") {
+    return "Dominant";
+  }
+
+  if (role === "growing") {
+    return "Growing";
+  }
+
+  if (role === "stabilizing") {
+    return "Stabilizing";
+  }
+
+  if (role === "declining") {
+    return "Declining";
+  }
+
+  return "Emerging";
+}
+
+function formatConceptTrend(
+  trend: RuntimeCompressedConcept["trend"]
+): string {
+  if (trend === "rising") {
+    return "Rising";
+  }
+
+  if (trend === "stable") {
+    return "Stable";
+  }
+
+  if (trend === "falling") {
+    return "Falling";
+  }
+
+  return "Early";
 }
