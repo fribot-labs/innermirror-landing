@@ -192,11 +192,28 @@ export type RuntimeDecisionEvolution = {
   suggestedReflection?: string;
 };
 
+export type RuntimeCompressedConceptRole =
+  | "dominant"
+  | "growing"
+  | "stabilizing"
+  | "declining"
+  | "emerging";
+
+export type RuntimeCompressedConceptTrend =
+  | "rising"
+  | "stable"
+  | "falling"
+  | "early";
+
 export type RuntimeCompressedConcept = {
   concept: string;
   weight: number;
   sourceCount: number;
   evidence: string[];
+
+  semanticRole?: RuntimeCompressedConceptRole;
+  trend?: RuntimeCompressedConceptTrend;
+  explanation?: string;
 };
 
 export type RuntimeKnowledgeCompression = {
@@ -205,6 +222,11 @@ export type RuntimeKnowledgeCompression = {
   compressionRatio: string;
   concepts: RuntimeCompressedConcept[];
   suggestedReflection?: string;
+
+  dominantConcept?: string;
+  growingConcept?: string;
+  compressionQuality?: "low" | "medium" | "high";
+  semanticSummary?: string;
 };
 
 export type RuntimeProjectIdentityStage =
