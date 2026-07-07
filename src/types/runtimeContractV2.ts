@@ -161,8 +161,9 @@ export type RuntimeContractV2Output = {
   decisionReview: RuntimeDecisionReview;
   projectEvolution?: RuntimeProjectEvolution;
   decisionEvolution?: RuntimeDecisionEvolution;
-  knowledgeCompression?: RuntimeKnowledgeCompression;
   projectIdentity?: RuntimeProjectIdentity;
+  knowledgeCompression?: RuntimeKnowledgeCompression;
+  insightSynthesis?: RuntimeInsightSynthesis;
 };
 
 export type RuntimeContractV2Response = {
@@ -223,4 +224,13 @@ export type RuntimeProjectIdentity = {
   identitySignals: string[];
   identityStatement: string;
   suggestedNextIdentityAction?: string;
+};
+
+export type RuntimeInsightSynthesis = {
+  title: string;
+  summary: string;
+  primaryInsight: string;
+  supportingSignals: string[];
+  recommendedFocus: string;
+  confidence: "low" | "medium" | "high";
 };
