@@ -6,6 +6,7 @@ import type {
 import { DecisionLandscape } from "./DecisionLandscape";
 import { KnowledgeCompressionPanel } from "./KnowledgeCompressionPanel";
 import { ProjectIdentityPanel } from "./ProjectIdentityPanel";
+import { RuntimeInsightSynthesisPanel } from "./RuntimeInsightSynthesisPanel";
 
 type RuntimeV2ResultPanelProps = {
   response: RuntimeContractV2Response;
@@ -74,6 +75,12 @@ export function RuntimeV2ResultPanel({
           ]}
         />
       </div>
+
+      {data.insightSynthesis ? (
+        <RuntimeInsightSynthesisPanel
+          insight={data.insightSynthesis}
+        />
+      ) : null}
 
       {data.projectEvolution ? (
         <section className="runtime-v2-project-evolution">
