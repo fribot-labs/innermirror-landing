@@ -1,4 +1,7 @@
-import type { RuntimeProjectIdentity } from "../../types/runtimeContractV2";
+import type {
+  RuntimeProjectIdentity,
+  RuntimeSemanticConceptRelationship,
+} from "../../types/runtimeContractV2";
 
 type ProjectIdentityPanelProps = {
   projectIdentity: RuntimeProjectIdentity;
@@ -33,6 +36,69 @@ export function ProjectIdentityPanel({
           <strong>{projectIdentity.confidence}</strong>
         </div>
       </div>
+
+      {projectIdentity.identityEvolution ? (
+        <div className="project-identity-evolution">
+          <span>Identity Evolution</span>
+
+          <p>{projectIdentity.identityEvolution.transitionSummary}</p>
+
+          <div className="project-identity-evolution-grid">
+            <div>
+              <span>Previous Identity</span>
+              <strong>
+                {projectIdentity.identityEvolution.previousIdentity}
+              </strong>
+            </div>
+
+            <div>
+              <span>Current Identity</span>
+              <strong>
+                {projectIdentity.identityEvolution.currentIdentity}
+              </strong>
+            </div>
+
+            <div>
+              <span>Emerging Identity</span>
+              <strong>
+                {projectIdentity.identityEvolution.emergingIdentity}
+              </strong>
+            </div>
+          </div>
+
+          {projectIdentity.identityEvolution.evidence.length > 0 ? (
+            <ul>
+              {projectIdentity.identityEvolution.evidence.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+
+      {projectIdentity.semanticRelationships &&
+      projectIdentity.semanticRelationships.length > 0 ? (
+        <div className="project-identity-relationships">
+          <span>Semantic Relationships</span>
+
+          <div className="project-identity-relationship-list">
+            {projectIdentity.semanticRelationships.map((relationship) => (
+              <article
+                key={`${relationship.from}-${relationship.to}`}
+                className="project-identity-relationship-card"
+              >
+                <strong>
+                  {relationship.from} → {relationship.to}
+                </strong>
+
+                <small>{formatRelationshipType(relationship.relationship)}</small>
+
+                <p>{relationship.explanation}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {projectIdentity.identitySignals.length > 0 ? (
         <ul>
@@ -110,4 +176,22 @@ function formatCurrentIdentity(
   }
 
   return "Identity Still Unclear";
+}
+
+function formatRelationshipType(
+  relationship: RuntimeSemanticConceptRelationship["relationship"]
+): string {
+  if (relationship === "supports") {
+    return "Supports";
+  }
+
+  if (relationship === "extends") {
+    return "Extends";
+  }
+
+  if (relationship === "stabilizes") {
+    return "Stabilizes";
+  }
+
+  return "Transitions to";
 }

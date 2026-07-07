@@ -246,6 +246,8 @@ export type RuntimeProjectIdentity = {
   identitySignals: string[];
   identityStatement: string;
   suggestedNextIdentityAction?: string;
+  semanticRelationships?: RuntimeSemanticConceptRelationship[];
+  identityEvolution?: RuntimeProjectIdentityEvolution;
 };
 
 export type RuntimeInsightSynthesis = {
@@ -266,4 +268,19 @@ export type RuntimeStrategyRecommendation = {
   rationale: string;
   priority: "low" | "medium" | "high";
   confidence: "low" | "medium" | "high";
+};
+
+export type RuntimeSemanticConceptRelationship = {
+  from: string;
+  to: string;
+  relationship: "supports" | "extends" | "stabilizes" | "transitions-to";
+  explanation: string;
+};
+
+export type RuntimeProjectIdentityEvolution = {
+  previousIdentity: string;
+  currentIdentity: string;
+  emergingIdentity: string;
+  transitionSummary: string;
+  evidence: string[];
 };
