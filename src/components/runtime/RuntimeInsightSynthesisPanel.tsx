@@ -34,6 +34,31 @@ export function RuntimeInsightSynthesisPanel({
         </div>
       </div>
 
+      {insight.strategyRecommendation ? (
+        <div className="runtime-insight-strategy">
+          <span>Recommended Strategy</span>
+
+          <strong>
+            {insight.strategyRecommendation.recommendedPrDirection}
+          </strong>
+
+          <p>{insight.strategyRecommendation.summary}</p>
+
+          {insight.strategyRecommendation.recommendedNextPrs.length > 0 ? (
+            <ol>
+              {insight.strategyRecommendation.recommendedNextPrs.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ol>
+          ) : null}
+
+          <small>
+            Priority: {insight.strategyRecommendation.priority} · Confidence:{" "}
+            {insight.strategyRecommendation.confidence}
+          </small>
+        </div>
+      ) : null}
+
       {insight.supportingSignals.length > 0 ? (
         <ul>
           {insight.supportingSignals.map((signal) => (

@@ -2318,6 +2318,52 @@ h1 {
   color: #fde68a;
 }
 
+.runtime-insight-strategy {
+  margin-top: 1rem;
+  border: 1px solid rgba(251, 191, 36, 0.22);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.runtime-insight-strategy > span {
+  display: block;
+  color: #fde68a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runtime-insight-strategy strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #fffbeb;
+  line-height: 1.5;
+}
+
+.runtime-insight-strategy p {
+  margin: 0.65rem 0 0;
+  color: #fde68a;
+  line-height: 1.5;
+}
+
+.runtime-insight-strategy ol {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+  color: #fde68a;
+}
+
+.runtime-insight-strategy li + li {
+  margin-top: 0.35rem;
+}
+
+.runtime-insight-strategy small {
+  display: block;
+  margin-top: 0.75rem;
+  color: #fef3c7;
+}
+
 .decision-landscape {
   margin-top: 1rem;
   border: 1px solid rgba(168, 85, 247, 0.28);
