@@ -2364,6 +2364,79 @@ h1 {
   color: #fef3c7;
 }
 
+.runtime-insight-refinement {
+  margin-top: 1rem;
+  border: 1px solid rgba(250, 204, 21, 0.18);
+  border-radius: 14px;
+  padding: 0.95rem;
+  background: rgba(15, 23, 42, 0.34);
+}
+
+.runtime-insight-refinement > span,
+.runtime-insight-risk > span,
+.runtime-insight-next-interpretation > span,
+.runtime-insight-supporting-card > span {
+  display: block;
+  color: #fde68a;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runtime-insight-refinement h4 {
+  margin: 0.5rem 0 0.8rem;
+  color: #fef9c3;
+}
+
+.runtime-insight-supporting-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.runtime-insight-supporting-card,
+.runtime-insight-risk,
+.runtime-insight-next-interpretation {
+  border: 1px solid rgba(250, 204, 21, 0.14);
+  border-radius: 12px;
+  padding: 0.8rem;
+  background: rgba(2, 6, 23, 0.28);
+}
+
+.runtime-insight-supporting-card strong,
+.runtime-insight-risk strong,
+.runtime-insight-next-interpretation strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #fefce8;
+  line-height: 1.45;
+}
+
+.runtime-insight-supporting-card p,
+.runtime-insight-risk p {
+  color: #fef3c7;
+  line-height: 1.5;
+}
+
+.runtime-insight-supporting-card small,
+.runtime-insight-risk small {
+  display: block;
+  margin-top: 0.45rem;
+  color: #fde68a;
+  font-weight: 700;
+}
+
+.runtime-insight-supporting-card ul {
+  margin: 0.65rem 0 0;
+  padding-left: 1.25rem;
+  color: #fef3c7;
+}
+
+.runtime-insight-risk,
+.runtime-insight-next-interpretation {
+  margin-top: 0.85rem;
+}
+
 .decision-landscape {
   margin-top: 1rem;
   border: 1px solid rgba(168, 85, 247, 0.28);

@@ -250,6 +250,34 @@ export type RuntimeProjectIdentity = {
   identityEvolution?: RuntimeProjectIdentityEvolution;
 };
 
+export type RuntimeSupportingInsight = {
+  title: string;
+  summary: string;
+  source:
+    | "signals"
+    | "project-evolution"
+    | "decision-evolution"
+    | "project-identity"
+    | "knowledge-compression"
+    | "strategy";
+  confidence: "low" | "medium" | "high";
+  evidence: string[];
+};
+
+export type RuntimeInsightRisk = {
+  title: string;
+  summary: string;
+  severity: "low" | "medium" | "high";
+};
+
+export type RuntimeInsightRefinement = {
+  primaryInsight: string;
+  supportingInsights: RuntimeSupportingInsight[];
+  evidence: string[];
+  risk?: RuntimeInsightRisk;
+  nextInterpretation: string;
+};
+
 export type RuntimeInsightSynthesis = {
   title: string;
   summary: string;
@@ -258,6 +286,8 @@ export type RuntimeInsightSynthesis = {
   recommendedFocus: string;
   confidence: "low" | "medium" | "high";
   strategyRecommendation?: RuntimeStrategyRecommendation;
+
+  refinement?: RuntimeInsightRefinement;
 };
 
 export type RuntimeStrategyRecommendation = {
