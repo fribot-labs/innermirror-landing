@@ -14,125 +14,212 @@ export function RuntimeInsightSynthesisPanel({
     return null;
   }
 
-  return (
-    <section className="runtime-insight-synthesis-panel">
-      <div className="runtime-insight-synthesis-header">
-        <span>Runtime Insight</span>
+  const topEvidence = getTopEvidence(insight);
+  const nextInterpretation =
+    insight.refinement?.nextInterpretation;
 
-        <h3>{insight.title}</h3>
+  return (
+    <section className="runtime-insight-synthesis-panel runtime-insight-synthesis-panel-primary">
+      <div className="runtime-insight-synthesis-header">
+        <span>Current Runtime Understanding</span>
+
+        <h3>{insight.primaryInsight}</h3>
 
         <p>{insight.summary}</p>
       </div>
 
-      <div className="runtime-insight-synthesis-primary">
-        <span>Primary Insight</span>
-        <strong>{insight.primaryInsight}</strong>
-      </div>
+      {insight.refinement?.nextInterpretation ? (
+        <div className="runtime-insight-next-action">
+          <span>Next Interpretation</span>
 
-      {insight.refinement ? (
-        <div className="runtime-insight-refinement">
-          <span>Insight Refinement</span>
-
-          <h4>Supporting Insights</h4>
-
-          <div className="runtime-insight-supporting-list">
-            {insight.refinement.supportingInsights.map(
-              (supportingInsight, index) => (
-                <article
-                  key={`${supportingInsight.source}-${index}-${supportingInsight.title}`}
-                  className="runtime-insight-supporting-card"
-                >
-                  <span>{formatInsightSource(supportingInsight.source)}</span>
-
-                  <strong>{supportingInsight.title}</strong>
-
-                  <p>{supportingInsight.summary}</p>
-
-                  <small>Confidence: {supportingInsight.confidence}</small>
-
-                  {supportingInsight.evidence.length > 0 ? (
-                    <ul>
-                      {supportingInsight.evidence.map((item, itemIndex) => (
-                        <li
-                          key={`${supportingInsight.source}-${index}-${itemIndex}-${item}`}
-                        >
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                </article>
-              )
-            )}
-          </div>
-
-          {insight.refinement.risk ? (
-            <div className="runtime-insight-risk">
-              <span>Risk</span>
-
-              <strong>{insight.refinement.risk.title}</strong>
-
-              <p>{insight.refinement.risk.summary}</p>
-
-              <small>
-                Severity: {insight.refinement.risk.severity}
-              </small>
-            </div>
-          ) : null}
-
-          <div className="runtime-insight-next-interpretation">
-            <span>Next Interpretation</span>
-
-            <strong>
-              {insight.refinement.nextInterpretation}
-            </strong>
-          </div>
+          <strong>
+            {insight.refinement.nextInterpretation}
+          </strong>
         </div>
       ) : null}
 
-      <div className="runtime-insight-synthesis-grid">
-        <div>
-          <span>Confidence</span>
-          <strong>{insight.confidence}</strong>
-        </div>
+      <div className="runtime-insight-next-action">
+        <span>Recommended Focus</span>
 
-        <div>
-          <span>Recommended Focus</span>
-          <strong>{insight.recommendedFocus}</strong>
+        <strong>{insight.recommendedFocus}</strong>
+      </div>
+
+      {getTopEvidence(insight).length > 0 ? (
+        <div className="runtime-insight-trust-evidence">
+          <span>Why Runtime thinks this</span>
+
+          <ul>
+            {getTopEvidence(insight).map((item, index) => (
+              <li
+                key={`runtime-evidence-${index}-${item}`}
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
+      ) : null}
+
+      <div className="runtime-insight-confidence-row">
+        <span>Confidence</span>
+
+        <strong>{insight.confidence}</strong>
       </div>
 
       {insight.strategyRecommendation ? (
-        <div className="runtime-insight-strategy">
+        <div className="runtime-insight-strategy-compact">
           <span>Recommended Strategy</span>
 
           <strong>
-            {insight.strategyRecommendation.recommendedPrDirection}
+            {
+              insight.strategyRecommendation
+                .recommendedPrDirection
+            }
           </strong>
 
-          <p>{insight.strategyRecommendation.summary}</p>
-
-          {insight.strategyRecommendation.recommendedNextPrs.length > 0 ? (
-            <ol>
-              {insight.strategyRecommendation.recommendedNextPrs.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ol>
-          ) : null}
-
           <small>
-            Priority: {insight.strategyRecommendation.priority} · Confidence:{" "}
-            {insight.strategyRecommendation.confidence}
+            Priority:{" "}
+            {insight.strategyRecommendation.priority}
+            {" · "}
+            Confidence:{" "}
+            {
+              insight.strategyRecommendation
+                .confidence
+            }
           </small>
+
+          <details>
+            <summary>View strategy details</summary>
+
+            <p>
+              {insight.strategyRecommendation.summary}
+            </p>
+
+            {insight.strategyRecommendation
+              .recommendedNextPrs.length > 0 ? (
+              <ol>
+                {insight.strategyRecommendation.recommendedNextPrs.map(
+                  (item, index) => (
+                    <li
+                      key={`strategy-${index}-${item}`}
+                    >
+                      {item}
+                    </li>
+                  )
+                )}
+              </ol>
+            ) : null}
+          </details>
         </div>
       ) : null}
 
+      {insight.refinement ? (
+        <details className="runtime-insight-advanced">
+          <summary>View supporting reasoning</summary>
+
+          <div className="runtime-insight-refinement">
+            <h4>Supporting Insights</h4>
+
+            <div className="runtime-insight-supporting-list">
+              {insight.refinement.supportingInsights.map(
+                (
+                  supportingInsight,
+                  index
+                ) => (
+                  <article
+                    key={`${supportingInsight.source}-${index}-${supportingInsight.title}`}
+                    className="runtime-insight-supporting-card"
+                  >
+                    <span>
+                      {formatInsightSource(
+                        supportingInsight.source
+                      )}
+                    </span>
+
+                    <strong>
+                      {supportingInsight.title}
+                    </strong>
+
+                    <p>
+                      {supportingInsight.summary}
+                    </p>
+
+                    <small>
+                      Confidence:{" "}
+                      {
+                        supportingInsight.confidence
+                      }
+                    </small>
+
+                    {supportingInsight.evidence
+                      .length > 0 ? (
+                      <ul>
+                        {supportingInsight.evidence.map(
+                          (
+                            item,
+                            itemIndex
+                          ) => (
+                            <li
+                              key={`${supportingInsight.source}-${index}-${itemIndex}-${item}`}
+                            >
+                              {item}
+                            </li>
+                          )
+                        )}
+                      </ul>
+                    ) : null}
+                  </article>
+                )
+              )}
+            </div>
+
+            {insight.refinement.risk ? (
+              <div className="runtime-insight-risk">
+                <span>Risk</span>
+
+                <strong>
+                  {
+                    insight.refinement.risk
+                      .title
+                  }
+                </strong>
+
+                <p>
+                  {
+                    insight.refinement.risk
+                      .summary
+                  }
+                </p>
+
+                <small>
+                  Severity:{" "}
+                  {
+                    insight.refinement.risk
+                      .severity
+                  }
+                </small>
+              </div>
+            ) : null}
+          </div>
+        </details>
+      ) : null}
+
       {insight.supportingSignals.length > 0 ? (
-        <ul>
-          {insight.supportingSignals.map((signal) => (
-            <li key={signal}>{signal}</li>
-          ))}
-        </ul>
+        <details className="runtime-insight-advanced">
+          <summary>View Runtime signals</summary>
+
+          <ul>
+            {insight.supportingSignals.map(
+              (signal, index) => (
+                <li
+                  key={`signal-${index}-${signal}`}
+                >
+                  {signal}
+                </li>
+              )
+            )}
+          </ul>
+        </details>
       ) : null}
     </section>
   );
@@ -162,4 +249,17 @@ function formatInsightSource(
   }
 
   return "Runtime Signals";
+}
+
+function getTopEvidence(insight: RuntimeInsightSynthesis): string[] {
+  const refinementEvidence =
+    insight.refinement?.evidence ?? [];
+
+  const supportingSignals =
+    insight.supportingSignals ?? [];
+
+  return [
+    ...refinementEvidence,
+    ...supportingSignals,
+  ].slice(0, 3);
 }

@@ -26,10 +26,11 @@ export function RuntimeV2ResultPanel({
           Runtime V2 Result
         </span>
 
-        <h2>Project-aware Runtime analysis</h2>
+        <h2>Current Runtime Understanding</h2>
 
         <p>
-          Runtime analyzed your project using the information available for this analysis.
+          Runtime summarizes the current project state, next focus, and the
+          clearest reason behind its interpretation.
         </p>
 
         <div className="runtime-v2-result-panel-meta">
@@ -39,149 +40,184 @@ export function RuntimeV2ResultPanel({
         </div>
       </div>
 
-      <div className="runtime-v2-result-panel-grid">
-        <RuntimeV2ResultCard
-          title="Summary"
-          label={data.summary.focus}
-          body={data.summary.text}
-        />
-
-        <RuntimeV2ResultCard
-          title="Question"
-          label="Next reflection"
-          body={data.question.question}
-          footer={data.question.reason}
-        />
-
-        <RuntimeV2ResultCard
-          title="Adaptive Coaching"
-          label={data.coaching.suggestedFocus}
-          body={data.coaching.nextAction}
-          footer={[
-            `Mode: ${formatCoachingMode(data.coaching.mode)}`,
-            `Reason: ${data.coaching.adaptiveReason ?? data.coaching.rationale}`,
-            `Confidence: ${data.coaching.confidence ?? "low"}`,
-          ]}
-        />
-
-        <RuntimeV2ResultCard
-          title="Decision Review"
-          label="Reasoning quality"
-          body={data.decisionReview.decisionSummary}
-          footer={[
-            `Strength: ${data.decisionReview.strength}`,
-            `Risk: ${data.decisionReview.risk}`,
-            `Question: ${data.decisionReview.improvementQuestion}`,
-          ]}
-        />
-      </div>
-
       {data.insightSynthesis ? (
         <RuntimeInsightSynthesisPanel
           insight={data.insightSynthesis}
         />
       ) : null}
 
-      {data.projectEvolution ? (
-        <section className="runtime-v2-project-evolution">
-          <span>Project Evolution</span>
+      <details className="runtime-v2-advanced-section">
+        <summary>View Runtime summary cards</summary>
 
-          <h3>{data.projectEvolution.title}</h3>
+        <div className="runtime-v2-result-panel-grid">
+          <RuntimeV2ResultCard
+            title="Summary"
+            label={data.summary.focus}
+            body={data.summary.text}
+          />
 
-          <p>{data.projectEvolution.summary}</p>
+          <RuntimeV2ResultCard
+            title="Question"
+            label="Next reflection"
+            body={data.question.question}
+            footer={data.question.reason}
+          />
 
-          {data.projectEvolution.shift ? (
-            <p>
-              <strong>Shift:</strong> {data.projectEvolution.shift}
-            </p>
-          ) : null}
+          <RuntimeV2ResultCard
+            title="Adaptive Coaching"
+            label={data.coaching.suggestedFocus}
+            body={data.coaching.nextAction}
+            footer={[
+              `Mode: ${formatCoachingMode(data.coaching.mode)}`,
+              `Reason: ${
+                data.coaching.adaptiveReason ??
+                data.coaching.rationale
+              }`,
+              `Confidence: ${data.coaching.confidence ?? "low"}`,
+            ]}
+          />
 
-          {data.projectEvolution.evidence.length > 0 ? (
-            <ul>
-              {data.projectEvolution.evidence.map((item: string) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          ) : null}
+          <RuntimeV2ResultCard
+            title="Decision Review"
+            label="Reasoning quality"
+            body={data.decisionReview.decisionSummary}
+            footer={[
+              `Strength: ${data.decisionReview.strength}`,
+              `Risk: ${data.decisionReview.risk}`,
+              `Question: ${data.decisionReview.improvementQuestion}`,
+            ]}
+          />
+        </div>
+      </details>
 
-          {data.projectEvolution.suggestedNextFocus ? (
-            <p>
-              <strong>Suggested next focus:</strong>{" "}
-              {data.projectEvolution.suggestedNextFocus}
-            </p>
-          ) : null}
-        </section>
-      ) : null}
+      <div className="runtime-v2-secondary-section">
+        {data.projectIdentity ? (
+          <ProjectIdentityPanel
+            projectIdentity={data.projectIdentity}
+          />
+        ) : null}
 
-      {data.decisionEvolution ? (
-        <>
-          <section className="runtime-v2-decision-evolution">
-            <span>Decision Evolution</span>
+        {data.knowledgeCompression ? (
+          <KnowledgeCompressionPanel
+            knowledgeCompression={data.knowledgeCompression}
+          />
+        ) : null}
+      </div>
 
-            <h3>{data.decisionEvolution.title}</h3>
+      <details className="runtime-v2-advanced-section">
+        <summary>View detailed Runtime analysis</summary>
 
-            <p>{data.decisionEvolution.summary}</p>
+        {data.projectEvolution ? (
+          <section className="runtime-v2-project-evolution">
+            <span>Project Evolution</span>
 
-            {data.decisionEvolution.shift ? (
+            <h3>{data.projectEvolution.title}</h3>
+
+            <p>{data.projectEvolution.summary}</p>
+
+            {data.projectEvolution.shift ? (
               <p>
-                <strong>Shift:</strong> {data.decisionEvolution.shift}
+                <strong>Shift:</strong>{" "}
+                {data.projectEvolution.shift}
               </p>
             ) : null}
 
-            <div className="runtime-v2-decision-evolution-grid">
-              <div>
-                <span>Previous Decision Style</span>
-                <strong>
-                  {formatDecisionStage(data.decisionEvolution.earlierStage)}
-                </strong>
-              </div>
-
-              <div>
-                <span>Current Decision Style</span>
-                <strong>
-                  {formatDecisionStage(data.decisionEvolution.recentStage)}
-                </strong>
-              </div>
-
-              <div>
-                <span>Emerging Decision Style</span>
-                <strong>
-                  {formatDecisionStage(data.decisionEvolution.currentStage)}
-                </strong>
-              </div>
-            </div>
-
-            {data.decisionEvolution.evidence.length > 0 ? (
+            {data.projectEvolution.evidence.length > 0 ? (
               <ul>
-                {data.decisionEvolution.evidence.map((item: string) => (
-                  <li key={item}>{item}</li>
-                ))}
+                {data.projectEvolution.evidence.map(
+                  (item: string, index: number) => (
+                    <li
+                      key={`project-evolution-${index}-${item}`}
+                    >
+                      {item}
+                    </li>
+                  )
+                )}
               </ul>
             ) : null}
 
-            {data.decisionEvolution.suggestedReflection ? (
+            {data.projectEvolution.suggestedNextFocus ? (
               <p>
-                <strong>Suggested reflection:</strong>{" "}
-                {data.decisionEvolution.suggestedReflection}
+                <strong>Suggested next focus:</strong>{" "}
+                {data.projectEvolution.suggestedNextFocus}
               </p>
             ) : null}
           </section>
+        ) : null}
 
-          <DecisionLandscape decisionEvolution={data.decisionEvolution} />
+        {data.decisionEvolution ? (
+          <>
+            <section className="runtime-v2-decision-evolution">
+              <span>Decision Evolution</span>
 
-          {data.projectIdentity ? (
-            <ProjectIdentityPanel
-              projectIdentity={data.projectIdentity}
+              <h3>{data.decisionEvolution.title}</h3>
+
+              <p>{data.decisionEvolution.summary}</p>
+
+              {data.decisionEvolution.shift ? (
+                <p>
+                  <strong>Shift:</strong>{" "}
+                  {data.decisionEvolution.shift}
+                </p>
+              ) : null}
+
+              <div className="runtime-v2-decision-evolution-grid">
+                <div>
+                  <span>Previous Decision Style</span>
+                  <strong>
+                    {formatDecisionStage(
+                      data.decisionEvolution.earlierStage
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Current Decision Style</span>
+                  <strong>
+                    {formatDecisionStage(
+                      data.decisionEvolution.recentStage
+                    )}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Emerging Decision Style</span>
+                  <strong>
+                    {formatDecisionStage(
+                      data.decisionEvolution.currentStage
+                    )}
+                  </strong>
+                </div>
+              </div>
+
+              {data.decisionEvolution.evidence.length > 0 ? (
+                <ul>
+                  {data.decisionEvolution.evidence.map(
+                    (item: string, index: number) => (
+                      <li
+                        key={`decision-evolution-${index}-${item}`}
+                      >
+                        {item}
+                      </li>
+                    )
+                  )}
+                </ul>
+              ) : null}
+
+              {data.decisionEvolution.suggestedReflection ? (
+                <p>
+                  <strong>Suggested reflection:</strong>{" "}
+                  {data.decisionEvolution.suggestedReflection}
+                </p>
+              ) : null}
+            </section>
+
+            <DecisionLandscape
+              decisionEvolution={data.decisionEvolution}
             />
-          ) : null}
-
-          {data.knowledgeCompression ? (
-            <KnowledgeCompressionPanel
-              knowledgeCompression={data.knowledgeCompression}
-            />
-          ) : null}
-        </>
-      ) : null}
+          </>
+        ) : null}
+      </details>
     </section>
   );
 }

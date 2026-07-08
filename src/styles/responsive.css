@@ -1,0 +1,128 @@
+@media (max-width: 720px) {
+  .runtime-panel {
+    padding: 28px;
+    border-radius: 24px;
+  }
+
+  .runtime-result {
+    grid-template-columns: 1fr;
+  }
+
+  .github-learning-entry-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .github-learning-entry-button {
+    width: 100%;
+  }
+
+  .project-start-panel-button {
+    width: 100%;
+  }
+
+  .project-continuity-surface-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-pattern-surface-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-v2-decision-evolution-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-identity-panel-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-insight-synthesis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .project-identity-evolution-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .landing-page {
+    width: min(calc(100% - 28px), 1120px);
+    padding: 72px 0 96px;
+  }
+
+  .hero-section {
+    padding: 48px 0 84px;
+  }
+
+  .boundary-section {
+    padding: 32px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .landing-page {
+    padding: 56px 0 72px;
+  }
+
+  .hero-section {
+    padding: 32px 0 64px;
+  }
+
+  .boundary-section {
+    padding: 26px;
+    border-radius: 22px;
+  }
+
+  .boundary-section p:not(.eyebrow) {
+    font-size: 16px;
+  }
+
+  .identity-drift-path {
+    flex-direction: column;
+  }
+
+  .identity-drift-arrow {
+    justify-content: center;
+    transform: rotate(90deg);
+  }
+
+  .runtime-memory-timeline {
+    padding: 16px;
+  }
+
+  .runtime-memory-timeline h2 {
+    font-size: 16px;
+  }
+
+  .runtime-memory-timeline-body {
+    padding: 11px 12px;
+  }
+
+  .runtime-failure-recovery-notice {
+    flex-direction: column;
+  }
+
+  .runtime-failure-recovery-notice button {
+    width: fit-content;
+  }
+
+  .runtime-failure-recovery-actions {
+    flex-wrap: wrap;
+  }
+
+  .github-learning-entry-card {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .github-learning-entry-button {
+    width: 100%;
+  }
+
+  .project-start-panel-button {
+    width: 100%;
+  }
+}

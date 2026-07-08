@@ -67,45 +67,63 @@ export function ProjectIdentityPanel({
           </div>
 
           {projectIdentity.identityEvolution.evidence.length > 0 ? (
-            <ul>
-              {projectIdentity.identityEvolution.evidence.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
+            <details className="project-identity-evidence">
+              <summary>View identity evidence</summary>
+
+              <ul>
+                {projectIdentity.identityEvolution.evidence.map(
+                  (item, index) => (
+                    <li key={`identity-evidence-${index}-${item}`}>
+                      {item}
+                    </li>
+                  )
+                )}
+              </ul>
+            </details>
           ) : null}
         </div>
       ) : null}
 
       {projectIdentity.semanticRelationships &&
       projectIdentity.semanticRelationships.length > 0 ? (
-        <div className="project-identity-relationships">
-          <span>Semantic Relationships</span>
+        <details className="project-identity-relationships">
+          <summary>View semantic relationships</summary>
 
           <div className="project-identity-relationship-list">
-            {projectIdentity.semanticRelationships.map((relationship) => (
-              <article
-                key={`${relationship.from}-${relationship.to}`}
-                className="project-identity-relationship-card"
-              >
-                <strong>
-                  {relationship.from} → {relationship.to}
-                </strong>
+            {projectIdentity.semanticRelationships.map(
+              (relationship, index) => (
+                <article
+                  key={`relationship-${index}-${relationship.from}-${relationship.to}`}
+                  className="project-identity-relationship-card"
+                >
+                  <strong>
+                    {relationship.from} → {relationship.to}
+                  </strong>
 
-                <small>{formatRelationshipType(relationship.relationship)}</small>
+                  <small>
+                    {formatRelationshipType(relationship.relationship)}
+                  </small>
 
-                <p>{relationship.explanation}</p>
-              </article>
-            ))}
+                  <p>{relationship.explanation}</p>
+                </article>
+              )
+            )}
           </div>
-        </div>
+        </details>
       ) : null}
 
       {projectIdentity.identitySignals.length > 0 ? (
-        <ul>
-          {projectIdentity.identitySignals.map((signal) => (
-            <li key={signal}>{signal}</li>
-          ))}
-        </ul>
+        <details className="project-identity-signals">
+          <summary>View identity signals</summary>
+
+          <ul>
+            {projectIdentity.identitySignals.map((signal, index) => (
+              <li key={`identity-signal-${index}-${signal}`}>
+                {signal}
+              </li>
+            ))}
+          </ul>
+        </details>
       ) : null}
 
       {projectIdentity.suggestedNextIdentityAction ? (
