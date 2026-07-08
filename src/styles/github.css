@@ -1,0 +1,447 @@
+.github-learning-entry {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.github-learning-entry-header {
+  max-width: 720px;
+}
+
+.github-learning-entry-header h2 {
+  margin: 0.45rem 0 0.55rem;
+  color: #f8fafc;
+}
+
+.github-learning-entry-header p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.github-learning-entry-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.github-learning-entry-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.25rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.github-learning-entry-status {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.github-learning-entry-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+}
+
+.github-learning-entry-status-dot-disconnected {
+  background: #94a3b8;
+}
+
+.github-learning-entry-status-dot-connecting {
+  background: #f59e0b;
+}
+
+.github-learning-entry-status-dot-connected {
+  background: #22c55e;
+}
+
+.github-learning-entry-status-dot-error {
+  background: #ef4444;
+}
+
+.github-learning-entry-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  background: #2563eb;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.github-learning-entry-button:disabled {
+  cursor: default;
+  background: #334155;
+  color: #94a3b8;
+}
+
+.github-learning-entry-policy {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 14px;
+  background: rgba(30, 41, 59, 0.72);
+  color: #cbd5e1;
+}
+
+.github-learning-entry-policy strong {
+  display: block;
+  color: #f8fafc;
+  margin-bottom: 0.4rem;
+}
+
+.github-learning-entry-policy p {
+  margin: 0 0 0.7rem;
+  line-height: 1.55;
+}
+
+.github-learning-entry-policy ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #cbd5e1;
+}
+
+.repository-selector {
+  margin-bottom: 2rem;
+  color: #f8fafc;
+}
+
+.repository-selector-header {
+  margin-bottom: 1rem;
+}
+
+.repository-selector-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-selector-header h2 {
+  margin: 0.45rem 0 0.5rem;
+  color: #f8fafc;
+}
+
+.repository-selector-header p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.repository-selector-list {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.repository-selector-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+  cursor: pointer;
+}
+
+.repository-selector-item:hover {
+  border-color: rgba(96, 165, 250, 0.72);
+  background: rgba(30, 41, 59, 0.82);
+}
+
+.repository-selector-item-selected {
+  border-color: #60a5fa;
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.repository-selector-name {
+  display: block;
+  color: #f8fafc;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.repository-selector-branch {
+  display: block;
+  margin-top: 0.4rem;
+  color: #cbd5e1;
+}
+
+.repository-selector-selected-label {
+  display: inline-block;
+  margin-top: 0.75rem;
+  color: #93c5fd;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.repository-selector-empty {
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #cbd5e1;
+}
+
+.repository-selector-empty strong {
+  display: block;
+  color: #f8fafc;
+  margin-bottom: 0.35rem;
+}
+
+.repository-selector-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.repository-selector-search {
+  display: grid;
+  gap: 0.4rem;
+  flex: 1;
+}
+
+.repository-selector-search span {
+  color: #93c5fd;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-selector-search input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  border-radius: 12px;
+  padding: 0.8rem 0.9rem;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.repository-selector-summary {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.repository-selector-card-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.repository-selector-badge {
+  border-radius: 999px;
+  padding: 0.18rem 0.42rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.repository-selector-badge-private {
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  color: #facc15;
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.repository-selector-badge-public {
+  border: 1px solid rgba(34, 197, 94, 0.35);
+  color: #86efac;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.repository-selector-updated-at {
+  color: #94a3b8;
+}
+
+.repository-selector-empty-search {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.repository-selector-selected-label {
+  display: inline-flex;
+  width: fit-content;
+  margin-top: 0.45rem;
+  border: 1px solid rgba(96, 165, 250, 0.45);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  background: rgba(37, 99, 235, 0.18);
+  color: #93c5fd;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.repository-selector-card-selected {
+  border-color: rgba(96, 165, 250, 0.75);
+  background: rgba(37, 99, 235, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(96, 165, 250, 0.28);
+}
+
+.repository-selector-name-group {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.repository-selector-name-group strong {
+  color: #f8fafc;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.repository-selector-name-group span {
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+.repository-selector-meta {
+  display: block;
+  margin-top: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+}
+
+/* =======================================================
+   GitHub Snapshot Panel
+   ======================================================= */
+
+.github-snapshot-panel {
+  margin-bottom: 2rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.github-snapshot-panel-idle,
+.github-snapshot-panel-loading,
+.github-snapshot-panel-error {
+  background: rgba(15, 23, 42, 0.72);
+}
+
+.github-snapshot-panel-error {
+  border-color: rgba(248, 113, 113, 0.45);
+}
+
+.github-snapshot-panel-header {
+  margin-bottom: 1rem;
+}
+
+.github-snapshot-panel-eyebrow {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #93c5fd;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.github-snapshot-panel-header h2 {
+  margin: 0.45rem 0 0.5rem;
+  color: #f8fafc;
+}
+
+.github-snapshot-panel-header p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.github-snapshot-panel-header small {
+  display: block;
+  margin-top: 0.55rem;
+  color: #94a3b8;
+}
+
+.github-snapshot-panel-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.github-snapshot-panel-summary-card {
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+  padding: 1rem;
+  background: rgba(30, 41, 59, 0.72);
+}
+
+.github-snapshot-panel-summary-card span {
+  display: block;
+  color: #93c5fd;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.github-snapshot-panel-summary-card strong {
+  display: block;
+  color: #f8fafc;
+  font-size: 1.35rem;
+  margin-bottom: 0.2rem;
+}
+
+.github-snapshot-panel-summary-card small {
+  color: #cbd5e1;
+}
+
+.github-snapshot-panel-section {
+  margin-top: 1rem;
+}
+
+.github-snapshot-panel-section h3 {
+  margin: 0 0 0.65rem;
+  color: #f8fafc;
+  font-size: 1rem;
+}
+
+.github-snapshot-panel-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.github-snapshot-panel-list-item {
+  padding: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 12px;
+  background: rgba(2, 6, 23, 0.42);
+}
+
+.github-snapshot-panel-list-item strong {
+  display: block;
+  color: #f8fafc;
+  margin-bottom: 0.25rem;
+}
+
+.github-snapshot-panel-list-item small {
+  color: #cbd5e1;
+}

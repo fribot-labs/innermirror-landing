@@ -34,7 +34,9 @@ export function KnowledgeCompressionPanel({
               <div>
                 <span>Dominant Concept</span>
 
-                <strong>{knowledgeCompression.dominantConcept}</strong>
+                <strong>
+                  {knowledgeCompression.dominantConcept}
+                </strong>
               </div>
             ) : null}
 
@@ -42,7 +44,9 @@ export function KnowledgeCompressionPanel({
               <div>
                 <span>Growing Concept</span>
 
-                <strong>{knowledgeCompression.growingConcept}</strong>
+                <strong>
+                  {knowledgeCompression.growingConcept}
+                </strong>
               </div>
             ) : null}
           </div>
@@ -72,53 +76,67 @@ export function KnowledgeCompressionPanel({
       </div>
 
       {knowledgeCompression.concepts.length > 0 ? (
-        <div className="knowledge-compression-concept-list">
-          {knowledgeCompression.concepts.map((concept) => (
-            <article
-              key={concept.concept}
-              className="knowledge-compression-concept-card"
-            >
-              <div>
-                <span>{concept.concept}</span>
+        <details className="knowledge-compression-concepts-advanced">
+          <summary>View compressed concepts</summary>
 
-                <strong>{concept.weight}%</strong>
-              </div>
+          <div className="knowledge-compression-concept-list">
+            {knowledgeCompression.concepts.map(
+              (concept, index) => (
+                <article
+                  key={`concept-${index}-${concept.concept}`}
+                  className="knowledge-compression-concept-card"
+                >
+                  <div>
+                    <span>{concept.concept}</span>
 
-              {concept.semanticRole || concept.trend ? (
-                <small>
-                  {concept.semanticRole
-                    ? `Role: ${formatConceptRole(
-                        concept.semanticRole
-                      )}`
-                    : ""}
+                    <strong>{concept.weight}%</strong>
+                  </div>
 
-                  {concept.semanticRole && concept.trend
-                    ? " · "
-                    : ""}
+                  {concept.semanticRole ||
+                  concept.trend ? (
+                    <small>
+                      {concept.semanticRole
+                        ? `Role: ${formatConceptRole(
+                            concept.semanticRole
+                          )}`
+                        : ""}
 
-                  {concept.trend
-                    ? `Trend: ${formatConceptTrend(concept.trend)}`
-                    : ""}
-                </small>
-              ) : null}
+                      {concept.semanticRole &&
+                      concept.trend
+                        ? " · "
+                        : ""}
 
-              <div className="knowledge-compression-bar">
-                <div
-                  className="knowledge-compression-bar-fill"
-                  style={{ width: `${concept.weight}%` }}
-                />
-              </div>
+                      {concept.trend
+                        ? `Trend: ${formatConceptTrend(
+                            concept.trend
+                          )}`
+                        : ""}
+                    </small>
+                  ) : null}
 
-              <small>{concept.sourceCount} source records</small>
+                  <div className="knowledge-compression-bar">
+                    <div
+                      className="knowledge-compression-bar-fill"
+                      style={{
+                        width: `${concept.weight}%`,
+                      }}
+                    />
+                  </div>
 
-              {concept.explanation ? (
-                <p className="knowledge-compression-concept-explanation">
-                  {concept.explanation}
-                </p>
-              ) : null}
-            </article>
-          ))}
-        </div>
+                  <small>
+                    {concept.sourceCount} source records
+                  </small>
+
+                  {concept.explanation ? (
+                    <p className="knowledge-compression-concept-explanation">
+                      {concept.explanation}
+                    </p>
+                  ) : null}
+                </article>
+              )
+            )}
+          </div>
+        </details>
       ) : null}
 
       {knowledgeCompression.suggestedReflection ? (
