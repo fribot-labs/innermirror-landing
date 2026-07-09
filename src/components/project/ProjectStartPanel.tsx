@@ -62,11 +62,15 @@ export function ProjectStartPanel({
           <label className="project-start-panel-field">
             <span>Current Focus</span>
 
+            <small className="project-start-panel-help">
+              Describe your current interest. Even a simple keyword is enough.
+            </small>
+
             <input
               type="text"
               value={currentStep}
               onChange={(event) => onChangeCurrentStep(event.target.value)}
-              placeholder="What are you focusing on now?"
+              placeholder="Examples: Runtime UI, Reflection, Memory, UX, Timeline"
             />
           </label>
 

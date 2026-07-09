@@ -11,8 +11,7 @@ import { LocalReflectionPersistenceNotice } from "../components/runtime/LocalRef
 import { LongGapRecoverySurface } from "../components/runtime/LongGapRecoverySurface";
 import { OfflineSyncRecoveryPanel } from "../components/runtime/OfflineSyncRecoveryPanel";
 import { ProjectAnalysisMemoryTimeline } from "../components/runtime/ProjectAnalysisMemoryTimeline";
-import { ProjectContinuitySurface } from "../components/runtime/ProjectContinuitySurface";
-import { ProjectPatternSurface } from "../components/runtime/ProjectPatternSurface";
+import { ProjectFlowSummaryPanel } from "../components/runtime/ProjectFlowSummaryPanel";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
@@ -74,9 +73,7 @@ export function App() {
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
 
-  const [currentStep, setCurrentStep] = useState(
-    "Project Timeline UX Stabilization"
-  );
+  const [currentStep, setCurrentStep] = useState("");
 
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
@@ -221,6 +218,11 @@ export function App() {
       "http://localhost:4000/github/oauth/start";
   };
 
+  const resolvedCurrentStep =
+    currentStep.trim().length > 0
+      ? currentStep.trim()
+      : "Explore this project";
+
   const handleStartProject = () => {
     if (selectedRepository === null) {
       return;
@@ -234,7 +236,7 @@ export function App() {
         name: selectedRepository.name,
         defaultBranch: selectedRepository.defaultBranch,
       },
-      currentStep,
+      currentStep: resolvedCurrentStep,
     });
 
     setActiveProject(nextProject);
@@ -279,7 +281,7 @@ export function App() {
           project: {
             projectId: activeProject.id,
             name: activeProject.name,
-            currentStep,
+            currentStep: resolvedCurrentStep,
           },
 
           repository: {
@@ -289,7 +291,7 @@ export function App() {
           },
 
           learningContext: {
-            currentStep,
+            currentStep: resolvedCurrentStep,
             learnerLevel: "junior",
           },
 
@@ -347,7 +349,7 @@ export function App() {
         project: {
           projectId: activeProject.id,
           name: activeProject.name,
-          currentStep,
+          currentStep: resolvedCurrentStep,
         },
 
         repository: {
@@ -359,7 +361,7 @@ export function App() {
         githubSnapshot: capturedSnapshot,
 
         learningContext: {
-          currentStep,
+          currentStep: resolvedCurrentStep,
           learnerLevel: "junior",
         },
 
@@ -592,9 +594,10 @@ export function App() {
         </>
       ) : null}
 
-      <ProjectContinuitySurface insight={projectContinuityInsight} />
-
-      <ProjectPatternSurface insight={projectPatternInsight} />
+      <ProjectFlowSummaryPanel
+        continuity={projectContinuityInsight ?? undefined}
+        pattern={projectPatternInsight ?? undefined}
+      />
 
       <ProjectAnalysisMemoryTimeline
           events={projectAnalysisMemory.events}
