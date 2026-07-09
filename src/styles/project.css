@@ -547,3 +547,11 @@
   font-weight: 800;
   color: #e0f2fe;
 }
+
+.project-flow-summary-hidden-tags {
+  margin-top: 0.85rem;
+}
+
+.project-flow-summary-hidden-tags h4 {
+  margin: 0 0 0.5rem;
+}

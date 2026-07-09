@@ -41,60 +41,12 @@ export function RuntimeV2ResultPanel({
       </div>
 
       {data.insightSynthesis ? (
-        <RuntimeInsightSynthesisPanel
-          insight={data.insightSynthesis}
-        />
+        <RuntimeInsightSynthesisPanel insight={data.insightSynthesis} />
       ) : null}
-
-      <details className="runtime-v2-advanced-section">
-        <summary>View Runtime summary cards</summary>
-
-        <div className="runtime-v2-result-panel-grid">
-          <RuntimeV2ResultCard
-            title="Summary"
-            label={data.summary.focus}
-            body={data.summary.text}
-          />
-
-          <RuntimeV2ResultCard
-            title="Question"
-            label="Next reflection"
-            body={data.question.question}
-            footer={data.question.reason}
-          />
-
-          <RuntimeV2ResultCard
-            title="Adaptive Coaching"
-            label={data.coaching.suggestedFocus}
-            body={data.coaching.nextAction}
-            footer={[
-              `Mode: ${formatCoachingMode(data.coaching.mode)}`,
-              `Reason: ${
-                data.coaching.adaptiveReason ??
-                data.coaching.rationale
-              }`,
-              `Confidence: ${data.coaching.confidence ?? "low"}`,
-            ]}
-          />
-
-          <RuntimeV2ResultCard
-            title="Decision Review"
-            label="Reasoning quality"
-            body={data.decisionReview.decisionSummary}
-            footer={[
-              `Strength: ${data.decisionReview.strength}`,
-              `Risk: ${data.decisionReview.risk}`,
-              `Question: ${data.decisionReview.improvementQuestion}`,
-            ]}
-          />
-        </div>
-      </details>
 
       <div className="runtime-v2-secondary-section">
         {data.projectIdentity ? (
-          <ProjectIdentityPanel
-            projectIdentity={data.projectIdentity}
-          />
+          <ProjectIdentityPanel projectIdentity={data.projectIdentity} />
         ) : null}
 
         {data.knowledgeCompression ? (
@@ -107,6 +59,49 @@ export function RuntimeV2ResultPanel({
       <details className="runtime-v2-advanced-section">
         <summary>View detailed Runtime analysis</summary>
 
+        <details className="runtime-v2-nested-advanced-section">
+          <summary>View Runtime summary cards</summary>
+
+          <div className="runtime-v2-result-panel-grid">
+            <RuntimeV2ResultCard
+              title="Summary"
+              label={data.summary.focus}
+              body={data.summary.text}
+            />
+
+            <RuntimeV2ResultCard
+              title="Question"
+              label="Next reflection"
+              body={data.question.question}
+              footer={data.question.reason}
+            />
+
+            <RuntimeV2ResultCard
+              title="Adaptive Coaching"
+              label={data.coaching.suggestedFocus}
+              body={data.coaching.nextAction}
+              footer={[
+                `Mode: ${formatCoachingMode(data.coaching.mode)}`,
+                `Reason: ${
+                  data.coaching.adaptiveReason ?? data.coaching.rationale
+                }`,
+                `Confidence: ${data.coaching.confidence ?? "low"}`,
+              ]}
+            />
+
+            <RuntimeV2ResultCard
+              title="Decision Review"
+              label="Reasoning quality"
+              body={data.decisionReview.decisionSummary}
+              footer={[
+                `Strength: ${data.decisionReview.strength}`,
+                `Risk: ${data.decisionReview.risk}`,
+                `Question: ${data.decisionReview.improvementQuestion}`,
+              ]}
+            />
+          </div>
+        </details>
+
         {data.projectEvolution ? (
           <section className="runtime-v2-project-evolution">
             <span>Project Evolution</span>
@@ -117,8 +112,7 @@ export function RuntimeV2ResultPanel({
 
             {data.projectEvolution.shift ? (
               <p>
-                <strong>Shift:</strong>{" "}
-                {data.projectEvolution.shift}
+                <strong>Shift:</strong> {data.projectEvolution.shift}
               </p>
             ) : null}
 
@@ -126,9 +120,7 @@ export function RuntimeV2ResultPanel({
               <ul>
                 {data.projectEvolution.evidence.map(
                   (item: string, index: number) => (
-                    <li
-                      key={`project-evolution-${index}-${item}`}
-                    >
+                    <li key={`project-evolution-${index}-${item}`}>
                       {item}
                     </li>
                   )
@@ -194,9 +186,7 @@ export function RuntimeV2ResultPanel({
                 <ul>
                   {data.decisionEvolution.evidence.map(
                     (item: string, index: number) => (
-                      <li
-                        key={`decision-evolution-${index}-${item}`}
-                      >
+                      <li key={`decision-evolution-${index}-${item}`}>
                         {item}
                       </li>
                     )

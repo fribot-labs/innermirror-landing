@@ -2,7 +2,6 @@ import type { PblProject } from "../../types/pblProject";
 import {
   countPblPullRequests,
   countPblReflections,
-  getCurrentPblMilestone,
 } from "../../types/pblProject";
 
 type ProjectSummaryPanelProps = {
@@ -31,7 +30,6 @@ export function ProjectSummaryPanel({
     );
   }
 
-  const currentMilestone = getCurrentPblMilestone(project);
   const pullRequestCount = countPblPullRequests(project);
   const reflectionCount = countPblReflections(project);
 
@@ -60,18 +58,6 @@ export function ProjectSummaryPanel({
 
           <small>
             Default branch: {project.repository.defaultBranch ?? "main"}
-          </small>
-        </div>
-
-        <div className="project-summary-panel-card">
-          <span>Current Focus</span>
-
-          <strong>
-            {currentMilestone?.title ?? "No milestone selected"}
-          </strong>
-
-          <small>
-            Status: {currentMilestone?.status ?? "not-started"}
           </small>
         </div>
 

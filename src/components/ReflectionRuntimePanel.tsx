@@ -17,9 +17,6 @@ export function ReflectionRuntimePanel() {
   const [isSubmitting, setIsSubmitting] =
     useState(false);
 
-  const session = result?.session;
-  const adaptivePacing = session?.adaptivePacing;
-
   const handleSubmit = async () => {
     setError(null);
     setResult(null);
@@ -32,19 +29,10 @@ export function ReflectionRuntimePanel() {
     setIsSubmitting(true);
 
     try {
-      const response =
+      const runtimeResult =
         await submitReflectionToRuntime(content);
 
-      if (!response.ok) {
-        setError(
-          response.errors
-            .map((item) => item.message)
-            .join(" ")
-        );
-        return;
-      }
-
-      setResult(response.result);
+      setResult(runtimeResult);
     } catch {
       setError(
         "Unable to reach the private runtime server."
@@ -85,79 +73,85 @@ export function ReflectionRuntimePanel() {
           : "Send to Runtime"}
       </button>
 
-      {error !== null && (
+      {error !== null ? (
         <div className="runtime-error">
           {error}
         </div>
-      )}
+      ) : null}
 
-      {result !== null && (
+      {result !== null ? (
         <div className="runtime-result">
           <div className="result-card">
-            <span>Summary</span>
-            <strong>{result.summary.text}</strong>
-            <p>{result.summary.description}</p>
-          </div>
-
-          <div className="result-card">
-            <span>Continuity</span>
-            <strong>
-              {result.continuitySignal.label}
-            </strong>
-            <p>
-              {result.continuitySignal.description}
-            </p>
-          </div>
-
-          <div className="result-card">
-            <span>Pacing</span>
-            <strong>{result.pacingHint.label}</strong>
-            <p>{result.pacingHint.description}</p>
-          </div>
-
-          <div className="result-card">
             <span>Next Question</span>
+
             <strong>
               {result.nextQuestion.question}
             </strong>
+
             <p>{result.nextQuestion.reason}</p>
           </div>
 
-          {session !== undefined && (
+          <details className="reflection-feedback-advanced">
+            <summary>View reflection details</summary>
+
             <div className="result-card">
-              <span>Session</span>
-              <strong>
-                {session.reflectionCount} reflections · Score{" "}
-                {session.continuityScore}
-              </strong>
+              <span>Summary</span>
+
+              <strong>{result.summary.text}</strong>
 
               <p>
-                Evolution: {session.continuityEvolution}
-              </p>
-
-              <p>
-                Drift: {session.driftStrength} ·{" "}
-                {session.driftDirection}
-              </p>
-
-              {adaptivePacing !== undefined && (
-                <>
-                  <p>
-                    Adaptive Pacing: {adaptivePacing.mode}
-                  </p>
-                  <p>
-                    {adaptivePacing.guidance}
-                  </p>
-                </>
-              )}
-
-              <p>
-                Session ID: {session.sessionId}
+                Confidence: {result.summary.confidence}
               </p>
             </div>
-          )}
+
+            <div className="result-card">
+              <span>Pacing</span>
+
+              <strong>{result.pacing.level}</strong>
+
+              <p>{result.pacing.message}</p>
+            </div>
+
+            <div className="result-card">
+              <span>Continuity</span>
+
+              <strong>
+                {result.continuitySignal.status}
+              </strong>
+
+              <p>{result.continuitySignal.message}</p>
+
+              <p>
+                Strength: {result.continuitySignal.strength}
+              </p>
+
+              {result.continuitySignal.relatedSummary ? (
+                <p>
+                  Related:{" "}
+                  {result.continuitySignal.relatedSummary}
+                </p>
+              ) : null}
+
+              {result.continuitySignal.relatedTimeLabel ? (
+                <p>
+                  Time:{" "}
+                  {result.continuitySignal.relatedTimeLabel}
+                </p>
+              ) : null}
+
+              {result.continuitySignal.driftStrength ? (
+                <p>
+                  Drift:{" "}
+                  {result.continuitySignal.driftStrength}
+                  {result.continuitySignal.driftDirection
+                    ? ` · ${result.continuitySignal.driftDirection}`
+                    : ""}
+                </p>
+              ) : null}
+            </div>
+          </details>
         </div>
-      )}
+      ) : null}
     </section>
   );
 }
