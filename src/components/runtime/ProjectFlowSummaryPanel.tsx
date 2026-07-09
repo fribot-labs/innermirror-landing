@@ -19,6 +19,9 @@ export function ProjectFlowSummaryPanel({
       ? continuity.dominantTags
       : pattern?.dominantTags ?? [];
 
+  const visibleTags = dominantTags.slice(0, 2);
+  const hiddenTags = dominantTags.slice(2);
+
   return (
     <section className="project-flow-summary-panel">
       <div className="project-flow-summary-header">
@@ -60,9 +63,9 @@ export function ProjectFlowSummaryPanel({
         ) : null}
       </div>
 
-      {dominantTags.length > 0 ? (
+      {visibleTags.length > 0 ? (
         <div className="project-flow-summary-tags">
-          {dominantTags.map((tag) => (
+          {visibleTags.map((tag) => (
             <span key={tag}>{tag}</span>
           ))}
         </div>
@@ -90,6 +93,18 @@ export function ProjectFlowSummaryPanel({
           <div>
             <h4>Pattern</h4>
             <p>{pattern.summary}</p>
+          </div>
+        ) : null}
+
+        {hiddenTags.length > 0 ? (
+          <div className="project-flow-summary-hidden-tags">
+            <h4>Additional tags</h4>
+
+            <div className="project-flow-summary-tags">
+              {hiddenTags.map((tag) => (
+                <span key={tag}>{tag}</span>
+              ))}
+            </div>
           </div>
         ) : null}
       </details>
