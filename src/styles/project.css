@@ -28,8 +28,7 @@
 }
 
 .project-start-panel-empty,
-.project-start-panel-card,
-.project-start-panel-result {
+.project-start-panel-card {
   padding: 1rem;
   border: 1px solid rgba(148, 163, 184, 0.28);
   border-radius: 14px;
@@ -53,8 +52,7 @@
 }
 
 .project-start-panel-repository span,
-.project-start-panel-field span,
-.project-start-panel-result-label {
+.project-start-panel-field span {
   display: block;
   color: #93c5fd;
   font-size: 0.78rem;
@@ -62,15 +60,13 @@
   margin-bottom: 0.35rem;
 }
 
-.project-start-panel-repository strong,
-.project-start-panel-result strong {
+.project-start-panel-repository strong {
   display: block;
   color: #f8fafc;
   font-size: 1rem;
 }
 
-.project-start-panel-repository small,
-.project-start-panel-result small {
+.project-start-panel-repository small {
   display: block;
   margin-top: 0.35rem;
   color: #cbd5e1;
@@ -105,19 +101,7 @@
   cursor: not-allowed;
   background: #334155;
   color: #94a3b8;
-}
-
-.project-start-panel-button:disabled {
   opacity: 0.65;
-}
-
-.project-start-panel-result {
-  margin-top: 1rem;
-}
-
-.project-start-panel-result p {
-  margin: 0.5rem 0;
-  color: #cbd5e1;
 }
 
 .project-start-panel-help {

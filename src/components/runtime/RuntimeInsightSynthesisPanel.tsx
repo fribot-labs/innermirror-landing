@@ -15,8 +15,7 @@ export function RuntimeInsightSynthesisPanel({
   }
 
   const topEvidence = getTopEvidence(insight);
-  const nextInterpretation =
-    insight.refinement?.nextInterpretation;
+  const runtimeGuidance = buildRuntimeGuidance(insight);
 
   return (
     <section className="runtime-insight-synthesis-panel runtime-insight-synthesis-panel-primary">
@@ -44,20 +43,17 @@ export function RuntimeInsightSynthesisPanel({
         <strong>{insight.recommendedFocus}</strong>
       </div>
 
-      {getTopEvidence(insight).length > 0 ? (
+      {topEvidence.length > 0 ? (
         <div className="runtime-insight-trust-evidence">
           <span>Why Runtime thinks this</span>
 
           <p className="runtime-guidance">
-            Runtime is still learning from your project history. More Reflection and
-            Project Analyze records will improve confidence.
+            {runtimeGuidance}
           </p>
 
           <ul>
-            {getTopEvidence(insight).map((item, index) => (
-              <li
-                key={`runtime-evidence-${index}-${item}`}
-              >
+            {topEvidence.map((item, index) => (
+              <li key={`runtime-evidence-${index}-${item}`}>
                 {item}
               </li>
             ))}
@@ -267,4 +263,27 @@ function getTopEvidence(insight: RuntimeInsightSynthesis): string[] {
     ...refinementEvidence,
     ...supportingSignals,
   ].slice(0, 3);
+}
+
+function buildRuntimeGuidance(
+  insight: RuntimeInsightSynthesis
+): string {
+  if (insight.confidence === "low") {
+    return (
+      "Runtime can see project activity, but it does not yet have enough " +
+      "connected Reflection records to explain why the project changed."
+    );
+  }
+
+  if (insight.confidence === "medium") {
+    return (
+      "Runtime is beginning to connect project activity with Reflection, " +
+      "but more repeated evidence will improve interpretation quality."
+    );
+  }
+
+  return (
+    "Runtime has enough connected project and Reflection evidence to explain " +
+    "the current direction with stronger confidence."
+  );
 }

@@ -86,21 +86,6 @@ export function ProjectStartPanel({
           ) : null}
         </div>
       )}
-
-      {project !== null ? (
-        <div className="project-start-panel-result">
-          <span className="project-start-panel-result-label">
-            Current project
-          </span>
-
-          <strong>{project.name}</strong>
-
-          <p>
-            Your project is ready.
-            Runtime can now analyze this repository together with your Reflection.
-          </p>
-        </div>
-      ) : null}
     </section>
   );
 }
