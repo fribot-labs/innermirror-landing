@@ -1,9 +1,17 @@
 import { useMemo, useState } from "react";
 import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
 
+const DEFAULT_VISIBLE_REPOSITORY_COUNT = 5;
+
 type RepositorySelectorProps = {
   repositories: GitHubRepositorySummary[];
   selectedRepository: GitHubRepositorySummary | null;
+  onSelectRepository: (repository: GitHubRepositorySummary) => void;
+};
+
+type RepositoryCardProps = {
+  repository: GitHubRepositorySummary;
+  isSelected: boolean;
   onSelectRepository: (repository: GitHubRepositorySummary) => void;
 };
 
@@ -14,10 +22,11 @@ export function RepositorySelector({
 }: RepositorySelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredRepositories = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLowerCase();
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+  const isSearching = normalizedQuery.length > 0;
 
-    if (normalizedQuery.length === 0) {
+  const filteredRepositories = useMemo(() => {
+    if (!isSearching) {
       return repositories;
     }
 
@@ -33,7 +42,20 @@ export function RepositorySelector({
 
       return searchableText.includes(normalizedQuery);
     });
-  }, [repositories, searchQuery]);
+  }, [repositories, normalizedQuery, isSearching]);
+
+  const visibleRepositories = isSearching
+    ? filteredRepositories
+    : filteredRepositories.slice(
+        0,
+        DEFAULT_VISIBLE_REPOSITORY_COUNT
+      );
+
+  const hiddenRepositories = isSearching
+    ? []
+    : filteredRepositories.slice(
+        DEFAULT_VISIBLE_REPOSITORY_COUNT
+      );
 
   return (
     <section className="repository-selector">
@@ -61,13 +83,18 @@ export function RepositorySelector({
             />
           </label>
 
-          <div className="repository-selector-summary">
-            {searchQuery.trim().length > 0 ? (
-                <div className="repository-selector-summary">
-                    Showing {filteredRepositories.length} of {repositories.length}
-                </div>
-            ) : null}
-          </div>
+          {isSearching ? (
+            <div className="repository-selector-summary">
+              Showing {filteredRepositories.length} of {repositories.length}
+            </div>
+          ) : (
+            <div className="repository-selector-summary">
+              Showing {Math.min(
+                repositories.length,
+                DEFAULT_VISIBLE_REPOSITORY_COUNT
+              )} of {repositories.length}
+            </div>
+          )}
         </div>
       ) : null}
 
@@ -87,63 +114,108 @@ export function RepositorySelector({
           <p>Try another repository name or owner.</p>
         </div>
       ) : (
-        <div className="repository-selector-list">
-          {filteredRepositories.map((repository) => {
-            const isSelected =
-              selectedRepository?.owner === repository.owner &&
-              selectedRepository?.name === repository.name;
-
-            return (
-              <button
+        <>
+          <div className="repository-selector-list">
+            {visibleRepositories.map((repository) => (
+              <RepositoryCard
                 key={`${repository.owner}/${repository.name}`}
-                className={
-                  isSelected
-                    ? "repository-selector-card repository-selector-card-selected"
-                    : "repository-selector-card"
-                }
-                type="button"
-                onClick={() => onSelectRepository(repository)}
-              >
-                <div className="repository-selector-card-main">
-                  <div className="repository-selector-name-group">
-                    <strong>{repository.name}</strong>
-                    <span>{repository.owner}</span>
-                  </div>
+                repository={repository}
+                isSelected={isSameRepository(
+                  selectedRepository,
+                  repository
+                )}
+                onSelectRepository={onSelectRepository}
+              />
+            ))}
+          </div>
 
-                  <span
-                    className={
-                      repository.private
-                        ? "repository-selector-badge repository-selector-badge-private"
-                        : "repository-selector-badge repository-selector-badge-public"
-                    }
-                  >
-                    {repository.private ? "Private" : "Public"}
-                  </span>
-                </div>
+          {hiddenRepositories.length > 0 ? (
+            <details className="github-repository-more">
+              <summary>
+                Show {hiddenRepositories.length} more repositories
+              </summary>
 
-                <small className="repository-selector-meta">
-                  {repository.defaultBranch ?? "main"}
-
-                  {repository.updatedAt
-                    ? ` · ${formatRepositoryDate(repository.updatedAt)}`
-                    : ""}
-                </small>
-
-                {isSelected ? (
-                  <span className="repository-selector-selected-label">
-                    Selected
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
+              <div className="repository-selector-list">
+                {hiddenRepositories.map((repository) => (
+                  <RepositoryCard
+                    key={`${repository.owner}/${repository.name}`}
+                    repository={repository}
+                    isSelected={isSameRepository(
+                      selectedRepository,
+                      repository
+                    )}
+                    onSelectRepository={onSelectRepository}
+                  />
+                ))}
+              </div>
+            </details>
+          ) : null}
+        </>
       )}
     </section>
   );
 }
 
-function formatRepositoryDate(value: string) {
+function RepositoryCard({
+  repository,
+  isSelected,
+  onSelectRepository,
+}: RepositoryCardProps) {
+  return (
+    <button
+      className={
+        isSelected
+          ? "repository-selector-card repository-selector-card-selected"
+          : "repository-selector-card"
+      }
+      type="button"
+      onClick={() => onSelectRepository(repository)}
+    >
+      <div className="repository-selector-card-main">
+        <div className="repository-selector-name-group">
+          <strong>{repository.name}</strong>
+          <span>{repository.owner}</span>
+        </div>
+
+        <span
+          className={
+            repository.private
+              ? "repository-selector-badge repository-selector-badge-private"
+              : "repository-selector-badge repository-selector-badge-public"
+          }
+        >
+          {repository.private ? "Private" : "Public"}
+        </span>
+      </div>
+
+      <small className="repository-selector-meta">
+        {repository.defaultBranch ?? "main"}
+
+        {repository.updatedAt
+          ? ` · ${formatRepositoryDate(repository.updatedAt)}`
+          : ""}
+      </small>
+
+      {isSelected ? (
+        <span className="repository-selector-selected-label">
+          Selected
+        </span>
+      ) : null}
+    </button>
+  );
+}
+
+function isSameRepository(
+  selectedRepository: GitHubRepositorySummary | null,
+  repository: GitHubRepositorySummary
+): boolean {
+  return (
+    selectedRepository?.owner === repository.owner &&
+    selectedRepository?.name === repository.name
+  );
+}
+
+function formatRepositoryDate(value: string): string {
   return new Intl.DateTimeFormat("en", {
     month: "short",
     day: "numeric",

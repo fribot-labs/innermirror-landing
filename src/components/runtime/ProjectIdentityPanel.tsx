@@ -10,6 +10,10 @@ type ProjectIdentityPanelProps = {
 export function ProjectIdentityPanel({
   projectIdentity,
 }: ProjectIdentityPanelProps) {
+
+  const emergingIdentity =
+    projectIdentity.identityEvolution?.emergingIdentity;
+
   return (
     <section className="project-identity-panel">
       <div className="project-identity-panel-header">
@@ -25,12 +29,14 @@ export function ProjectIdentityPanel({
         <strong>{formatCurrentIdentity(projectIdentity.stage)}</strong>
       </div>
 
-      <div className="project-identity-panel-grid">
-        <div>
-          <span>Identity Stage</span>
-          <strong>{formatProjectIdentityStage(projectIdentity.stage)}</strong>
+      {emergingIdentity ? (
+        <div className="project-identity-panel-statement">
+          <span>Emerging Identity</span>
+          <strong>{emergingIdentity}</strong>
         </div>
+      ) : null}
 
+      <div className="project-identity-panel-grid">
         <div>
           <span>Confidence</span>
           <strong>{projectIdentity.confidence}</strong>
@@ -38,38 +44,45 @@ export function ProjectIdentityPanel({
       </div>
 
       {projectIdentity.identityEvolution ? (
-        <div className="project-identity-evolution">
-          <span>Identity Evolution</span>
+        <details className="project-identity-evolution-details">
+          <summary>View identity evolution</summary>
 
-          <p>{projectIdentity.identityEvolution.transitionSummary}</p>
-
-          <div className="project-identity-evolution-grid">
-            <div>
-              <span>Previous Identity</span>
+          <div className="project-identity-evolution">
+            <div className="project-identity-evolution-stage">
+              <span>Identity Stage</span>
               <strong>
-                {projectIdentity.identityEvolution.previousIdentity}
+                {formatProjectIdentityStage(projectIdentity.stage)}
               </strong>
             </div>
 
-            <div>
-              <span>Current Identity</span>
-              <strong>
-                {projectIdentity.identityEvolution.currentIdentity}
-              </strong>
+            <p>
+              {projectIdentity.identityEvolution.transitionSummary}
+            </p>
+
+            <div className="project-identity-evolution-grid">
+              <div>
+                <span>Previous Identity</span>
+                <strong>
+                  {projectIdentity.identityEvolution.previousIdentity}
+                </strong>
+              </div>
+
+              <div>
+                <span>Current Identity</span>
+                <strong>
+                  {projectIdentity.identityEvolution.currentIdentity}
+                </strong>
+              </div>
+
+              <div>
+                <span>Emerging Identity</span>
+                <strong>
+                  {projectIdentity.identityEvolution.emergingIdentity}
+                </strong>
+              </div>
             </div>
 
-            <div>
-              <span>Emerging Identity</span>
-              <strong>
-                {projectIdentity.identityEvolution.emergingIdentity}
-              </strong>
-            </div>
-          </div>
-
-          {projectIdentity.identityEvolution.evidence.length > 0 ? (
-            <details className="project-identity-evidence">
-              <summary>View identity evidence</summary>
-
+            {projectIdentity.identityEvolution.evidence.length > 0 ? (
               <ul>
                 {projectIdentity.identityEvolution.evidence.map(
                   (item, index) => (
@@ -79,9 +92,9 @@ export function ProjectIdentityPanel({
                   )
                 )}
               </ul>
-            </details>
-          ) : null}
-        </div>
+            ) : null}
+          </div>
+        </details>
       ) : null}
 
       {projectIdentity.semanticRelationships &&
