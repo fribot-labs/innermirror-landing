@@ -1021,6 +1021,26 @@
   line-height: 1.45;
 }
 
+.knowledge-compression-key-concepts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.knowledge-compression-key-concepts > div {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  padding: 0.85rem;
+  background: rgba(15, 23, 42, 0.22);
+}
+
+.knowledge-compression-key-concepts span,
+.knowledge-compression-overview-grid span {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
 .project-identity-panel {
   margin-top: 1rem;
   border: 1px solid rgba(14, 165, 233, 0.32);

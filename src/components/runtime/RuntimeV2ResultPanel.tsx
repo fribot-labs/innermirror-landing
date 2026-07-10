@@ -44,6 +44,15 @@ export function RuntimeV2ResultPanel({
         <RuntimeInsightSynthesisPanel insight={data.insightSynthesis} />
       ) : null}
 
+      <div className="runtime-v2-interpretation-group-header">
+        <span>Runtime Interpretation Layers</span>
+
+        <p>
+          These sections explain how Runtime understands the project from identity,
+          knowledge, and flow.
+        </p>
+      </div>
+
       <div className="runtime-v2-secondary-section">
         {data.projectIdentity ? (
           <ProjectIdentityPanel projectIdentity={data.projectIdentity} />

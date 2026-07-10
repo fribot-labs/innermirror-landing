@@ -19,6 +19,13 @@ export function KnowledgeCompressionPanel({
 
         <p>{knowledgeCompression.summary}</p>
 
+        {knowledgeCompression.compressionQuality === "low" ? (
+          <p className="knowledge-compression-guidance">
+            Runtime needs more Reflection or Project Analyze history before recurring
+            knowledge can be compressed reliably.
+          </p>
+        ) : null}
+
         {knowledgeCompression.semanticSummary ? (
           <div className="knowledge-compression-semantic-summary">
             <span>Semantic Summary</span>

@@ -1,6 +1,5 @@
 import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
 import type { PblProject } from "../../types/pblProject";
-import { getCurrentPblMilestone } from "../../types/pblProject";
 
 type ProjectStartPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
@@ -19,9 +18,6 @@ export function ProjectStartPanel({
 }: ProjectStartPanelProps) {
   const canStartProject =
     selectedRepository !== null && currentStep.trim().length > 0;
-
-  const currentMilestone =
-    project !== null ? getCurrentPblMilestone(project) : null;
 
   return (
     <section className="project-start-panel">
@@ -82,6 +78,12 @@ export function ProjectStartPanel({
           >
             {project === null ? "Start Project" : "Restart Project"}
           </button>
+
+          {!canStartProject ? (
+            <small className="project-start-panel-help">
+              Describe your current focus first. Even a simple keyword is enough to help Runtime understand your project direction.
+            </small>
+          ) : null}
         </div>
       )}
 
@@ -94,18 +96,9 @@ export function ProjectStartPanel({
           <strong>{project.name}</strong>
 
           <p>
-            Current Focus:{" "}
-            <b>{currentMilestone?.title ?? "No focus selected"}</b>
+            Your project is ready.
+            Runtime can now analyze this repository together with your Reflection.
           </p>
-
-          <p>
-              Project Progress:
-              <b>{project.completionRate}%</b>
-          </p>
-
-          <small>
-            Project ID: <code>{project.id}</code>
-          </small>
         </div>
       ) : null}
     </section>

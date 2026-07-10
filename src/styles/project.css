@@ -107,6 +107,10 @@
   color: #94a3b8;
 }
 
+.project-start-panel-button:disabled {
+  opacity: 0.65;
+}
+
 .project-start-panel-result {
   margin-top: 1rem;
 }
@@ -114,6 +118,14 @@
 .project-start-panel-result p {
   margin: 0.5rem 0;
   color: #cbd5e1;
+}
+
+.project-start-panel-help {
+  display: block;
+  margin-top: 0.5rem;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.5;
 }
 
 .project-summary-panel {
@@ -182,6 +194,14 @@
 
 .project-summary-panel-card small {
   color: #cbd5e1;
+}
+
+.project-summary-panel-card:first-child {
+  grid-column: span 2;
+}
+
+.project-summary-panel-card strong {
+  overflow-wrap: anywhere;
 }
 
 .project-analysis-memory-timeline {
@@ -272,6 +292,25 @@
   font-size: 0.72rem;
 }
 
+.project-analysis-memory-more {
+  margin-top: 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 14px;
+  padding: 0.9rem;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.project-analysis-memory-more summary {
+  cursor: pointer;
+  color: #e2e8f0;
+  font-weight: 700;
+  user-select: none;
+}
+
+.project-analysis-memory-more .project-analysis-memory-timeline-list {
+  margin-top: 0.9rem;
+}
+
 .project-analysis-memory-meta-row {
   display: flex;
   align-items: center;
@@ -286,14 +325,6 @@
   color: #bfdbfe;
   font-size: 0.7rem;
   font-weight: 700;
-}
-
-.project-analysis-memory-expand-button {
-  width: 100%;
-  margin-top: 0.75rem;
-  border: 1px solid rgba(148, 163, 184, 0.24);
-  background: rgba(15, 23, 42, 0.7);
-  color: #dbeafe;
 }
 
 .project-continuity-surface {
@@ -554,4 +585,16 @@
 
 .project-flow-summary-hidden-tags h4 {
   margin: 0 0 0.5rem;
+}
+
+.runtime-guidance,
+.knowledge-compression-guidance,
+.project-flow-guidance {
+  margin: 0.75rem 0;
+  padding: 0.75rem 0.9rem;
+  border-left: 3px solid rgba(56, 189, 248, 0.6);
+  background: rgba(15, 23, 42, 0.28);
+  color: #cbd5e1;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
