@@ -40,6 +40,13 @@ export function ProjectFlowSummaryPanel({
         </p>
       </div>
 
+      {continuity?.strength === "weak" ? (
+        <p className="project-flow-guidance">
+          Continue using Project Analyze together with Reflection to build a stronger
+          understanding of project continuity.
+        </p>
+      ) : null}
+
       <div className="project-flow-summary-grid">
         {continuity ? (
           <div>

@@ -48,6 +48,11 @@ export function RuntimeInsightSynthesisPanel({
         <div className="runtime-insight-trust-evidence">
           <span>Why Runtime thinks this</span>
 
+          <p className="runtime-guidance">
+            Runtime is still learning from your project history. More Reflection and
+            Project Analyze records will improve confidence.
+          </p>
+
           <ul>
             {getTopEvidence(insight).map((item, index) => (
               <li

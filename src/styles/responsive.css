@@ -44,6 +44,10 @@
   .project-identity-evolution-grid {
     grid-template-columns: 1fr;
   }
+
+  .project-summary-panel-card strong {
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (max-width: 900px) {

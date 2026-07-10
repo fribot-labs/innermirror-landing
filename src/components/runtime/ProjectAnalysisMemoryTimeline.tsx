@@ -1,7 +1,6 @@
-import { useState } from "react";
 import type { ProjectAnalysisMemoryEvent } from "../../types/projectAnalysisMemory";
 
-const DEFAULT_VISIBLE_EVENT_COUNT = 5;
+const DEFAULT_VISIBLE_EVENT_COUNT = 3;
 const SUMMARY_MAX_LENGTH = 280;
 
 type ProjectAnalysisMemoryTimelineProps = {
@@ -13,20 +12,12 @@ export function ProjectAnalysisMemoryTimeline({
   events,
   onClear,
 }: ProjectAnalysisMemoryTimelineProps) {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   if (events.length === 0) {
     return null;
   }
 
-  const visibleEvents = isExpanded
-    ? events
-    : events.slice(0, DEFAULT_VISIBLE_EVENT_COUNT);
-
-  const hiddenEventCount = Math.max(
-    0,
-    events.length - visibleEvents.length
-  );
+  const visibleEvents = events.slice(0, DEFAULT_VISIBLE_EVENT_COUNT);
+  const hiddenEvents = events.slice(DEFAULT_VISIBLE_EVENT_COUNT);
 
   return (
     <section className="project-analysis-memory-timeline">
@@ -44,63 +35,76 @@ export function ProjectAnalysisMemoryTimeline({
 
       <div className="project-analysis-memory-timeline-list">
         {visibleEvents.map((event) => (
-          <article
+          <ProjectAnalysisMemoryTimelineItem
             key={event.id}
-            className="project-analysis-memory-timeline-item"
-          >
-            <div className="project-analysis-memory-meta-row">
-              <span>{formatRelativeTime(event.createdAt)}</span>
-
-              <span className="project-analysis-memory-source">
-                {formatSourceLabel(event.source)}
-              </span>
-            </div>
-
-            <h3>{event.title}</h3>
-
-            <p>{truncateText(event.summary, SUMMARY_MAX_LENGTH)}</p>
-
-            {event.repositoryName ? (
-              <small>{event.repositoryName}</small>
-            ) : null}
-
-            {event.commitCount !== undefined ||
-            event.pullRequestCount !== undefined ? (
-              <small>
-                {event.commitCount ?? 0} commits ·{" "}
-                {event.pullRequestCount ?? 0} pull requests
-              </small>
-            ) : null}
-
-            <div className="project-analysis-memory-tags">
-              {event.tags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
-            </div>
-          </article>
+            event={event}
+          />
         ))}
       </div>
 
-      {hiddenEventCount > 0 ? (
-        <button
-          type="button"
-          className="project-analysis-memory-expand-button"
-          onClick={() => setIsExpanded(true)}
-        >
-          Show {hiddenEventCount} more project events
-        </button>
-      ) : null}
+      {hiddenEvents.length > 0 ? (
+        <details className="project-analysis-memory-more">
+          <summary>
+            Show {hiddenEvents.length} older project events
+          </summary>
 
-      {isExpanded && events.length > DEFAULT_VISIBLE_EVENT_COUNT ? (
-        <button
-          type="button"
-          className="project-analysis-memory-expand-button"
-          onClick={() => setIsExpanded(false)}
-        >
-          Show fewer project events
-        </button>
+          <div className="project-analysis-memory-timeline-list">
+            {hiddenEvents.map((event) => (
+              <ProjectAnalysisMemoryTimelineItem
+                key={event.id}
+                event={event}
+              />
+            ))}
+          </div>
+        </details>
       ) : null}
     </section>
+  );
+}
+
+type ProjectAnalysisMemoryTimelineItemProps = {
+  event: ProjectAnalysisMemoryEvent;
+};
+
+function ProjectAnalysisMemoryTimelineItem({
+  event,
+}: ProjectAnalysisMemoryTimelineItemProps) {
+  return (
+    <article className="project-analysis-memory-timeline-item">
+      <div className="project-analysis-memory-meta-row">
+        <span>{formatRelativeTime(event.createdAt)}</span>
+
+        <span className="project-analysis-memory-source">
+          {formatSourceLabel(event.source)}
+        </span>
+      </div>
+
+      <h3>{event.title}</h3>
+
+      <p>{truncateText(event.summary, SUMMARY_MAX_LENGTH)}</p>
+
+      {event.repositoryName ? (
+        <small>{event.repositoryName}</small>
+      ) : null}
+
+      {event.commitCount !== undefined ||
+      event.pullRequestCount !== undefined ? (
+        <small>
+          {event.commitCount ?? 0} commits ·{" "}
+          {event.pullRequestCount ?? 0} pull requests
+        </small>
+      ) : null}
+
+      {event.tags.length > 0 ? (
+        <div className="project-analysis-memory-tags">
+          {event.tags.map((tag) => (
+            <span key={`${event.id}-${tag}`}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      ) : null}
+    </article>
   );
 }
 
