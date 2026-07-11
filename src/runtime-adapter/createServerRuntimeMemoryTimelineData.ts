@@ -1,9 +1,10 @@
 import type {
-    RuntimeMemoryTimelineData,
+  RuntimeMemoryFlowState,
+  RuntimeMemoryTimelineData,
 } from "../types/runtimeMemoryTimeline";
 
 import type {
-    RuntimeMemoryTimelineResponse,
+  RuntimeMemoryTimelineResponse,
 } from "../types/runtimeStreamingMerge";
 
 type ServerRuntimeMemoryTimelineResult =
@@ -18,35 +19,82 @@ export function createServerRuntimeMemoryTimelineData(
   ) {
     return {
       visible: false,
-      title: "기억 흐름",
+      title: "Memory Flow",
       subtitle:
-        "아직 runtime memory timeline에 저장된 reflection이 없습니다.",
+        "No reflections have been stored in Runtime memory yet.",
       items: [],
     };
   }
 
   return {
     visible: true,
-    title: "기억 흐름",
+    title: "Memory Flow",
     subtitle:
-      "Runtime memory에 저장된 reflection 흐름입니다.",
-    items:
-      timeline.items.map((item) => ({
-        id:
-          item.id,
-        summary:
-          item.summaryText ??
-          item.content,
-        createdAt:
-          item.createdAt,
-        timeLabel:
-          item.timeLabel,
-        continuityLabel:
-          item.continuityLabel,
-        themeLabel:
-          item.continuityStatus,
-        driftLabel:
-          item.source,
-      })),
+      "Reflection history stored in Runtime memory.",
+    items: timeline.items.map((item) => ({
+      id: item.id,
+
+      summary:
+        item.summaryText ??
+        item.content,
+
+      createdAt:
+        item.createdAt,
+
+      timeLabel:
+        item.timeLabel,
+
+      flowState:
+        normalizeFlowState(
+          item.continuityStatus
+        ),
+
+      topicLabel:
+        formatTopicLabel(item.source),
+    })),
   };
+}
+
+function normalizeFlowState(
+  value: string | undefined
+): RuntimeMemoryFlowState | undefined {
+  if (value === "forming") {
+    return "forming";
+  }
+
+  if (value === "deepening") {
+    return "deepening";
+  }
+
+  if (value === "branching") {
+    return "branching";
+  }
+
+  if (value === "returning") {
+    return "returning";
+  }
+
+  if (value === "stable") {
+    return "stable";
+  }
+
+  return undefined;
+}
+
+function formatTopicLabel(
+  value: string | undefined
+): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+
+  return value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(
+      (part) =>
+        part.charAt(0).toUpperCase() +
+        part.slice(1)
+    )
+    .join(" ");
 }

@@ -1,4 +1,5 @@
 import type {
+  RuntimeMemoryFlowState,
   RuntimeMemoryTimelineData,
 } from "../../types/runtimeMemoryTimeline";
 
@@ -41,22 +42,22 @@ export function RuntimeMemoryTimeline({
 
             <div className="runtime-memory-timeline-body">
               <div className="runtime-memory-timeline-meta">
-                <span>
+                <span className="runtime-memory-timeline-time">
                   {index === 0
-                    ? "현재 reflection"
+                    ? "Current reflection"
                     : item.timeLabel}
                 </span>
 
-                {item.continuityLabel ? (
-                  <span>{item.continuityLabel}</span>
+                {item.flowState ? (
+                  <span className="runtime-memory-timeline-chip">
+                    {formatFlowState(item.flowState)}
+                  </span>
                 ) : null}
 
-                {item.themeLabel ? (
-                  <span>{item.themeLabel}</span>
-                ) : null}
-
-                {item.driftLabel ? (
-                  <span>{item.driftLabel}</span>
+                {item.topicLabel ? (
+                  <span className="runtime-memory-timeline-chip">
+                    {item.topicLabel}
+                  </span>
                 ) : null}
               </div>
 
@@ -85,4 +86,26 @@ function truncateMemoryText(
   return `${value
     .slice(0, maxLength)
     .trim()}...`;
+}
+
+function formatFlowState(
+  state: RuntimeMemoryFlowState
+): string {
+  if (state === "forming") {
+    return "Forming";
+  }
+
+  if (state === "deepening") {
+    return "Deepening";
+  }
+
+  if (state === "branching") {
+    return "Branching";
+  }
+
+  if (state === "returning") {
+    return "Returning";
+  }
+
+  return "Stable";
 }
