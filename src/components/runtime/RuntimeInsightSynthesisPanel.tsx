@@ -68,8 +68,13 @@ export function RuntimeInsightSynthesisPanel({
       </div>
 
       {insight.strategyRecommendation ? (
-        <div className="runtime-insight-strategy-compact">
-          <span>Recommended Strategy</span>
+        <details className="runtime-insight-strategy-compact">
+          <summary>
+            View recommended strategy
+            <small>
+              Priority: {insight.strategyRecommendation.priority}
+            </small>
+          </summary>
 
           <strong>
             {
@@ -78,40 +83,28 @@ export function RuntimeInsightSynthesisPanel({
             }
           </strong>
 
+          <p>
+            {insight.strategyRecommendation.summary}
+          </p>
+
+          {insight.strategyRecommendation
+            .recommendedNextPrs.length > 0 ? (
+            <ol>
+              {insight.strategyRecommendation.recommendedNextPrs.map(
+                (item, index) => (
+                  <li key={`strategy-${index}-${item}`}>
+                    {item}
+                  </li>
+                )
+              )}
+            </ol>
+          ) : null}
+
           <small>
-            Priority:{" "}
-            {insight.strategyRecommendation.priority}
-            {" · "}
             Confidence:{" "}
-            {
-              insight.strategyRecommendation
-                .confidence
-            }
+            {insight.strategyRecommendation.confidence}
           </small>
-
-          <details>
-            <summary>View strategy details</summary>
-
-            <p>
-              {insight.strategyRecommendation.summary}
-            </p>
-
-            {insight.strategyRecommendation
-              .recommendedNextPrs.length > 0 ? (
-              <ol>
-                {insight.strategyRecommendation.recommendedNextPrs.map(
-                  (item, index) => (
-                    <li
-                      key={`strategy-${index}-${item}`}
-                    >
-                      {item}
-                    </li>
-                  )
-                )}
-              </ol>
-            ) : null}
-          </details>
-        </div>
+        </details>
       ) : null}
 
       {insight.refinement ? (

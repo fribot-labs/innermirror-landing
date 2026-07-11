@@ -1,6 +1,8 @@
 import type {
-    RuntimeMemoryTimelineData,
+  RuntimeMemoryTimelineData,
 } from "../../types/runtimeMemoryTimeline";
+
+const MEMORY_TEXT_MAX_LENGTH = 140;
 
 type Props = {
   data: RuntimeMemoryTimelineData;
@@ -21,13 +23,9 @@ export function RuntimeMemoryTimeline({
             Memory Timeline
           </div>
 
-          <h2>
-            {data.title}
-          </h2>
+          <h2>{data.title}</h2>
 
-          <p>
-            {data.subtitle}
-          </p>
+          <p>{data.subtitle}</p>
         </div>
       </div>
 
@@ -43,38 +41,48 @@ export function RuntimeMemoryTimeline({
 
             <div className="runtime-memory-timeline-body">
               <div className="runtime-memory-timeline-meta">
-                {index === 0
-                  ? "현재 reflection"
-                  : item.timeLabel}
-              </div>
+                <span>
+                  {index === 0
+                    ? "현재 reflection"
+                    : item.timeLabel}
+                </span>
 
-              <div className="runtime-memory-timeline-summary">
-                {item.summary}
-              </div>
-
-              <div className="runtime-memory-timeline-tags">
                 {item.continuityLabel ? (
-                  <span>
-                    {item.continuityLabel}
-                  </span>
+                  <span>{item.continuityLabel}</span>
                 ) : null}
 
                 {item.themeLabel ? (
-                  <span>
-                    {item.themeLabel}
-                  </span>
+                  <span>{item.themeLabel}</span>
                 ) : null}
 
                 {item.driftLabel ? (
-                  <span>
-                    {item.driftLabel}
-                  </span>
+                  <span>{item.driftLabel}</span>
                 ) : null}
               </div>
+
+              <p className="runtime-memory-timeline-summary">
+                {truncateMemoryText(
+                  item.summary,
+                  MEMORY_TEXT_MAX_LENGTH
+                )}
+              </p>
             </div>
           </article>
         ))}
       </div>
     </section>
   );
+}
+
+function truncateMemoryText(
+  value: string,
+  maxLength: number
+): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value
+    .slice(0, maxLength)
+    .trim()}...`;
 }
