@@ -1,6 +1,5 @@
 import type { PblProject } from "../../types/pblProject";
 import {
-  countPblPullRequests,
   countPblReflections,
 } from "../../types/pblProject";
 
@@ -30,7 +29,6 @@ export function ProjectSummaryPanel({
     );
   }
 
-  const pullRequestCount = countPblPullRequests(project);
   const reflectionCount = countPblReflections(project);
 
   return (
@@ -43,38 +41,19 @@ export function ProjectSummaryPanel({
         <h2>{project.name}</h2>
 
         <p>
-          This project connects your thinking, project activity, and Runtime 
-          coaching.
+          {project.repository.owner}/{project.repository.name}
+          {" · "}
+          This project connects your thinking with Runtime coaching.
         </p>
       </div>
 
       <div className="project-summary-panel-grid">
-        <div className="project-summary-panel-card">
-          <span>Repository</span>
-
-          <strong>
-            {project.repository.owner}/{project.repository.name}
-          </strong>
-
-          <small>
-            Default branch: {project.repository.defaultBranch ?? "main"}
-          </small>
-        </div>
-
         <div className="project-summary-panel-card">
           <span>Completion</span>
 
           <strong>{project.completionRate}%</strong>
 
           <small>Project progress based on milestones</small>
-        </div>
-
-        <div className="project-summary-panel-card">
-          <span>Pull Requests</span>
-
-          <strong>{pullRequestCount}</strong>
-
-          <small>Linked PR records</small>
         </div>
 
         <div className="project-summary-panel-card">

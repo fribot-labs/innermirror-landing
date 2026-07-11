@@ -781,14 +781,26 @@
   font-weight: 800;
 }
 
-.runtime-insight-strategy-compact details {
-  margin-top: 0.75rem;
-}
-
 .runtime-insight-strategy-compact summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+
   cursor: pointer;
   color: #fde68a;
+  font-weight: 800;
+}
+
+.runtime-insight-strategy-compact summary small {
+  color: #fef3c7;
+  font-size: 0.75rem;
   font-weight: 700;
+  white-space: nowrap;
+}
+
+.runtime-insight-strategy-compact[open] summary {
+  margin-bottom: 0.85rem;
 }
 
 .decision-landscape {

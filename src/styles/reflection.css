@@ -321,7 +321,7 @@
   color: rgba(255, 255, 255, 0.94);
 }
 
-.runtime-memory-timeline p {
+.runtime-memory-timeline-header p {
   margin: 6px 0 0;
   font-size: 13px;
   line-height: 1.55;
@@ -347,7 +347,7 @@
   display: flex;
   gap: 12px;
   position: relative;
-  padding-bottom: 16px;
+  padding-bottom: 12px;
 }
 
 .runtime-memory-timeline-item:last-child {
@@ -358,7 +358,7 @@
   position: relative;
   z-index: 1;
   width: 14px;
-  padding-top: 5px;
+  padding-top: 4px;
 }
 
 .runtime-memory-timeline-marker span {
@@ -373,38 +373,36 @@
 
 .runtime-memory-timeline-body {
   flex: 1;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.075);
 }
 
 .runtime-memory-timeline-meta {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.45);
-  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  align-items: center;
+
+  margin-bottom: 0.45rem;
+
+  font-size: 0.76rem;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.runtime-memory-timeline-meta span {
+  display: inline-flex;
+  align-items: center;
 }
 
 .runtime-memory-timeline-summary {
-  font-size: 14px;
+  margin: 0.35rem 0 0;
+
+  font-size: 0.9rem;
   line-height: 1.5;
+
   color: rgba(255, 255, 255, 0.88);
-}
-
-.runtime-memory-timeline-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.runtime-memory-timeline-tags span {
-  display: inline-flex;
-  padding: 5px 8px;
-  border-radius: 999px;
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.72);
-  background: rgba(255, 255, 255, 0.07);
 }
 
 .immediate-reflection-feedback {

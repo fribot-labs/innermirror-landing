@@ -261,11 +261,16 @@
   margin-top: 0.25rem;
 }
 
+.project-analysis-memory-context {
+  display: block;
+  margin-top: 0.35rem;
+}
+
 .project-analysis-memory-tags {
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
-  margin-top: 0.65rem;
+  margin-top: 0.45rem;
 }
 
 .project-analysis-memory-tags span {
