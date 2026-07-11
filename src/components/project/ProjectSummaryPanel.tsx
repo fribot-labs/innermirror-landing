@@ -41,9 +41,7 @@ export function ProjectSummaryPanel({
         <h2>{project.name}</h2>
 
         <p>
-          {project.repository.owner}/{project.repository.name}
-          {" · "}
-          This project connects your thinking with Runtime coaching.
+          Active learning project connected to Runtime coaching.
         </p>
       </div>
 

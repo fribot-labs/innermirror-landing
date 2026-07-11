@@ -1,12 +1,18 @@
+export type RuntimeMemoryFlowState =
+  | "forming"
+  | "deepening"
+  | "branching"
+  | "returning"
+  | "stable";
+
 export type RuntimeMemoryTimelineItem = {
   id: string;
   summary: string;
   createdAt: string;
   timeLabel: string;
 
-  continuityLabel?: string;
-  themeLabel?: string;
-  driftLabel?: string;
+  flowState?: RuntimeMemoryFlowState;
+  topicLabel?: string;
 };
 
 export type RuntimeMemoryTimelineData = {

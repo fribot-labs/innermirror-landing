@@ -114,12 +114,11 @@ export function GitHubSnapshotPanel({
           Project Snapshot
         </span>
 
-        <h2>
-          {snapshot.repository.owner}/{snapshot.repository.name}
-        </h2>
+        <h2>Latest GitHub activity</h2>
 
         <p>
-          Manually captured through <b>Project Analyze</b>.
+          Captured from {snapshot.repository.name} through{" "}
+          <b>Project Analyze</b>.
         </p>
 
         <small>
@@ -132,15 +131,15 @@ export function GitHubSnapshotPanel({
 
       <div className="github-snapshot-panel-summary">
         <div className="github-snapshot-panel-summary-card">
-          <span>Recent commits</span>
+          <span>Commits captured</span>
           <strong>{snapshot.recentCommits.length}</strong>
-          <small>MVP limit: 10</small>
+          <small>Latest GitHub activity</small>
         </div>
 
         <div className="github-snapshot-panel-summary-card">
-          <span>Recent pull requests</span>
+          <span>Pull requests captured</span>
           <strong>{snapshot.recentPullRequests.length}</strong>
-          <small>MVP limit: 3</small>
+          <small>Latest GitHub activity</small>
         </div>
       </div>
 

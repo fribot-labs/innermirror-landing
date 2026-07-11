@@ -46,12 +46,12 @@ export function ProjectStartPanel({
           <div className="project-start-panel-repository">
             <span>Selected repository</span>
 
-            <strong>
-              {selectedRepository.owner}/{selectedRepository.name}
-            </strong>
+            <strong>{selectedRepository.name}</strong>
 
             <small>
-              Default branch: {selectedRepository.defaultBranch ?? "main"}
+              {selectedRepository.owner}
+              {" · "}
+              {selectedRepository.defaultBranch ?? "main"}
             </small>
           </div>
 

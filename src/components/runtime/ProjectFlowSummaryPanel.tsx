@@ -40,45 +40,8 @@ export function ProjectFlowSummaryPanel({
         </p>
       </div>
 
-      {continuity?.strength === "weak" ? (
-        <p className="project-flow-guidance">
-          Continue using Project Analyze together with Reflection to build a stronger
-          understanding of project continuity.
-        </p>
-      ) : null}
-
-      <div className="project-flow-summary-grid">
-        {continuity ? (
-          <div>
-            <span>Continuity</span>
-            <strong>{continuity.strength}</strong>
-          </div>
-        ) : null}
-
-        {pattern ? (
-          <div>
-            <span>Pattern</span>
-            <strong>{pattern.type}</strong>
-          </div>
-        ) : null}
-
-        {pattern ? (
-          <div>
-            <span>Events Reviewed</span>
-            <strong>{pattern.eventCount}</strong>
-          </div>
-        ) : null}
-      </div>
-
-      {visibleTags.length > 0 ? (
-        <div className="project-flow-summary-tags">
-          {visibleTags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </div>
-      ) : null}
-
-      {continuity?.suggestedNextAction || pattern?.suggestedAction ? (
+      {continuity?.suggestedNextAction ||
+      pattern?.suggestedAction ? (
         <p className="project-flow-summary-action">
           <strong>Suggested next action:</strong>{" "}
           {continuity?.suggestedNextAction ??
@@ -89,29 +52,34 @@ export function ProjectFlowSummaryPanel({
       <details className="project-flow-summary-details">
         <summary>View flow details</summary>
 
-        {continuity ? (
-          <div>
-            <h4>Continuity</h4>
-            <p>{continuity.summary}</p>
-          </div>
-        ) : null}
-
-        {pattern ? (
-          <div>
-            <h4>Pattern</h4>
-            <p>{pattern.summary}</p>
-          </div>
-        ) : null}
-
-        {hiddenTags.length > 0 ? (
-          <div className="project-flow-summary-hidden-tags">
-            <h4>Additional tags</h4>
-
-            <div className="project-flow-summary-tags">
-              {hiddenTags.map((tag) => (
-                <span key={tag}>{tag}</span>
-              ))}
+        <div className="project-flow-summary-grid">
+          {continuity ? (
+            <div>
+              <span>Continuity</span>
+              <strong>{continuity.strength}</strong>
             </div>
+          ) : null}
+
+          {pattern ? (
+            <div>
+              <span>Pattern</span>
+              <strong>{pattern.type}</strong>
+            </div>
+          ) : null}
+
+          {pattern ? (
+            <div>
+              <span>Events Reviewed</span>
+              <strong>{pattern.eventCount}</strong>
+            </div>
+          ) : null}
+        </div>
+
+        {dominantTags.length > 0 ? (
+          <div className="project-flow-summary-tags">
+            {visibleTags.map((tag) => (
+              <span key={tag}>{tag}</span>
+            ))}
           </div>
         ) : null}
       </details>

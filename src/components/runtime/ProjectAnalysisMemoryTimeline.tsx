@@ -108,13 +108,6 @@ function ProjectAnalysisMemoryTimelineItem({
       {event.repositoryName ? (
         <small className="project-analysis-memory-context">
           {event.repositoryName}
-
-          {event.commitCount !== undefined ||
-          event.pullRequestCount !== undefined
-            ? ` · ${event.commitCount ?? 0} commits · ${
-                event.pullRequestCount ?? 0
-              } pull requests`
-            : ""}
         </small>
       ) : null}
 
