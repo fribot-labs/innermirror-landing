@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
+import { ProjectReflectionPanel } from "../components/project/ProjectReflectionPanel";
 import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
 import { ProjectSummaryPanel } from "../components/project/ProjectSummaryPanel";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
@@ -51,9 +52,16 @@ import type {
 import {
   addPblReflection,
   createPblProject,
+  updatePblProjectFocus,
   type PblProject,
 } from "../types/pblProject";
 import type { RuntimeContractV2Response } from "../types/runtimeContractV2";
+
+type ProjectActionState =
+  | "idle"
+  | "saving-thought"
+  | "analyzing-github"
+  | "analyzing-combined";
 
 export function App() {
   const [content, setContent] = useState("");
@@ -65,7 +73,6 @@ export function App() {
     repositories,
     isLoading: isLoadingRepositories,
     error: repositoryError,
-    refresh: refreshRepositories,
   } = useGitHubRepositories({
     enabled: githubConnectionState === "connected",
   });
@@ -81,6 +88,9 @@ export function App() {
   const [runtimeV2Response, setRuntimeV2Response] =
     useState<RuntimeContractV2Response | null>(null);
 
+  const [projectActionState, setProjectActionState] =
+    useState<ProjectActionState>("idle");
+
   const {
     snapshotState,
     captureSnapshot,
@@ -95,6 +105,18 @@ export function App() {
     immediateFeedback,
     submitReflection,
   } = useRuntimeReflection();
+
+  const isSavingThought =
+    projectActionState === "saving-thought";
+
+  const isGitHubAnalyzing =
+    projectActionState === "analyzing-github";
+
+  const isCombinedAnalyzing =
+    projectActionState === "analyzing-combined";
+
+  const isAnyProjectActionRunning =
+    projectActionState !== "idle" || isLoading;
 
   const {
     isMerging,
@@ -218,111 +240,175 @@ export function App() {
       "http://localhost:4000/github/oauth/start";
   };
 
+  const handleSelectRepository = (
+    repository: GitHubRepositorySummary
+  ) => {
+    const repositoryChanged =
+      activeProject !== null &&
+      (
+        activeProject.repository.owner !== repository.owner ||
+        activeProject.repository.name !== repository.name
+      );
+
+    setSelectedRepository(repository);
+
+    if (repositoryChanged) {
+      setActiveProject(null);
+      setCurrentStep("");
+      resetSnapshot();
+      setRuntimeV2Response(null);
+      resetMerge();
+    }
+  };
+
   const resolvedCurrentStep =
     currentStep.trim().length > 0
       ? currentStep.trim()
       : "Explore this project";
 
-  const handleStartProject = () => {
+  const handleApplyProjectFocus = () => {
     if (selectedRepository === null) {
       return;
     }
 
-    const nextProject = createPblProject({
-      name: selectedRepository.name,
-      repository: {
-        provider: "github",
-        owner: selectedRepository.owner,
+    const trimmedCurrentStep = currentStep.trim();
+
+    if (trimmedCurrentStep.length === 0) {
+      return;
+    }
+
+    if (activeProject === null) {
+      const nextProject = createPblProject({
         name: selectedRepository.name,
-        defaultBranch: selectedRepository.defaultBranch,
-      },
-      currentStep: resolvedCurrentStep,
+        repository: {
+          provider: "github",
+          owner: selectedRepository.owner,
+          name: selectedRepository.name,
+          defaultBranch: selectedRepository.defaultBranch,
+        },
+        currentStep: trimmedCurrentStep,
+      });
+
+      setActiveProject(nextProject);
+      resetSnapshot();
+
+      return;
+    }
+
+    const updatedProject = updatePblProjectFocus({
+      project: activeProject,
+      currentStep: trimmedCurrentStep,
     });
 
-    setActiveProject(nextProject);
-    resetSnapshot();
+    setActiveProject(updatedProject);
   };
 
   const handleReflect = async () => {
     const trimmedContent = content.trim();
 
-    if (trimmedContent.length === 0) {
+    if (
+      trimmedContent.length === 0 ||
+      isAnyProjectActionRunning
+    ) {
       return;
     }
 
-    if (activeProject !== null) {
-      setActiveProject(
-        addPblReflection({
-          project: activeProject,
-          content: trimmedContent,
-        })
-      );
-    }
-
-    resetMerge();
-
-    if (isLocalOnlyMode) {
-      saveLocalReflection(trimmedContent);
-
-      setContent("");
-
-      return;
-    }
-
-    resetMerge();
-
-    setRuntimeV2Response(null);
+    setProjectActionState("saving-thought");
 
     try {
       if (activeProject !== null) {
-        const payload = createRuntimeContractV2Payload({
-          reflectionText: trimmedContent,
-
-          project: {
-            projectId: activeProject.id,
-            name: activeProject.name,
-            currentStep: resolvedCurrentStep,
-          },
-
-          repository: {
-            owner: activeProject.repository.owner,
-            name: activeProject.repository.name,
-            defaultBranch: activeProject.repository.defaultBranch,
-          },
-
-          learningContext: {
-            currentStep: resolvedCurrentStep,
-            learnerLevel: "junior",
-          },
-
-          trigger: "reflection",
-        });
-
-        const runtimeResponse = await analyzeRuntimeV2(payload);
-
-        setRuntimeV2Response(runtimeResponse);
+        setActiveProject(
+          addPblReflection({
+            project: activeProject,
+            content: trimmedContent,
+          })
+        );
       }
-    } catch (error) {
-      console.error("Runtime V2 reflection request failed.", error);
-    }
 
-    await submitReflection(trimmedContent);
-    
-    window.setTimeout(() => {
-      void serverMemoryTimeline.refresh();
-    }, 800);
+      resetMerge();
 
-    if (runtimeUxMode.canUseStreamingMerge) {
-      void startMerge({
-        content: trimmedContent,
-      });
+      if (isLocalOnlyMode) {
+        saveLocalReflection(trimmedContent);
+        setContent("");
+
+        return;
+      }
+
+      setRuntimeV2Response(null);
+
+      try {
+        if (activeProject !== null) {
+          const payload = createRuntimeContractV2Payload({
+            reflectionText: trimmedContent,
+
+            project: {
+              projectId: activeProject.id,
+              name: activeProject.name,
+              currentStep: resolvedCurrentStep,
+            },
+
+            repository: {
+              owner: activeProject.repository.owner,
+              name: activeProject.repository.name,
+              defaultBranch:
+                activeProject.repository.defaultBranch,
+            },
+
+            learningContext: {
+              currentStep: resolvedCurrentStep,
+              learnerLevel: "junior",
+            },
+
+            trigger: "reflection",
+          });
+
+          const runtimeResponse =
+            await analyzeRuntimeV2(payload);
+
+          setRuntimeV2Response(runtimeResponse);
+        }
+      } catch (error) {
+        console.error(
+          "Runtime V2 reflection request failed.",
+          error
+        );
+      }
+
+      await submitReflection(trimmedContent);
+
+      window.setTimeout(() => {
+        void serverMemoryTimeline.refresh();
+      }, 800);
+
+      if (runtimeUxMode.canUseStreamingMerge) {
+        void startMerge({
+          content: trimmedContent,
+        });
+      }
+    } finally {
+      setProjectActionState("idle");
     }
   };
 
-  const handleGitHubAnalyze = async () => {
-    if (activeProject === null) {
+  const handleGitHubAnalyze = async (
+    includeThought: boolean
+  ) => {
+    const trimmedContent =
+      includeThought ? content.trim() : "";
+
+    if (
+      activeProject === null ||
+      isAnyProjectActionRunning ||
+      (includeThought && trimmedContent.length === 0)
+    ) {
       return;
     }
+
+    setProjectActionState(
+      includeThought
+        ? "analyzing-combined"
+        : "analyzing-github"
+    );
 
     resetMerge();
     setRuntimeV2Response(null);
@@ -340,7 +426,18 @@ export function App() {
         return;
       }
 
-      const trimmedContent = content.trim();
+      if (includeThought) {
+        setActiveProject((currentProject) => {
+          if (currentProject === null) {
+            return currentProject;
+          }
+
+          return addPblReflection({
+            project: currentProject,
+            content: trimmedContent,
+          });
+        });
+      }
 
       const payload = createRuntimeContractV2Payload({
         reflectionText:
@@ -439,8 +536,21 @@ export function App() {
         resetSnapshot();
       }
 
-      console.error("GitHub Analyze request failed.", error);
+      console.error(
+        "GitHub Analyze request failed.",
+        error
+      );
+    } finally {
+      setProjectActionState("idle");
     }
+  };
+
+  const handleAnalyzeGitHubProject = () => {
+    void handleGitHubAnalyze(false);
+  };
+
+  const handleThoughtAndProjectAnalyze = () => {
+    void handleGitHubAnalyze(true);
   };
 
   return (
@@ -452,10 +562,12 @@ export function App() {
 
       <RepositorySelector
         repositories={
-          githubConnectionState === "connected" ? repositories : []
+          githubConnectionState === "connected"
+            ? repositories
+            : []
         }
         selectedRepository={selectedRepository}
-        onSelectRepository={setSelectedRepository}
+        onSelectRepository={handleSelectRepository}
       />
 
       {isLoadingRepositories ? (
@@ -475,7 +587,26 @@ export function App() {
         project={activeProject}
         currentStep={currentStep}
         onChangeCurrentStep={setCurrentStep}
-        onStartProject={handleStartProject}
+        onApplyProjectFocus={handleApplyProjectFocus}
+        onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
+        isGitHubAnalyzing={isGitHubAnalyzing}
+        isActionLocked={
+          isSavingThought || isCombinedAnalyzing
+        }
+      />
+
+      <ProjectReflectionPanel
+        project={activeProject}
+        selectedRepository={selectedRepository}
+        content={content}
+        onChangeContent={setContent}
+        onSaveThought={handleReflect}
+        onThoughtAndProjectAnalyze={
+          handleThoughtAndProjectAnalyze
+        }
+        isSavingThought={isSavingThought || isLoading}
+        isCombinedAnalyzing={isCombinedAnalyzing}
+        isActionLocked={isGitHubAnalyzing}
       />
 
       <ProjectSummaryPanel project={activeProject} />
@@ -515,38 +646,6 @@ export function App() {
         onSyncLocal={offlineSyncRecovery.syncPendingReflections}
         onDismiss={runtimeFailureRecoveryDismiss.dismiss}
       />
-
-      <textarea
-        value={content}
-        onChange={(event) => setContent(event.target.value)}
-        placeholder="Describe your thinking (optional)"
-      />
-
-      <div className="runtime-action-row">
-        <button
-          type="button"
-          onClick={handleReflect}
-          disabled={
-            isLoading ||
-            content.trim().length === 0 ||
-            activeProject === null
-          }
-        >
-          {isLoading ? "Analyzing..." : "Save Thought"}
-        </button>
-
-        <button
-          type="button"
-          onClick={handleGitHubAnalyze}
-          disabled={
-            isLoading ||
-            activeProject === null ||
-            githubConnectionState !== "connected"
-          }
-        >
-          {isLoading ? "Analyzing..." : "Project Analyze"}
-        </button>
-      </div>
 
       <ImmediateReflectionFeedback data={immediateFeedback} />
 

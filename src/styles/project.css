@@ -51,12 +51,15 @@
   gap: 1rem;
 }
 
-.project-start-panel-repository span,
-.project-start-panel-field span {
+.project-start-panel-repository > span,
+.project-start-panel-field-heading > span {
   display: block;
   color: #93c5fd;
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.project-start-panel-repository > span {
   margin-bottom: 0.35rem;
 }
 
@@ -110,6 +113,215 @@
   color: #94a3b8;
   font-size: 0.78rem;
   line-height: 1.5;
+}
+
+.project-start-panel-field-heading,
+.project-reflection-panel-field-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.project-field-requirement,
+.project-field-optional {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+
+  padding: 0.18rem 0.45rem;
+  border-radius: 999px;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.project-field-requirement {
+  border: 1px solid rgba(96, 165, 250, 0.28);
+  background: rgba(37, 99, 235, 0.12);
+  color: #93c5fd;
+}
+
+.project-field-optional {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(148, 163, 184, 0.08);
+  color: #cbd5e1;
+}
+
+.project-start-panel-actions,
+.project-reflection-panel-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+}
+
+.project-start-panel-actions button,
+.project-reflection-panel-actions button {
+  width: 100%;
+  min-height: 44px;
+}
+
+.project-start-panel-actions .project-start-panel-button {
+  justify-self: stretch;
+}
+
+.project-start-panel-button-secondary {
+  border: 1px solid rgba(96, 165, 250, 0.34);
+  background: rgba(37, 99, 235, 0.1);
+  color: #dbeafe;
+}
+
+.project-start-panel-button-secondary:not(:disabled):hover {
+  background: rgba(37, 99, 235, 0.18);
+}
+
+.project-start-panel-action-help {
+  display: block;
+  margin-top: 0.65rem;
+
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.project-reflection-panel {
+  margin-bottom: 2rem;
+  padding: 1rem;
+
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 14px;
+
+  background: rgba(15, 23, 42, 0.72);
+  color: #f8fafc;
+}
+
+.project-reflection-panel-header {
+  margin-bottom: 1rem;
+}
+
+.project-reflection-panel-eyebrow {
+  display: inline-block;
+
+  color: #93c5fd;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.project-reflection-panel-header h2 {
+  margin: 0.45rem 0 0.5rem;
+  color: #f8fafc;
+}
+
+.project-reflection-panel-header p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.project-reflection-panel-field {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.project-reflection-panel-field-heading > span {
+  color: #93c5fd;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.project-reflection-panel-help {
+  display: block;
+
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.project-reflection-panel-field textarea {
+  width: 100%;
+  min-height: 110px;
+  box-sizing: border-box;
+  resize: vertical;
+
+  padding: 0.8rem 0.9rem;
+
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 12px;
+
+  background: rgba(2, 6, 23, 0.66);
+  color: #f8fafc;
+
+  font: inherit;
+  line-height: 1.55;
+}
+
+.project-reflection-panel-field textarea::placeholder {
+  color: #64748b;
+}
+
+.project-reflection-panel-field textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.project-reflection-button {
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+
+  background: rgba(51, 65, 85, 0.74);
+  color: #e2e8f0;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.project-reflection-button-primary {
+  border-color: #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.project-reflection-button:not(:disabled):hover {
+  filter: brightness(1.08);
+}
+
+.project-reflection-button:disabled {
+  cursor: not-allowed;
+  background: #334155;
+  border-color: #334155;
+  color: #94a3b8;
+  opacity: 0.65;
+}
+
+.project-reflection-panel-status {
+  display: block;
+  margin-top: 0.65rem;
+
+  color: #94a3b8;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.project-reflection-panel-action-help {
+  display: grid;
+  gap: 0.3rem;
+
+  margin-top: 0.65rem;
+
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.project-reflection-panel-action-help p {
+  margin: 0;
 }
 
 .project-summary-panel {
