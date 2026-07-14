@@ -5,8 +5,13 @@ type ProjectStartPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
   project: PblProject | null;
   currentStep: string;
+
   onChangeCurrentStep: (value: string) => void;
-  onStartProject: () => void;
+  onApplyProjectFocus: () => void;
+  onAnalyzeGitHubProject: () => void;
+
+  isGitHubAnalyzing?: boolean;
+  isActionLocked?: boolean;
 };
 
 export function ProjectStartPanel({
@@ -14,21 +19,51 @@ export function ProjectStartPanel({
   project,
   currentStep,
   onChangeCurrentStep,
-  onStartProject,
+  onApplyProjectFocus,
+  onAnalyzeGitHubProject,
+  isGitHubAnalyzing = false,
+  isActionLocked = false,
 }: ProjectStartPanelProps) {
-  const canStartProject =
-    selectedRepository !== null && currentStep.trim().length > 0;
+  const hasRepository =
+    selectedRepository !== null;
+
+  const hasCurrentFocus =
+    currentStep.trim().length > 0;
+
+  const isAnyProjectActionRunning =
+    isGitHubAnalyzing ||
+    isActionLocked;
+
+  const isSelectedRepositoryActiveProject =
+    selectedRepository !== null &&
+    project !== null &&
+    project.repository.owner === selectedRepository.owner &&
+    project.repository.name === selectedRepository.name;
+
+  const canApplyProjectFocus =
+    hasRepository &&
+    hasCurrentFocus &&
+    !isAnyProjectActionRunning;
+
+  const canAnalyzeGitHubProject =
+    isSelectedRepositoryActiveProject &&
+    !isAnyProjectActionRunning;
 
   return (
-    <section className="project-start-panel">
+    <section
+      className="project-start-panel"
+      aria-busy={isAnyProjectActionRunning}
+    >
       <div className="project-start-panel-header">
-        <span className="project-start-panel-eyebrow">Project Start</span>
+        <span className="project-start-panel-eyebrow">
+          Project Setup
+        </span>
 
         <h2>Start a PBL coding project</h2>
 
         <p>
-          Create a learning project from the selected GitHub repository. You can
-          save your thinking, analyze project activity, or use both together.
+          Select a repository, define the current project focus,
+          and choose whether to analyze recent GitHub activity.
         </p>
       </div>
 
@@ -37,8 +72,8 @@ export function ProjectStartPanel({
           <strong>Select a repository first</strong>
 
           <p>
-            A project can be started after choosing the GitHub repository that
-            will become the learning record.
+            A project can be started after choosing the GitHub
+            repository that will become the learning record.
           </p>
         </div>
       ) : (
@@ -56,34 +91,73 @@ export function ProjectStartPanel({
           </div>
 
           <label className="project-start-panel-field">
-            <span>Current Focus</span>
+            <div className="project-start-panel-field-heading">
+              <span>Current Focus</span>
+
+              <small className="project-field-requirement">
+                Required
+              </small>
+            </div>
 
             <small className="project-start-panel-help">
-              Describe your current interest. Even a simple keyword is enough.
+              Describe the main topic or task you are working on.
+              A keyword or short sentence is enough.
             </small>
 
             <input
               type="text"
               value={currentStep}
-              onChange={(event) => onChangeCurrentStep(event.target.value)}
-              placeholder="Examples: Runtime UI, Reflection, Memory, UX, Timeline"
+              onChange={(event) =>
+                onChangeCurrentStep(event.target.value)
+              }
+              placeholder="Examples: Runtime UI, Reflection memory, Simplify result screen"
+              required
+              aria-required="true"
+              disabled={isAnyProjectActionRunning}
             />
           </label>
 
-          <button
-            className="project-start-panel-button"
-            type="button"
-            onClick={onStartProject}
-            disabled={!canStartProject}
-          >
-            {project === null ? "Start Project" : "Restart Project"}
-          </button>
+          <div className="project-start-panel-actions">
+            <button
+              className="project-start-panel-button"
+              type="button"
+              onClick={onApplyProjectFocus}
+              disabled={!canApplyProjectFocus}
+            >
+              {project === null
+                ? "Start Project"
+                : "Update Project Focus"}
+            </button>
 
-          {!canStartProject ? (
-            <small className="project-start-panel-help">
-              Describe your current focus first. Even a simple keyword is enough to help Runtime understand your project direction.
+            <button
+              className="project-start-panel-button project-start-panel-button-secondary"
+              type="button"
+              onClick={onAnalyzeGitHubProject}
+              disabled={!canAnalyzeGitHubProject}
+            >
+              {isGitHubAnalyzing
+                ? "Analyzing GitHub..."
+                : "Analyze GitHub Project"}
+            </button>
+          </div>
+
+          {!hasCurrentFocus ? (
+            <small className="project-start-panel-action-help">
+              Describe your current focus first. Even a simple
+              keyword is enough to help Runtime understand your
+              project direction.
             </small>
-          ) : null}
+          ) : !isSelectedRepositoryActiveProject ? (
+            <small className="project-start-panel-action-help">
+              Start this repository as a project before running
+              GitHub analysis.
+            </small>
+          ) : (
+            <small className="project-start-panel-action-help">
+              Analyze GitHub Project reviews recent repository
+              activity without adding a new Reflection.
+            </small>
+          )}
         </div>
       )}
     </section>

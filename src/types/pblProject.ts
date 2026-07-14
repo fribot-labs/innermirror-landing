@@ -213,3 +213,46 @@ export function countPblPullRequests(project: PblProject): number {
 export function countPblReflections(project: PblProject): number {
   return project.reflections.length;
 }
+
+export function updatePblProjectFocus({
+  project,
+  currentStep,
+}: {
+  project: PblProject;
+  currentStep: string;
+}): PblProject {
+  const trimmedCurrentStep = currentStep.trim();
+
+  if (trimmedCurrentStep.length === 0) {
+    return project;
+  }
+
+  if (!project.currentMilestoneId) {
+    return project;
+  }
+
+  const now = new Date().toISOString();
+
+  const hasCurrentMilestone = project.milestones.some(
+    (milestone) =>
+      milestone.id === project.currentMilestoneId
+  );
+
+  if (!hasCurrentMilestone) {
+    return project;
+  }
+
+  return {
+    ...project,
+    milestones: project.milestones.map((milestone) =>
+      milestone.id === project.currentMilestoneId
+        ? {
+            ...milestone,
+            title: trimmedCurrentStep,
+            updatedAt: now,
+          }
+        : milestone
+    ),
+    updatedAt: now,
+  };
+}

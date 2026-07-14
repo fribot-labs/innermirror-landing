@@ -17,10 +17,6 @@
     width: 100%;
   }
 
-  .project-start-panel-button {
-    width: 100%;
-  }
-
   .project-continuity-surface-grid {
     grid-template-columns: 1fr;
   }
@@ -47,6 +43,21 @@
 
   .project-summary-panel-card strong {
     overflow-wrap: anywhere;
+  }
+
+  .project-start-panel-actions,
+  .project-reflection-panel-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .project-start-panel-actions button,
+  .project-reflection-panel-actions button {
+    width: 100%;
+  }
+
+  .project-start-panel-field-heading,
+  .project-reflection-panel-field-heading {
+    align-items: flex-start;
   }
 }
 
@@ -115,18 +126,5 @@
 
   .runtime-failure-recovery-actions {
     flex-wrap: wrap;
-  }
-
-  .github-learning-entry-card {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .github-learning-entry-button {
-    width: 100%;
-  }
-
-  .project-start-panel-button {
-    width: 100%;
   }
 }
