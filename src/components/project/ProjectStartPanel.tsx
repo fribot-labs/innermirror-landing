@@ -62,8 +62,7 @@ export function ProjectStartPanel({
         <h2>Start a PBL coding project</h2>
 
         <p>
-          Select a repository, define the current project focus,
-          and choose whether to analyze recent GitHub activity.
+          Define the current focus, then analyze recent GitHub activity.
         </p>
       </div>
 
@@ -100,8 +99,7 @@ export function ProjectStartPanel({
             </div>
 
             <small className="project-start-panel-help">
-              Describe the main topic or task you are working on.
-              A keyword or short sentence is enough.
+              Enter a keyword or short sentence.
             </small>
 
             <input
@@ -154,8 +152,7 @@ export function ProjectStartPanel({
             </small>
           ) : (
             <small className="project-start-panel-action-help">
-              Analyze GitHub Project reviews recent repository
-              activity without adding a new Reflection.
+              GitHub activity only. No Reflection is saved.
             </small>
           )}
         </div>

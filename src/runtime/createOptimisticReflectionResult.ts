@@ -1,13 +1,10 @@
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 export function createOptimisticReflectionResult(
   content: string
 ): RuntimeReflectionResult {
-  const now =
-    new Date().toISOString();
-
   return {
     contractVersion: "v1",
     reflectionId:
@@ -22,27 +19,27 @@ export function createOptimisticReflectionResult(
     pacing: {
       level: "medium",
       message:
-        "생각을 기록했습니다. 지금 흐름을 읽고 있습니다.",
+        "Reflection recorded. Runtime is reading the current Reflection.",
     },
 
     nextQuestion: {
       question:
-        "이 생각에서 아직 끝나지 않은 부분은 무엇인가요?",
+        "What part of this thought still feels unfinished?",
       reason:
-        "Immediate optimistic response before private runtime analysis completes.",
+        "Immediate optimistic response before private Runtime analysis completes.",
     },
 
     continuitySignal: {
       status: "forming",
       strength: 50,
       message:
-        "이 흐름을 이전 reflection과 연결하고 있습니다.",
+        "Runtime is connecting this Reflection with earlier Reflection Memory.",
 
       relatedSummary:
-        "방금 기록된 reflection 흐름",
+        "Recently recorded Reflection",
 
       relatedTimeLabel:
-        "방금 전",
+        "Just now",
 
       bridgeKind:
         "weak-signal",
@@ -51,8 +48,10 @@ export function createOptimisticReflectionResult(
 
       driftStrength: "none",
       driftDirection: "stable",
-      driftFromLabel: "기존 생각 흐름",
-      driftToLabel: "현재 생각 흐름",
+      driftFromLabel:
+        "Previous perspective",
+      driftToLabel:
+        "Current perspective",
     },
   };
 }

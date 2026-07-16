@@ -20,7 +20,6 @@ export function ProjectFlowSummaryPanel({
       : pattern?.dominantTags ?? [];
 
   const visibleTags = dominantTags.slice(0, 2);
-  const hiddenTags = dominantTags.slice(2);
 
   return (
     <section className="project-flow-summary-panel">
@@ -40,6 +39,37 @@ export function ProjectFlowSummaryPanel({
         </p>
       </div>
 
+      <div className="project-flow-summary-grid">
+        {continuity ? (
+          <div>
+            <span>Continuity</span>
+            <strong>{continuity.strength}</strong>
+          </div>
+        ) : null}
+
+        {pattern ? (
+          <div>
+            <span>Pattern</span>
+            <strong>{pattern.type}</strong>
+          </div>
+        ) : null}
+
+        {pattern ? (
+          <div>
+            <span>Events Reviewed</span>
+            <strong>{pattern.eventCount}</strong>
+          </div>
+        ) : null}
+      </div>
+
+      {visibleTags.length > 0 ? (
+        <div className="project-flow-summary-tags">
+          {visibleTags.map((tag) => (
+            <span key={tag}>{tag}</span>
+          ))}
+        </div>
+      ) : null}
+
       {continuity?.suggestedNextAction ||
       pattern?.suggestedAction ? (
         <p className="project-flow-summary-action">
@@ -49,40 +79,29 @@ export function ProjectFlowSummaryPanel({
         </p>
       ) : null}
 
-      <details className="project-flow-summary-details">
-        <summary>View flow details</summary>
+      {continuity || pattern ? (
+        <details className="project-flow-summary-details">
+          <summary>
+            Why this project appears connected
+          </summary>
 
-        <div className="project-flow-summary-grid">
-          {continuity ? (
-            <div>
-              <span>Continuity</span>
-              <strong>{continuity.strength}</strong>
-            </div>
-          ) : null}
+          <div className="project-flow-summary-details-content">
+            {continuity ? (
+              <div>
+                <h4>Project connection</h4>
+                <p>{continuity.summary}</p>
+              </div>
+            ) : null}
 
-          {pattern ? (
-            <div>
-              <span>Pattern</span>
-              <strong>{pattern.type}</strong>
-            </div>
-          ) : null}
-
-          {pattern ? (
-            <div>
-              <span>Events Reviewed</span>
-              <strong>{pattern.eventCount}</strong>
-            </div>
-          ) : null}
-        </div>
-
-        {dominantTags.length > 0 ? (
-          <div className="project-flow-summary-tags">
-            {visibleTags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
+            {pattern ? (
+              <div>
+                <h4>Repeated activity pattern</h4>
+                <p>{pattern.summary}</p>
+              </div>
+            ) : null}
           </div>
-        ) : null}
-      </details>
+        </details>
+      ) : null}
     </section>
   );
 }

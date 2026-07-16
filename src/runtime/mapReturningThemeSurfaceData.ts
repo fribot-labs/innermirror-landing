@@ -26,10 +26,15 @@ export function mapReturningThemeSurfaceData(
   const message =
     continuity.message ?? "";
 
+  const normalizedMessage =
+    message.toLowerCase();
+
   const isReturningTheme =
     strength >= 70 ||
-    message.toLowerCase().includes("continuity") ||
-    message.toLowerCase().includes("pattern") ||
+    normalizedMessage.includes("continuity") ||
+    normalizedMessage.includes("pattern") ||
+    normalizedMessage.includes("recurring") ||
+    normalizedMessage.includes("returning") ||
     message.includes("반복") ||
     message.includes("흐름");
 
@@ -43,15 +48,16 @@ export function mapReturningThemeSurfaceData(
 
   return {
     visible: true,
-    title: "이 주제는 다시 돌아온 흐름입니다.",
+    title:
+      "This theme is returning.",
     message:
-      "지금의 reflection은 단절된 생각이 아니라, 이전에도 반복해서 나타난 관심사와 이어져 있습니다.",
+      "The current Reflection is connected to an interest that has appeared before.",
     themeLabel:
       createThemeLabel(result.summary.text),
     occurrenceLabel:
-      "반복 감지됨",
+      "Recurring pattern detected",
     emotionalCue:
-      "서두르지 말고, 이 주제가 왜 다시 나타났는지 살펴보세요.",
+      "Pause and consider why this theme has returned.",
     strength:
       strength >= 85
         ? "strong"
@@ -68,7 +74,7 @@ function createThemeLabel(
     summaryText.trim();
 
   if (normalized.length === 0) {
-    return "되돌아온 생각";
+    return "Returning thought";
   }
 
   if (normalized.length <= 24) {

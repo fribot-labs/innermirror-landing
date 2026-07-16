@@ -1,27 +1,46 @@
 import type {
   RuntimeMemoryFlowState,
   RuntimeMemoryTimelineData,
+  RuntimeMemoryTimelineItem,
 } from "../../types/runtimeMemoryTimeline";
 
-const MEMORY_TEXT_MAX_LENGTH = 140;
+import {
+  RUNTIME_TERMINOLOGY,
+} from "../../constants/runtimeTerminology";
+
+const DEFAULT_VISIBLE_MEMORY_COUNT = 3;
 
 type Props = {
   data: RuntimeMemoryTimelineData;
 };
 
+type RuntimeMemoryTimelineItemProps = {
+  item: RuntimeMemoryTimelineItem;
+  isCurrent: boolean;
+};
+
 export function RuntimeMemoryTimeline({
   data,
 }: Props) {
-  if (!data.visible) {
+  if (!data.visible || data.items.length === 0) {
     return null;
   }
+
+  const visibleItems = data.items.slice(
+    0,
+    DEFAULT_VISIBLE_MEMORY_COUNT
+  );
+
+  const hiddenItems = data.items.slice(
+    DEFAULT_VISIBLE_MEMORY_COUNT
+  );
 
   return (
     <section className="runtime-memory-timeline">
       <div className="runtime-memory-timeline-header">
         <div>
           <div className="runtime-memory-timeline-eyebrow">
-            Memory Timeline
+            {RUNTIME_TERMINOLOGY.reflectionMemory}
           </div>
 
           <h2>{data.title}</h2>
@@ -31,81 +50,141 @@ export function RuntimeMemoryTimeline({
       </div>
 
       <div className="runtime-memory-timeline-list">
-        {data.items.map((item, index) => (
-          <article
+        {visibleItems.map((item, index) => (
+          <RuntimeMemoryTimelineEntry
             key={item.id}
-            className="runtime-memory-timeline-item"
-          >
-            <div className="runtime-memory-timeline-marker">
-              <span />
-            </div>
-
-            <div className="runtime-memory-timeline-body">
-              <div className="runtime-memory-timeline-meta">
-                <span className="runtime-memory-timeline-time">
-                  {index === 0
-                    ? "Current reflection"
-                    : item.timeLabel}
-                </span>
-
-                {item.flowState ? (
-                  <span className="runtime-memory-timeline-chip">
-                    {formatFlowState(item.flowState)}
-                  </span>
-                ) : null}
-
-                {item.topicLabel ? (
-                  <span className="runtime-memory-timeline-chip">
-                    {item.topicLabel}
-                  </span>
-                ) : null}
-              </div>
-
-              <p className="runtime-memory-timeline-summary">
-                {truncateMemoryText(
-                  item.summary,
-                  MEMORY_TEXT_MAX_LENGTH
-                )}
-              </p>
-            </div>
-          </article>
+            item={item}
+            isCurrent={index === 0}
+          />
         ))}
       </div>
+
+      {hiddenItems.length > 0 ? (
+        <details className="runtime-memory-timeline-more">
+          <summary>
+            Show {hiddenItems.length} older memory records
+          </summary>
+
+          <div className="runtime-memory-timeline-list runtime-memory-timeline-list-older">
+            {hiddenItems.map((item) => (
+              <RuntimeMemoryTimelineEntry
+                key={item.id}
+                item={item}
+                isCurrent={false}
+              />
+            ))}
+          </div>
+        </details>
+      ) : null}
     </section>
   );
 }
 
-function truncateMemoryText(
-  value: string,
-  maxLength: number
-): string {
-  if (value.length <= maxLength) {
-    return value;
-  }
+function RuntimeMemoryTimelineEntry({
+  item,
+  isCurrent,
+}: RuntimeMemoryTimelineItemProps) {
+  return (
+    <article className="runtime-memory-timeline-item">
+      <div className="runtime-memory-timeline-marker">
+        <span />
+      </div>
 
-  return `${value
-    .slice(0, maxLength)
-    .trim()}...`;
+      <div className="runtime-memory-timeline-body">
+        <div className="runtime-memory-timeline-meta">
+          {isCurrent
+            ? RUNTIME_TERMINOLOGY.currentReflection
+            : formatRelativeTime(item.createdAt)}
+        </div>
+
+        <p className="runtime-memory-timeline-summary">
+          {item.summary}
+        </p>
+
+        {item.flowState || item.topicLabel ? (
+          <div className="runtime-memory-timeline-tags">
+            {item.flowState ? (
+              <span>
+                {formatFlowState(item.flowState)}
+              </span>
+            ) : null}
+
+            {item.topicLabel ? (
+              <span>
+                {RUNTIME_TERMINOLOGY.origin}:{" "}
+                {item.topicLabel}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    </article>
+  );
 }
 
 function formatFlowState(
-  state: RuntimeMemoryFlowState
+  value: RuntimeMemoryFlowState
 ): string {
-  if (state === "forming") {
-    return "Forming";
+  return (
+    value.charAt(0).toUpperCase() +
+    value.slice(1)
+  );
+}
+
+function formatRelativeTime(
+  value: string
+): string {
+  const timestamp =
+    new Date(value).getTime();
+
+  if (!Number.isFinite(timestamp)) {
+    return "";
   }
 
-  if (state === "deepening") {
-    return "Deepening";
+  const elapsedMilliseconds =
+    Date.now() - timestamp;
+
+  const elapsedMinutes =
+    Math.max(
+      0,
+      Math.floor(
+        elapsedMilliseconds / 60_000
+      )
+    );
+
+  if (elapsedMinutes < 1) {
+    return "Just now";
   }
 
-  if (state === "branching") {
-    return "Branching";
+  if (elapsedMinutes < 60) {
+    return `${elapsedMinutes} ${
+      elapsedMinutes === 1
+        ? "minute"
+        : "minutes"
+    } ago`;
   }
 
-  if (state === "returning") {
-    return "Returning";
+  const elapsedHours =
+    Math.floor(
+      elapsedMinutes / 60
+    );
+
+  if (elapsedHours < 24) {
+    return `${elapsedHours} ${
+      elapsedHours === 1
+        ? "hour"
+        : "hours"
+    } ago`;
   }
 
-  return "Stable";
+  const elapsedDays =
+    Math.floor(
+      elapsedHours / 24
+    );
+
+  return `${elapsedDays} ${
+    elapsedDays === 1
+      ? "day"
+      : "days"
+  } ago`;
 }

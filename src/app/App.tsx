@@ -243,22 +243,20 @@ export function App() {
   const handleSelectRepository = (
     repository: GitHubRepositorySummary
   ) => {
-    const repositoryChanged =
-      activeProject !== null &&
-      (
-        activeProject.repository.owner !== repository.owner ||
-        activeProject.repository.name !== repository.name
-      );
+    const isSameRepository =
+      selectedRepository?.owner === repository.owner &&
+      selectedRepository?.name === repository.name;
+
+    if (isSameRepository) {
+      return;
+    }
 
     setSelectedRepository(repository);
-
-    if (repositoryChanged) {
-      setActiveProject(null);
-      setCurrentStep("");
-      resetSnapshot();
-      setRuntimeV2Response(null);
-      resetMerge();
-    }
+    setActiveProject(null);
+    setCurrentStep("");
+    resetSnapshot();
+    setRuntimeV2Response(null);
+    resetMerge();
   };
 
   const resolvedCurrentStep =
@@ -693,31 +691,41 @@ export function App() {
         </>
       ) : null}
 
-      <ProjectFlowSummaryPanel
-        continuity={projectContinuityInsight ?? undefined}
-        pattern={projectPatternInsight ?? undefined}
-      />
+      {activeProject !== null &&
+      (projectContinuityInsight ||
+        projectPatternInsight) ? (
+        <ProjectFlowSummaryPanel
+          continuity={projectContinuityInsight ?? undefined}
+          pattern={projectPatternInsight ?? undefined}
+        />
+      ) : null}
 
-      <ProjectAnalysisMemoryTimeline
+      {activeProject !== null &&
+      projectAnalysisMemory.events.length > 0 ? (
+        <ProjectAnalysisMemoryTimeline
           events={projectAnalysisMemory.events}
           onClear={projectAnalysisMemory.clearEvents}
-      />
+        />
+      ) : null}
 
-      {runtimeUxMode.canUseMemoryTimeline ? (
+      {activeProject !== null &&
+      runtimeUxMode.canUseMemoryTimeline ? (
         <>
           {serverMemoryTimeline.isLoading ? (
             <div className="runtime-memory-source-note">
-              Runtime memory timeline을 불러오고 있습니다.
+              Loading Runtime memory timeline...
             </div>
           ) : null}
 
           {serverMemoryTimeline.error !== null ? (
             <div className="runtime-memory-source-note runtime-memory-source-note-error">
-              Runtime memory timeline을 불러오지 못했습니다.
+              Unable to load Runtime memory timeline.
             </div>
           ) : null}
 
-          <RuntimeMemoryTimeline data={runtimeMemoryTimelineData} />
+          <RuntimeMemoryTimeline
+            data={runtimeMemoryTimelineData}
+          />
         </>
       ) : null}
 

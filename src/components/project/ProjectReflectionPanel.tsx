@@ -64,8 +64,7 @@ export function ProjectReflectionPanel({
         <h2>Add a thought about this project</h2>
 
         <p>
-          Record an unfinished thought, decision, question,
-          or concern about your current project.
+          Record a thought, decision, question, or concern.
         </p>
       </div>
 
@@ -79,9 +78,7 @@ export function ProjectReflectionPanel({
         </div>
 
         <small className="project-reflection-panel-help">
-          Reflection is optional for project setup, but required
-          when saving a thought or analyzing thought together
-          with GitHub activity.
+          Add context so Runtime can understand why the project changed.
         </small>
 
         <textarea
@@ -133,14 +130,13 @@ export function ProjectReflectionPanel({
       ) : (
         <div className="project-reflection-panel-action-help">
           <p>
-            <strong>Save Thought</strong>{" "}
-            stores and analyzes your Reflection without fetching
-            new GitHub activity.
+            <strong>Save Thought:</strong>{" "}
+            Reflection only.
           </p>
 
           <p>
-            <strong>Thought + Project Analyze</strong>{" "}
-            connects this Reflection with the latest GitHub activity.
+            <strong>Thought + Project Analyze:</strong>{" "}
+            Reflection with fresh GitHub activity.
           </p>
         </div>
       )}

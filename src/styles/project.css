@@ -769,14 +769,51 @@
   margin-top: 0.85rem;
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 14px;
-  padding: 0.85rem;
   background: rgba(15, 23, 42, 0.25);
+  overflow: hidden;
 }
 
-.project-flow-summary-details summary {
-  cursor: pointer;
-  font-weight: 800;
+.project-flow-summary-details > summary {
+  padding: 0.85rem 1rem;
   color: #e0f2fe;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.project-flow-summary-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.project-flow-summary-details > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.45rem;
+  transition: transform 0.2s ease;
+}
+
+.project-flow-summary-details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.project-flow-summary-details-content {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.project-flow-summary-details-content h4 {
+  margin: 0 0 0.4rem;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+}
+
+.project-flow-summary-details-content p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.6;
 }
 
 .project-flow-summary-hidden-tags {
@@ -797,9 +834,4 @@
   color: #cbd5e1;
   font-size: 0.88rem;
   line-height: 1.6;
-}
-
-.project-flow-summary-details 
-.project-flow-summary-grid {
-  margin-top: 0.85rem;
 }

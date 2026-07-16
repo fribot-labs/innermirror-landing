@@ -1,5 +1,5 @@
 import type {
-    ReturningThemeSurfaceData,
+  ReturningThemeSurfaceData,
 } from "../../types/runtimeReturningTheme";
 
 type Props = {
@@ -16,7 +16,7 @@ export function ReturningThemeSurface({
   return (
     <section className="returning-theme-surface">
       <div className="returning-theme-eyebrow">
-        반복 등장하는 주제
+        Recurring Theme
       </div>
 
       <div className="returning-theme-title">

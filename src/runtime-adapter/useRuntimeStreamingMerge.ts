@@ -1,26 +1,26 @@
 import {
-    useCallback,
-    useState,
+  useCallback,
+  useState,
 } from "react";
 
 import {
-    createRuntimeStreamingMergeEvent,
+  createRuntimeStreamingMergeEvent,
 } from "./createRuntimeStreamingMergeEvent";
 
 import {
-    fetchRuntimeMemoryTimeline,
+  fetchRuntimeMemoryTimeline,
 } from "./fetchRuntimeMemoryTimeline";
 
 import type {
-    RuntimeMemoryTimelineItem,
-    RuntimeStreamingMergeEvent,
+  RuntimeMemoryTimelineRecord,
+  RuntimeStreamingMergeEvent,
 } from "../types/runtimeStreamingMerge";
 
 export type RuntimeStreamingMergeState = {
   isMerging: boolean;
   events: RuntimeStreamingMergeEvent[];
   latestTimelineItem:
-    RuntimeMemoryTimelineItem | null;
+    RuntimeMemoryTimelineRecord | null;
 };
 
 export function useRuntimeStreamingMerge() {
@@ -142,9 +142,9 @@ export function useRuntimeStreamingMerge() {
 }
 
 function findBestTimelineMatch(
-  items: RuntimeMemoryTimelineItem[],
+  items: RuntimeMemoryTimelineRecord[],
   content: string
-): RuntimeMemoryTimelineItem | null {
+): RuntimeMemoryTimelineRecord | null {
   const normalizedContent =
     normalizeText(content);
 

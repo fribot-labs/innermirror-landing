@@ -39,8 +39,7 @@ export function GitHubSnapshotPanel({
           <h2>No Project snapshot yet</h2>
 
           <p>
-            Press <b>Project Analyze</b> to manually capture recent commits and
-            pull requests for Runtime analysis. Reflection is optional.
+            Press <b>Analyze GitHub Project</b> to capture recent activity.
           </p>
         </div>
       </section>
@@ -58,8 +57,7 @@ export function GitHubSnapshotPanel({
           <h2>Capturing Project snapshot...</h2>
 
           <p>
-            Collecting the latest 10 commits and 3 pull requests from the
-            selected repository for project-aware Runtime analysis.
+            Collecting the latest commits and pull requests.
           </p>
         </div>
       </section>
@@ -117,8 +115,7 @@ export function GitHubSnapshotPanel({
         <h2>Latest GitHub activity</h2>
 
         <p>
-          Captured from {snapshot.repository.name} through{" "}
-          <b>Project Analyze</b>.
+          Captured from {snapshot.repository.name}.
         </p>
 
         <small>
@@ -133,13 +130,11 @@ export function GitHubSnapshotPanel({
         <div className="github-snapshot-panel-summary-card">
           <span>Commits captured</span>
           <strong>{snapshot.recentCommits.length}</strong>
-          <small>Latest GitHub activity</small>
         </div>
 
         <div className="github-snapshot-panel-summary-card">
           <span>Pull requests captured</span>
           <strong>{snapshot.recentPullRequests.length}</strong>
-          <small>Latest GitHub activity</small>
         </div>
       </div>
 

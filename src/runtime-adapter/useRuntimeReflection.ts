@@ -173,9 +173,10 @@ function createImmediateFeedback(
     return {
       visible: true,
       status,
-      title: "생각을 기록했습니다.",
+      title:
+        "Reflection recorded.",
       message:
-        "화면을 멈추지 않고, 지금 흐름을 바로 정리하고 있습니다.",
+        "Runtime is organizing the current flow without interrupting the screen.",
     };
   }
 
@@ -183,9 +184,10 @@ function createImmediateFeedback(
     return {
       visible: true,
       status,
-      title: "이 흐름을 분석하고 있습니다.",
+      title:
+        "Analyzing the current flow.",
       message:
-        "summary, pacing, next question을 준비하고 있습니다.",
+        "Runtime is preparing the summary, pacing, and next question.",
     };
   }
 
@@ -193,9 +195,10 @@ function createImmediateFeedback(
     return {
       visible: true,
       status,
-      title: "이전 reflection과 연결 중입니다.",
+      title:
+        "Connecting with earlier Reflections.",
       message:
-        "비슷한 흐름과 반복되는 주제를 함께 확인하고 있습니다.",
+        "Runtime is reviewing similar flows and recurring themes.",
     };
   }
 
@@ -203,9 +206,10 @@ function createImmediateFeedback(
     return {
       visible: true,
       status,
-      title: "기록은 유지되었습니다.",
+      title:
+        "The Reflection remains saved.",
       message:
-        "깊은 runtime 분석은 실패했지만, 입력한 생각은 화면에 남아 있습니다.",
+        "Deep Runtime analysis failed, but the recorded thought remains available.",
     };
   }
 

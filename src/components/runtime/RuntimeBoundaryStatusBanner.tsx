@@ -1,5 +1,5 @@
 import type {
-    RuntimeBoundaryHealthResult,
+  RuntimeBoundaryHealthResult,
 } from "../../runtime-adapter/runtimeBoundaryTypes";
 
 type Props = {
@@ -34,10 +34,10 @@ export function RuntimeBoundaryStatusBanner({
     return (
       <section className="runtime-boundary-banner runtime-boundary-banner-healthy">
         <strong>
-          Runtime 연결이 정상입니다.
+          Runtime is connected.
         </strong>
         <p>
-          빠른 분석, memory timeline, deep merge 기능을 사용할 수 있습니다.
+          Fast analysis, memory timeline, and deep merge are available.
         </p>
       </section>
     );

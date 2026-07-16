@@ -21,8 +21,7 @@ export function ProjectSummaryPanel({
           <h2>No active PBL project</h2>
 
           <p>
-            Start a project from a GitHub repository to save your thinking,
-            analyze project activity, and receive Runtime coaching.
+            Select a repository and start a project to continue.
           </p>
         </div>
       </section>

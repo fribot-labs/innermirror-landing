@@ -59,6 +59,35 @@
   .project-reflection-panel-field-heading {
     align-items: flex-start;
   }
+
+  .collapsible-analysis-section-summary {
+    align-items: flex-start;
+    padding: 0.9rem;
+  }
+
+  .collapsible-analysis-section-content {
+    padding: 0 0.9rem 0.9rem;
+  }
+
+  .collapsible-analysis-section-indicator {
+    margin-top: 0.1rem;
+  }
+
+  .project-flow-summary-details > summary {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .project-flow-summary-details-content {
+    padding: 0 0.9rem 0.9rem;
+  }
+
+  .runtime-memory-timeline-more > summary {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .runtime-memory-timeline-list-older {
+    padding: 0 0.9rem 0.9rem;
+  }
 }
 
 @media (max-width: 900px) {

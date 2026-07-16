@@ -13,6 +13,7 @@ export type RuntimeMemoryTimelineItem = {
 
   flowState?: RuntimeMemoryFlowState;
   topicLabel?: string;
+  repositoryLabel?: string;
 };
 
 export type RuntimeMemoryTimelineData = {
