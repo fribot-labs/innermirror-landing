@@ -1,9 +1,9 @@
 import type {
-    RuntimeReflectionResult,
+  RuntimeReflectionResult,
 } from "../runtime-adapter/runtimeAdapterTypes";
 
 import type {
-    IdentityDriftSurfaceData,
+  IdentityDriftSurfaceData,
 } from "../types/runtimeIdentityDrift";
 
 export function createIdentityDriftSurfaceData(
@@ -56,13 +56,17 @@ export function createIdentityDriftSurfaceData(
       ),
 
     fromLabel:
-      continuity.driftFromLabel ??
-      "기존 생각 흐름",
+      normalizeDriftDisplayLabel(
+        continuity.driftFromLabel,
+        "Previous perspective"
+      ),
 
     toLabel:
-      continuity.driftToLabel ??
-      createDefaultToLabel(
-        driftDirection
+      normalizeDriftDisplayLabel(
+        continuity.driftToLabel,
+        createDefaultToLabel(
+          driftDirection
+        )
       ),
 
     driftCue:
@@ -96,25 +100,25 @@ function createIdentityDriftTitle(
   driftDirection: string
 ): string {
   if (driftDirection === "branching") {
-    return "생각이 새로운 방향으로 갈라지고 있습니다.";
+    return "The thought is branching into a new direction.";
   }
 
   if (driftDirection === "fragmenting") {
-    return "생각 흐름이 여러 방향으로 흩어지고 있습니다.";
+    return "The thought flow is spreading across multiple directions.";
   }
 
   if (driftDirection === "resetting") {
-    return "기존 흐름을 다시 정리하려는 움직임이 보입니다.";
+    return "A movement to reorganize the earlier flow is emerging.";
   }
 
   if (
     driftStrength === "moderate" ||
     driftStrength === "strong"
   ) {
-    return "생각 방향이 바뀌고 있습니다.";
+    return "The direction of thought is changing.";
   }
 
-  return "생각 방향에 작은 변화가 보입니다.";
+  return "A small change is appearing in the direction of thought.";
 }
 
 function createIdentityDriftMessage(
@@ -122,25 +126,40 @@ function createIdentityDriftMessage(
   driftDirection: string
 ): string {
   if (driftDirection === "branching") {
-    return "이 reflection은 이전 흐름을 유지하면서도, 새로운 판단 방향을 함께 열고 있습니다.";
+    return (
+      "This Reflection continues the earlier flow while also opening " +
+      "a new direction of judgment."
+    );
   }
 
   if (driftDirection === "fragmenting") {
-    return "지금은 하나의 결론보다 여러 가능성이 동시에 나타나는 상태로 보입니다.";
+    return (
+      "Several possibilities appear to be emerging at the same time, " +
+      "rather than forming a single conclusion."
+    );
   }
 
   if (driftDirection === "resetting") {
-    return "이전 방향을 그대로 이어가기보다, 다시 정리하고 새 기준을 찾으려는 흐름이 보입니다.";
+    return (
+      "Instead of continuing the earlier direction as it is, " +
+      "the current flow appears to be reorganizing and searching for a new standard."
+    );
   }
 
   if (
     driftStrength === "moderate" ||
     driftStrength === "strong"
   ) {
-    return "이전 reflection 흐름과 이어져 있지만, 현재의 판단 방향은 조금 달라지고 있습니다.";
+    return (
+      "The current Reflection is connected to the earlier flow, " +
+      "but the direction of judgment is beginning to change."
+    );
   }
 
-  return "이전 흐름과 연결되어 있지만, 지금의 관점에는 작은 변화가 담겨 있습니다.";
+  return (
+    "The current Reflection remains connected to the earlier flow, " +
+    "but it contains a small shift in perspective."
+  );
 }
 
 function createDriftLabel(
@@ -148,62 +167,99 @@ function createDriftLabel(
   driftDirection: string
 ): string {
   if (driftDirection === "branching") {
-    return "새 방향 분기";
+    return "New direction";
   }
 
   if (driftDirection === "fragmenting") {
-    return "흐름 분산";
+    return "Fragmented flow";
   }
 
   if (driftDirection === "resetting") {
-    return "기준 재정리";
+    return "Reframing";
   }
 
   if (driftStrength === "strong") {
-    return "강한 방향 변화";
+    return "Strong directional shift";
   }
 
   if (driftStrength === "moderate") {
-    return "중간 정도 변화";
+    return "Moderate shift";
   }
 
-  return "작은 변화";
+  return "Minor shift";
 }
 
 function createDefaultToLabel(
   driftDirection: string
 ): string {
   if (driftDirection === "branching") {
-    return "새로운 가능성";
+    return "New possibility";
   }
 
   if (driftDirection === "fragmenting") {
-    return "여러 갈래 흐름";
+    return "Multiple emerging flows";
   }
 
   if (driftDirection === "resetting") {
-    return "재정리된 기준";
+    return "Reorganized standard";
   }
 
-  return "달라진 관점";
+  return "Changed perspective";
+}
+
+function normalizeDriftDisplayLabel(
+  value: string | undefined,
+  fallback: string
+): string {
+  if (!value) {
+    return fallback;
+  }
+
+  if (
+    value === "기존 생각 흐름" ||
+    value === "Previous thought flow"
+  ) {
+    return "Previous perspective";
+  }
+
+  if (
+    value === "현재 생각 흐름" ||
+    value === "Current thought flow"
+  ) {
+    return "Current perspective";
+  }
+
+  return value;
 }
 
 function createDriftCue(
   driftDirection: string
 ): string {
   if (driftDirection === "fragmenting") {
-    return "지금은 하나로 결론내리기보다, 흩어진 방향을 먼저 바라보는 것이 좋습니다.";
+    return (
+      "Rather than forcing a single conclusion, first observe " +
+      "the different directions that are emerging."
+    );
   }
 
   if (driftDirection === "resetting") {
-    return "기존 판단을 버리는 것이 아니라, 새 기준을 세우는 과정일 수 있습니다.";
+    return (
+      "This may not be a rejection of the earlier judgment, " +
+      "but a process of establishing a new standard."
+    );
   }
 
   if (driftDirection === "branching") {
-    return "새 방향이 나타났다면, 기존 흐름과 무엇이 달라졌는지 천천히 비교해보세요.";
+    return (
+      "When a new direction appears, compare it slowly with the earlier flow " +
+      "and notice what has changed."
+    );
   }
 
-  return "방향 변화가 보일 때는 서두르지 말고, 이전의 나와 현재의 나를 함께 바라보세요.";
+  return (
+    "When a directional shift appears, avoid rushing and observe " +
+    "both the earlier and current perspectives."
+  );
 }
 
 function normalizeDriftStrength(

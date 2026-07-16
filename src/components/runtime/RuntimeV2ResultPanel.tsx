@@ -1,8 +1,10 @@
+import { RUNTIME_TERMINOLOGY } from "../../constants/runtimeTerminology";
 import type {
   RuntimeCoaching,
   RuntimeContractV2Response,
   RuntimeDecisionEvolution,
 } from "../../types/runtimeContractV2";
+import { CollapsibleAnalysisSection } from "./CollapsibleAnalysisSection";
 import { DecisionLandscape } from "./DecisionLandscape";
 import { KnowledgeCompressionPanel } from "./KnowledgeCompressionPanel";
 import { ProjectIdentityPanel } from "./ProjectIdentityPanel";
@@ -28,11 +30,6 @@ export function RuntimeV2ResultPanel({
 
         <h2>Current Runtime Understanding</h2>
 
-        <p>
-          Runtime summarizes the current project state, next focus, and the
-          clearest reason behind its interpretation.
-        </p>
-
         <div className="runtime-v2-result-panel-meta">
           <span>{meta.runtimeVersion}</span>
           <span>{meta.pipeline}</span>
@@ -44,32 +41,37 @@ export function RuntimeV2ResultPanel({
         <RuntimeInsightSynthesisPanel insight={data.insightSynthesis} />
       ) : null}
 
-      <div className="runtime-v2-interpretation-group-header">
-        <span>Runtime Interpretation Layers</span>
+      {data.projectIdentity ||
+      data.knowledgeCompression ? (
+        <CollapsibleAnalysisSection
+          eyebrow={
+            RUNTIME_TERMINOLOGY.runtimeInterpretation
+          }
+          title="View identity and knowledge analysis"
+          description="Explore project identity, knowledge, and long-term direction."
+          className="runtime-v2-interpretation-layers"
+        >
+          <div className="runtime-v2-secondary-section">
+            {data.projectIdentity ? (
+              <ProjectIdentityPanel
+                projectIdentity={data.projectIdentity}
+              />
+            ) : null}
 
-        <p>
-          These sections explain how Runtime understands the project from identity,
-          knowledge, and flow.
-        </p>
-      </div>
-
-      <div className="runtime-v2-secondary-section">
-        {data.projectIdentity ? (
-          <ProjectIdentityPanel projectIdentity={data.projectIdentity} />
-        ) : null}
-
-        {data.knowledgeCompression ? (
-          <KnowledgeCompressionPanel
-            knowledgeCompression={data.knowledgeCompression}
-          />
-        ) : null}
-      </div>
+            {data.knowledgeCompression ? (
+              <KnowledgeCompressionPanel
+                knowledgeCompression={data.knowledgeCompression}
+              />
+            ) : null}
+          </div>
+        </CollapsibleAnalysisSection>
+      ) : null}
 
       <details className="runtime-v2-advanced-section">
-        <summary>View detailed Runtime analysis</summary>
+        <summary>View project and decision evolution</summary>
 
         <details className="runtime-v2-nested-advanced-section">
-          <summary>View Runtime summary cards</summary>
+          <summary>View coaching and decision summary</summary>
 
           <div className="runtime-v2-result-panel-grid">
             <RuntimeV2ResultCard

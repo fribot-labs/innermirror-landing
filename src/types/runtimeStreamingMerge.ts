@@ -14,7 +14,7 @@ export type RuntimeStreamingMergeEvent = {
   createdAt: string;
 };
 
-export type RuntimeMemoryTimelineItem = {
+export type RuntimeMemoryTimelineRecord = {
   id: string;
   content: string;
   summaryText: string;
@@ -33,7 +33,7 @@ export type RuntimeMemoryTimelineResponse = {
   ok: boolean;
   result?: {
     userId: string;
-    items: RuntimeMemoryTimelineItem[];
+    items: RuntimeMemoryTimelineRecord[];
     totalCount: number;
     latestCreatedAt: string | null;
     firstCreatedAt: string | null;

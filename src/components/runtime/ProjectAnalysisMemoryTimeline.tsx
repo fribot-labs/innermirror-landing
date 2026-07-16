@@ -1,7 +1,7 @@
 import type { ProjectAnalysisMemoryEvent } from "../../types/projectAnalysisMemory";
 
 const DEFAULT_VISIBLE_EVENT_COUNT = 3;
-const SUMMARY_MAX_LENGTH = 160;
+const SUMMARY_MAX_LENGTH = 280;
 
 type ProjectAnalysisMemoryTimelineProps = {
   events: ProjectAnalysisMemoryEvent[];
@@ -31,15 +31,15 @@ export function ProjectAnalysisMemoryTimeline({
         <div>
           <span>Project Timeline</span>
 
-          <h2>프로젝트 흐름</h2>
+          <h2>Project Activity</h2>
 
           <p>
-            Project Analyze로 생성된 프로젝트 활동 기록입니다.
+            Project Activity arranged by analysis time.
           </p>
         </div>
 
         <button type="button" onClick={onClear}>
-          Clear project timeline
+          Clear timeline
         </button>
       </div>
 
@@ -79,13 +79,6 @@ type ProjectAnalysisMemoryTimelineItemProps = {
 function ProjectAnalysisMemoryTimelineItem({
   event,
 }: ProjectAnalysisMemoryTimelineItemProps) {
-  const visibleTags = event.tags.slice(0, 2);
-
-  const hiddenTagCount = Math.max(
-    0,
-    event.tags.length - visibleTags.length
-  );
-
   return (
     <article className="project-analysis-memory-timeline-item">
       <div className="project-analysis-memory-meta-row">
@@ -108,20 +101,23 @@ function ProjectAnalysisMemoryTimelineItem({
       {event.repositoryName ? (
         <small className="project-analysis-memory-context">
           {event.repositoryName}
+
+          {event.commitCount !== undefined ||
+          event.pullRequestCount !== undefined
+            ? ` · ${event.commitCount ?? 0} commits · ${
+                event.pullRequestCount ?? 0
+              } pull requests`
+            : ""}
         </small>
       ) : null}
 
-      {visibleTags.length > 0 ? (
+      {event.tags.length > 0 ? (
         <div className="project-analysis-memory-tags">
-          {visibleTags.map((tag) => (
+          {event.tags.map((tag) => (
             <span key={`${event.id}-${tag}`}>
               {tag}
             </span>
           ))}
-
-          {hiddenTagCount > 0 ? (
-            <span>+{hiddenTagCount}</span>
-          ) : null}
         </div>
       ) : null}
     </article>
@@ -138,22 +134,22 @@ function formatRelativeTime(value: string): string {
   );
 
   if (minutes < 1) {
-    return "방금 전";
+    return "Just now";
   }
 
   if (minutes < 60) {
-    return `${minutes}분 전`;
+    return `${minutes}m ago`;
   }
 
   const hours = Math.floor(minutes / 60);
 
   if (hours < 24) {
-    return `${hours}시간 전`;
+    return `${hours}h ago`;
   }
 
   const days = Math.floor(hours / 24);
 
-  return `${days}일 전`;
+  return `${days}d ago`;
 }
 
 function formatSourceLabel(
@@ -178,7 +174,5 @@ function truncateText(
     return value;
   }
 
-  return `${value
-    .slice(0, maxLength)
-    .trim()}...`;
+  return `${value.slice(0, maxLength).trim()}...`;
 }

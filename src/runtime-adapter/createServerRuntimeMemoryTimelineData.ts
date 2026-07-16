@@ -1,3 +1,7 @@
+import {
+  RUNTIME_TERMINOLOGY,
+} from "../constants/runtimeTerminology";
+
 import type {
   RuntimeMemoryFlowState,
   RuntimeMemoryTimelineData,
@@ -19,18 +23,20 @@ export function createServerRuntimeMemoryTimelineData(
   ) {
     return {
       visible: false,
-      title: "Memory Flow",
+      title:
+        RUNTIME_TERMINOLOGY.memoryTimeline,
       subtitle:
-        "No reflections have been stored in Runtime memory yet.",
+        "No Reflection Memory records are available yet.",
       items: [],
     };
   }
 
   return {
     visible: true,
-    title: "Memory Flow",
+    title:
+      RUNTIME_TERMINOLOGY.memoryTimeline,
     subtitle:
-      "Reflection history stored in Runtime memory.",
+      "Reflection Memory arranged by time.",
     items: timeline.items.map((item) => ({
       id: item.id,
 

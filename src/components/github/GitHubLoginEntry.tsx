@@ -67,8 +67,9 @@ export function GitHubLoginEntry({
         <strong>MVP sync rule</strong>
 
         <p>
-          GitHub data is checked only when the learner explicitly presses{" "}
-          <b>Reflect + GitHub Analyze</b>.
+          GitHub data is checked only when the learner explicitly uses{" "}
+          <b>Analyze GitHub Project</b> or{" "}
+          <b>Thought + Project Analyze</b>.
         </p>
 
         <ul>

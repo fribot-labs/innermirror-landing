@@ -1,34 +1,38 @@
 import type {
-    RuntimeMemoryTimelineItem,
-    RuntimeStreamingMergeEvent,
-    RuntimeStreamingMergeStage,
+  RuntimeMemoryTimelineRecord,
+  RuntimeStreamingMergeEvent,
+  RuntimeStreamingMergeStage,
 } from "../types/runtimeStreamingMerge";
+
+import {
+  RUNTIME_TERMINOLOGY,
+} from "../constants/runtimeTerminology";
 
 export function createRuntimeStreamingMergeEvent(
   stage: RuntimeStreamingMergeStage,
-  item?: RuntimeMemoryTimelineItem
+  item?: RuntimeMemoryTimelineRecord
 ): RuntimeStreamingMergeEvent {
   if (stage === "recorded") {
     return createEvent(
       stage,
-      "생각을 기록했습니다.",
-      "InnerMirror가 입력한 reflection을 즉시 받아들였습니다."
+      "Reflection recorded.",
+      "InnerMirror accepted the current Reflection."
     );
   }
 
   if (stage === "fast-result") {
     return createEvent(
       stage,
-      "빠른 분석 결과를 받았습니다.",
-      "summary와 next question이 먼저 도착했습니다."
+      "Fast analysis received.",
+      "The summary and next question arrived first."
     );
   }
 
   if (stage === "memory-query") {
     return createEvent(
       stage,
-      "기억 흐름을 확인하고 있습니다.",
-      "최근 reflection memory와 현재 생각을 비교하고 있습니다."
+      "Reviewing Reflection Memory.",
+      "Runtime is comparing recent Reflection memory with the current thought."
     );
   }
 
@@ -44,16 +48,16 @@ export function createRuntimeStreamingMergeEvent(
   if (stage === "completed") {
     return createEvent(
       stage,
-      "분석 흐름이 정리되었습니다.",
-      "현재 reflection과 memory timeline이 함께 갱신되었습니다."
+      "Analysis completed.",
+      "The current Reflection has been stored in Reflection Memory."
     );
   }
 
   if (stage === "failed") {
     return createEvent(
       stage,
-      "깊은 연결 확인은 지연되고 있습니다.",
-      "기록은 유지되었고, 기본 reflection 결과는 사용할 수 있습니다."
+      "Deep continuity analysis is delayed.",
+      "The Reflection remains saved, and the basic result is still available."
     );
   }
 
@@ -65,52 +69,57 @@ export function createRuntimeStreamingMergeEvent(
 }
 
 function createContinuityMergedEvent(
-  item: RuntimeMemoryTimelineItem
+  item: RuntimeMemoryTimelineRecord
 ): RuntimeStreamingMergeEvent {
+  const continuityLabel =
+    normalizeContinuityLabel(
+      item.continuityLabel,
+      item.continuityStatus
+    );
   if (item.continuityStatus === "returning") {
     return createEvent(
       "continuity-merged",
-      "반복 주제가 감지되었습니다.",
-      `"${item.continuityLabel}" 흐름으로 이전 reflection과 이어집니다.`
+      "A recurring theme was detected.",
+      `"${continuityLabel}" connects this Reflection with an earlier flow.`
     );
   }
 
   if (item.continuityStatus === "deepening") {
     return createEvent(
       "continuity-merged",
-      "생각이 더 깊어지고 있습니다.",
-      `"${item.continuityLabel}" 상태로 이전 흐름 위에 쌓이고 있습니다.`
+      "The thought is becoming deeper.",
+      `"${continuityLabel}" is building on the earlier flow.`
     );
   }
 
   if (item.continuityStatus === "branching") {
     return createEvent(
       "continuity-merged",
-      "새 방향이 열리고 있습니다.",
-      `"${item.continuityLabel}" 흐름으로 기존 생각에서 갈라지고 있습니다.`
+      "A new direction is emerging.",
+      `"${continuityLabel}" is branching from the earlier thought flow.`
     );
   }
 
   if (item.continuityStatus === "recovering") {
     return createEvent(
       "continuity-merged",
-      "오래전 흐름과 다시 연결되었습니다.",
-      `"${item.continuityLabel}" 흐름이 복구되었습니다.`
+      "An earlier flow has been restored.",
+      `"${continuityLabel}" has reconnected with a past Reflection flow.`
     );
   }
 
   if (item.continuityStatus === "drifting") {
     return createEvent(
       "continuity-merged",
-      "생각 방향이 이동하고 있습니다.",
-      `"${item.continuityLabel}" 흐름으로 이전과 다른 방향이 나타났습니다.`
+      "The thought direction is shifting.",
+      `"${continuityLabel}" indicates movement away from the earlier flow.`
     );
   }
 
   return createEvent(
     "continuity-merged",
-    "기억 흐름이 갱신되었습니다.",
-    "현재 reflection이 memory timeline에 반영되었습니다."
+    `${RUNTIME_TERMINOLOGY.reflectionMemory} updated.`,
+    `The current Reflection is now available in the ${RUNTIME_TERMINOLOGY.memoryTimeline}.`
   );
 }
 
@@ -126,4 +135,74 @@ function createEvent(
     createdAt:
       new Date().toISOString(),
   };
+}
+
+function normalizeContinuityLabel(
+  value: string | undefined,
+  status: string | undefined
+): string {
+  if (!value) {
+    return formatContinuityStatus(status);
+  }
+
+  const normalizedValue =
+    value.trim().toLowerCase();
+
+  if (
+    value === "깊어지는 흐름" ||
+    normalizedValue === "deepening flow"
+  ) {
+    return "Deepening";
+  }
+
+  if (
+    value === "반복되는 흐름" ||
+    value === "되돌아온 흐름" ||
+    normalizedValue === "returning flow"
+  ) {
+    return "Returning";
+  }
+
+  if (
+    value === "새로운 분기" ||
+    value === "갈라지는 흐름" ||
+    normalizedValue === "branching flow"
+  ) {
+    return "Branching";
+  }
+
+  if (
+    value === "형성되는 흐름" ||
+    normalizedValue === "forming flow"
+  ) {
+    return "Forming";
+  }
+
+  return value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(
+      (part) =>
+        part.charAt(0).toUpperCase() +
+        part.slice(1)
+    )
+    .join(" ");
+}
+
+function formatContinuityStatus(
+  value: string | undefined
+): string {
+  if (!value) {
+    return "Current continuity";
+  }
+
+  return value
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(
+      (part) =>
+        part.charAt(0).toUpperCase() +
+        part.slice(1)
+    )
+    .join(" ");
 }

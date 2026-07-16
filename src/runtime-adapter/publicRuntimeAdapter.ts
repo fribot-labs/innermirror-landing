@@ -323,12 +323,12 @@ function normalizeRuntimeReflectionResult(
       relatedSummary:
         result.continuitySignal
           .relatedSummary ??
-        "이전에 비슷한 reflection 흐름이 있었습니다.",
+        "A similar Reflection flow appeared earlier.",
 
       relatedTimeLabel:
         result.continuitySignal
           .relatedTimeLabel ??
-        "최근 흐름",
+        "Recent flow",
 
       bridgeKind:
         result.continuitySignal
@@ -345,14 +345,35 @@ function normalizeRuntimeReflectionResult(
         result.continuitySignal.driftDirection ?? "stable",
 
       driftFromLabel:
-        result.continuitySignal
-          .driftFromLabel ??
-        "기존 생각 흐름",
+        normalizeDriftDisplayLabel(
+          result.continuitySignal.driftFromLabel,
+          "Previous thought flow"
+        ),
 
       driftToLabel:
-        result.continuitySignal
-          .driftToLabel ??
-        "현재 생각 흐름",
+        normalizeDriftDisplayLabel(
+          result.continuitySignal.driftToLabel,
+          "Current thought flow"
+        ),
     },
   };
+}
+
+function normalizeDriftDisplayLabel(
+  value: string | undefined,
+  fallback: string
+): string {
+  if (!value) {
+    return fallback;
+  }
+
+  if (value === "기존 생각 흐름") {
+    return "Previous thought flow";
+  }
+
+  if (value === "현재 생각 흐름") {
+    return "Current thought flow";
+  }
+
+  return value;
 }
