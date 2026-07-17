@@ -26,6 +26,7 @@ import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
+import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
@@ -117,6 +118,27 @@ export function App() {
 
   const isAnyProjectActionRunning =
     projectActionState !== "idle" || isLoading;
+
+  const projectActionGuidance =
+    resolveProjectActionGuidance({
+      hasRepository:
+        selectedRepository !== null,
+
+      hasProject:
+        activeProject !== null,
+
+      hasCurrentFocus:
+        currentStep.trim().length > 0,
+
+      hasReflectionDraft:
+        content.trim().length > 0,
+
+      hasProjectSnapshot:
+        snapshotState.status === "ready",
+
+      isActionRunning:
+        isAnyProjectActionRunning,
+    });
 
   const {
     isMerging,
@@ -374,6 +396,8 @@ export function App() {
 
       await submitReflection(trimmedContent);
 
+      setContent("");
+
       window.setTimeout(() => {
         void serverMemoryTimeline.refresh();
       }, 800);
@@ -591,6 +615,14 @@ export function App() {
         isActionLocked={
           isSavingThought || isCombinedAnalyzing
         }
+        startAction={
+          activeProject === null
+            ? projectActionGuidance.startProject
+            : projectActionGuidance.updateProjectFocus
+        }
+        analyzeAction={
+          projectActionGuidance.analyzeGitHubProject
+        }
       />
 
       <ProjectReflectionPanel
@@ -605,6 +637,12 @@ export function App() {
         isSavingThought={isSavingThought || isLoading}
         isCombinedAnalyzing={isCombinedAnalyzing}
         isActionLocked={isGitHubAnalyzing}
+        saveAction={
+          projectActionGuidance.saveThought
+        }
+        combinedAction={
+          projectActionGuidance.thoughtProjectAnalyze
+        }
       />
 
       <ProjectSummaryPanel project={activeProject} />
