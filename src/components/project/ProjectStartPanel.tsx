@@ -1,5 +1,15 @@
-import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
-import type { PblProject } from "../../types/pblProject";
+import type {
+  ActionAvailability,
+  GuidedActionPresentation,
+} from "../../project-actions/projectActionGuidanceTypes";
+
+import type {
+  GitHubRepositorySummary,
+} from "../../types/githubLearningEntry";
+
+import type {
+  PblProject,
+} from "../../types/pblProject";
 
 type ProjectStartPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
@@ -10,8 +20,12 @@ type ProjectStartPanelProps = {
   onApplyProjectFocus: () => void;
   onAnalyzeGitHubProject: () => void;
 
+  isProjectSubmitting?: boolean;
   isGitHubAnalyzing?: boolean;
   isActionLocked?: boolean;
+
+  startAction: GuidedActionPresentation;
+  analyzeAction: GuidedActionPresentation;
 };
 
 export function ProjectStartPanel({
@@ -21,33 +35,29 @@ export function ProjectStartPanel({
   onChangeCurrentStep,
   onApplyProjectFocus,
   onAnalyzeGitHubProject,
+  isProjectSubmitting = false,
   isGitHubAnalyzing = false,
   isActionLocked = false,
+  startAction,
+  analyzeAction,
 }: ProjectStartPanelProps) {
-  const hasRepository =
-    selectedRepository !== null;
-
-  const hasCurrentFocus =
-    currentStep.trim().length > 0;
-
   const isAnyProjectActionRunning =
+    isProjectSubmitting ||
     isGitHubAnalyzing ||
     isActionLocked;
 
-  const isSelectedRepositoryActiveProject =
-    selectedRepository !== null &&
-    project !== null &&
-    project.repository.owner === selectedRepository.owner &&
-    project.repository.name === selectedRepository.name;
+  const isStartActionDisabled =
+    startAction.availability === "disabled" ||
+    isAnyProjectActionRunning;
 
-  const canApplyProjectFocus =
-    hasRepository &&
-    hasCurrentFocus &&
-    !isAnyProjectActionRunning;
+  const isAnalyzeActionDisabled =
+    analyzeAction.availability === "disabled" ||
+    isAnyProjectActionRunning;
 
-  const canAnalyzeGitHubProject =
-    isSelectedRepositoryActiveProject &&
-    !isAnyProjectActionRunning;
+  const startActionLabel =
+    project === null
+      ? "Start Project"
+      : "Update Project Focus";
 
   return (
     <section
@@ -62,7 +72,8 @@ export function ProjectStartPanel({
         <h2>Start a PBL coding project</h2>
 
         <p>
-          Define the current focus, then analyze recent GitHub activity.
+          Define the current focus, then choose how to continue
+          with recent GitHub activity.
         </p>
       </div>
 
@@ -116,47 +127,109 @@ export function ProjectStartPanel({
           </label>
 
           <div className="project-start-panel-actions">
-            <button
-              className="project-start-panel-button"
-              type="button"
-              onClick={onApplyProjectFocus}
-              disabled={!canApplyProjectFocus}
+            <div
+              className={[
+                "project-guided-action",
+                `project-guided-action-${startAction.availability}`,
+              ].join(" ")}
             >
-              {project === null
-                ? "Start Project"
-                : "Update Project Focus"}
-            </button>
+              <ActionAvailabilityLabel
+                availability={startAction.availability}
+              />
 
-            <button
-              className="project-start-panel-button project-start-panel-button-secondary"
-              type="button"
-              onClick={onAnalyzeGitHubProject}
-              disabled={!canAnalyzeGitHubProject}
+              <button
+                className={createActionButtonClassName(
+                  startAction.availability
+                )}
+                type="button"
+                onClick={onApplyProjectFocus}
+                disabled={isStartActionDisabled}
+                aria-describedby="project-start-action-reason"
+              >
+                {isProjectSubmitting
+                  ? "Saving Project..."
+                  : startActionLabel}
+              </button>
+
+              <small
+                id="project-start-action-reason"
+                className="project-action-reason"
+              >
+                {startAction.reason}
+              </small>
+            </div>
+
+            <div
+              className={[
+                "project-guided-action",
+                `project-guided-action-${analyzeAction.availability}`,
+              ].join(" ")}
             >
-              {isGitHubAnalyzing
-                ? "Analyzing GitHub..."
-                : "Analyze GitHub Project"}
-            </button>
+              <ActionAvailabilityLabel
+                availability={analyzeAction.availability}
+              />
+
+              <button
+                className={createActionButtonClassName(
+                  analyzeAction.availability
+                )}
+                type="button"
+                onClick={onAnalyzeGitHubProject}
+                disabled={isAnalyzeActionDisabled}
+                aria-describedby="project-analyze-action-reason"
+              >
+                {isGitHubAnalyzing
+                  ? "Analyzing GitHub..."
+                  : "Analyze GitHub Project"}
+              </button>
+
+              <small
+                id="project-analyze-action-reason"
+                className="project-action-reason"
+              >
+                {analyzeAction.reason}
+              </small>
+            </div>
           </div>
-
-          {!hasCurrentFocus ? (
-            <small className="project-start-panel-action-help">
-              Describe your current focus first. Even a simple
-              keyword is enough to help Runtime understand your
-              project direction.
-            </small>
-          ) : !isSelectedRepositoryActiveProject ? (
-            <small className="project-start-panel-action-help">
-              Start this repository as a project before running
-              GitHub analysis.
-            </small>
-          ) : (
-            <small className="project-start-panel-action-help">
-              GitHub activity only. No Reflection is saved.
-            </small>
-          )}
         </div>
       )}
     </section>
   );
+}
+
+function createActionButtonClassName(
+  availability: ActionAvailability
+): string {
+  return [
+    "project-start-panel-button",
+    "project-action-button",
+    `project-action-button-${availability}`,
+  ].join(" ");
+}
+
+type ActionAvailabilityLabelProps = {
+  availability: ActionAvailability;
+};
+
+function ActionAvailabilityLabel({
+  availability,
+}: ActionAvailabilityLabelProps) {
+  if (availability === "recommended") {
+    return (
+      <span className="project-action-recommendation">
+        <span aria-hidden="true">★</span>
+        Recommended
+      </span>
+    );
+  }
+
+  if (availability === "available") {
+    return (
+      <span className="project-action-availability">
+        Available
+      </span>
+    );
+  }
+
+  return null;
 }

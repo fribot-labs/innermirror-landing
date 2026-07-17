@@ -835,3 +835,92 @@
   font-size: 0.88rem;
   line-height: 1.6;
 }
+
+/* -------------------------------------------------
+   Project action guidance
+-------------------------------------------------- */
+
+.project-action-button-recommended {
+  background: var(--action-primary-background);
+  border-color: var(--action-primary-border);
+  color: var(--action-primary-text);
+}
+
+.project-action-button-available {
+  background: transparent;
+  border-color: var(--action-primary-border);
+  color: var(--action-secondary-text);
+}
+
+.project-action-button-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.project-action-description {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.project-action-recommendation {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+}
+
+.project-action-availability {
+  font-weight: 600;
+}
+
+.project-action-disabled-reason {
+  opacity: 0.72;
+}
+
+.project-action-recommendation,
+.project-action-availability {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 18px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.project-action-recommendation {
+  color: #8eb7ff;
+}
+
+.project-action-availability {
+  color: #a8b4c7;
+}
+
+/* -------------------------------------------------
+   Project card background
+-------------------------------------------------- */
+
+.project-guided-action {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+}
+
+.project-guided-action-recommended {
+  background: rgba(47, 111, 237, 0.07);
+  border-color: rgba(79, 134, 239, 0.38);
+}
+
+.project-guided-action-available {
+  background: transparent;
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.project-guided-action-disabled {
+  background: transparent;
+  border-color: transparent;
+}

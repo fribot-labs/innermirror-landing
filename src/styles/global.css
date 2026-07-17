@@ -5,3 +5,72 @@
 @import "./project.css";
 @import "./reflection.css";
 @import "./responsive.css";
+
+/* -------------------------------------------------
+   Guided project action states
+-------------------------------------------------- */
+
+.project-action-button {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+/* Recommended:
+   strongest next action */
+.project-start-panel-button.project-action-button-recommended,
+.project-reflection-button.project-action-button-recommended {
+  background: #2f6fed;
+  border-color: #2f6fed;
+  color: #ffffff;
+  box-shadow: 0 6px 16px rgba(47, 111, 237, 0.22);
+}
+
+.project-start-panel-button.project-action-button-recommended:hover:not(:disabled),
+.project-reflection-button.project-action-button-recommended:hover:not(:disabled) {
+  background: #255ed0;
+  border-color: #255ed0;
+  transform: translateY(-1px);
+}
+
+/* Available:
+   valid alternative, but not the primary recommendation */
+.project-start-panel-button.project-action-button-available,
+.project-reflection-button.project-action-button-available {
+  background: transparent;
+  border-color: #4f86ef;
+  color: #dce9ff;
+  box-shadow: none;
+}
+
+.project-start-panel-button.project-action-button-available:hover:not(:disabled),
+.project-reflection-button.project-action-button-available:hover:not(:disabled) {
+  background: rgba(47, 111, 237, 0.12);
+  border-color: #74a3ff;
+  color: #ffffff;
+}
+
+/* Disabled:
+   unavailable action */
+.project-start-panel-button.project-action-button-disabled,
+.project-reflection-button.project-action-button-disabled,
+.project-action-button:disabled {
+  background: #263449;
+  border-color: #314159;
+  color: #718096;
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 0.72;
+  transform: none;
+}

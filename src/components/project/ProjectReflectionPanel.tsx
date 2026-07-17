@@ -1,5 +1,20 @@
-import type { GitHubRepositorySummary } from "../../types/githubLearningEntry";
-import type { PblProject } from "../../types/pblProject";
+import type {
+  ActionAvailability,
+  GuidedActionPresentation,
+} from "../../project-actions/projectActionGuidanceTypes";
+
+import {
+  PROJECT_ACTION_DESCRIPTIONS,
+  PROJECT_ACTION_LABELS,
+} from "../../constants/projectActionLabels";
+
+import type {
+  GitHubRepositorySummary,
+} from "../../types/githubLearningEntry";
+
+import type {
+  PblProject,
+} from "../../types/pblProject";
 
 type ProjectReflectionPanelProps = {
   project: PblProject | null;
@@ -13,6 +28,9 @@ type ProjectReflectionPanelProps = {
   isSavingThought?: boolean;
   isCombinedAnalyzing?: boolean;
   isActionLocked?: boolean;
+
+  saveAction: GuidedActionPresentation;
+  combinedAction: GuidedActionPresentation;
 };
 
 export function ProjectReflectionPanel({
@@ -25,6 +43,8 @@ export function ProjectReflectionPanel({
   isSavingThought = false,
   isCombinedAnalyzing = false,
   isActionLocked = false,
+  saveAction,
+  combinedAction,
 }: ProjectReflectionPanelProps) {
   const hasReflection =
     content.trim().length > 0;
@@ -40,16 +60,13 @@ export function ProjectReflectionPanel({
     isCombinedAnalyzing ||
     isActionLocked;
 
-  const canSaveThought =
-    hasActiveProject &&
-    hasReflection &&
-    !isAnyReflectionActionRunning;
+  const isReflectionOnlyDisabled =
+    saveAction.availability === "disabled" ||
+    isAnyReflectionActionRunning;
 
-  const canRunCombinedAnalysis =
-    hasActiveProject &&
-    hasSelectedRepository &&
-    hasReflection &&
-    !isAnyReflectionActionRunning;
+  const isReflectionWithGitHubDisabled =
+    combinedAction.availability === "disabled" ||
+    isAnyReflectionActionRunning;
 
   return (
     <section
@@ -91,55 +108,171 @@ export function ProjectReflectionPanel({
         />
       </label>
 
-      <div className="project-reflection-panel-actions">
-        <button
-          type="button"
-          className="project-reflection-button"
-          onClick={onSaveThought}
-          disabled={!canSaveThought}
-        >
-          {isSavingThought
-            ? "Saving Thought..."
-            : "Save Thought"}
-        </button>
+      {hasActiveProject && hasReflection ? (
+        <p className="project-reflection-choice-help">
+          Choose one analysis scope for this Reflection.
+        </p>
+      ) : null}
 
-        <button
-          type="button"
-          className="project-reflection-button project-reflection-button-primary"
-          onClick={onThoughtAndProjectAnalyze}
-          disabled={!canRunCombinedAnalysis}
+      <div className="project-reflection-panel-actions">
+        <div
+          className={createGuidedActionClassName(
+            saveAction.availability
+          )}
         >
-          {isCombinedAnalyzing
-            ? "Analyzing Thought + Project..."
-            : "Thought + Project Analyze"}
-        </button>
+          <ActionAvailabilityLabel
+            availability={saveAction.availability}
+          />
+
+          <button
+            type="button"
+            className={createReflectionActionButtonClassName(
+              saveAction.availability
+            )}
+            onClick={onSaveThought}
+            disabled={isReflectionOnlyDisabled}
+            aria-describedby="reflection-only-description"
+          >
+            {isSavingThought
+              ? "Analyzing Reflection..."
+              : PROJECT_ACTION_LABELS.reflectionOnly}
+          </button>
+
+          <div
+            id="reflection-only-description"
+            className="project-action-description"
+          >
+            <strong>
+              {
+                PROJECT_ACTION_DESCRIPTIONS
+                  .reflectionOnly.primary
+              }
+            </strong>
+
+            <span>
+              {
+                PROJECT_ACTION_DESCRIPTIONS
+                  .reflectionOnly.secondary
+              }
+            </span>
+          </div>
+
+          {saveAction.availability === "disabled" ? (
+            <small className="project-action-disabled-reason">
+              {saveAction.reason}
+            </small>
+          ) : null}
+        </div>
+
+        <div
+          className={createGuidedActionClassName(
+            combinedAction.availability
+          )}
+        >
+          <ActionAvailabilityLabel
+            availability={combinedAction.availability}
+          />
+
+          <button
+            type="button"
+            className={createReflectionActionButtonClassName(
+              combinedAction.availability
+            )}
+            onClick={onThoughtAndProjectAnalyze}
+            disabled={isReflectionWithGitHubDisabled}
+            aria-describedby="reflection-github-description"
+          >
+            {isCombinedAnalyzing
+              ? "Analyzing Reflection + GitHub..."
+              : PROJECT_ACTION_LABELS.reflectionWithGitHub}
+          </button>
+
+          <div
+            id="reflection-github-description"
+            className="project-action-description"
+          >
+            <strong>
+              {
+                PROJECT_ACTION_DESCRIPTIONS
+                  .reflectionWithGitHub.primary
+              }
+            </strong>
+
+            <span>
+              {
+                PROJECT_ACTION_DESCRIPTIONS
+                  .reflectionWithGitHub.secondary
+              }
+            </span>
+          </div>
+
+          {combinedAction.availability === "disabled" ? (
+            <small className="project-action-disabled-reason">
+              {combinedAction.reason}
+            </small>
+          ) : null}
+        </div>
       </div>
 
       {!hasActiveProject ? (
         <small className="project-reflection-panel-status">
-          Start the project before saving or analyzing a Reflection.
+          Start the project before analyzing a Reflection.
         </small>
       ) : !hasReflection ? (
         <small className="project-reflection-panel-status">
-          Add a Reflection to activate these actions.
+          Add a Reflection to choose an analysis scope.
         </small>
       ) : !hasSelectedRepository ? (
         <small className="project-reflection-panel-status">
-          Select a repository before running Thought + Project Analyze.
+          Select a repository before using Reflection + GitHub.
         </small>
-      ) : (
-        <div className="project-reflection-panel-action-help">
-          <p>
-            <strong>Save Thought:</strong>{" "}
-            Reflection only.
-          </p>
-
-          <p>
-            <strong>Thought + Project Analyze:</strong>{" "}
-            Reflection with fresh GitHub activity.
-          </p>
-        </div>
-      )}
+      ) : null}
     </section>
   );
+}
+
+type ActionAvailabilityLabelProps = {
+  availability: ActionAvailability;
+};
+
+function ActionAvailabilityLabel({
+  availability,
+}: ActionAvailabilityLabelProps) {
+  if (availability === "recommended") {
+    return (
+      <span className="project-action-recommendation">
+        <span aria-hidden="true">★</span>
+        Recommended
+      </span>
+    );
+  }
+
+  if (availability === "available") {
+    return (
+      <span className="project-action-availability">
+        Available
+      </span>
+    );
+  }
+
+  return null;
+}
+
+function createGuidedActionClassName(
+  availability: ActionAvailability
+): string {
+  return [
+    "project-guided-action",
+    `project-guided-action-${availability}`,
+  ].join(" ");
+}
+
+function createReflectionActionButtonClassName(
+  availability: ActionAvailability
+): string {
+  return [
+    "project-reflection-button",
+    "project-action-button",
+    `project-action-button-${availability}`,
+  ].join(" ");
 }
