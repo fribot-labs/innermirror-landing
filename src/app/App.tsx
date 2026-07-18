@@ -5,6 +5,7 @@ import { RepositorySelector } from "../components/github/RepositorySelector";
 import { ProjectReflectionPanel } from "../components/project/ProjectReflectionPanel";
 import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
 import { ProjectSummaryPanel } from "../components/project/ProjectSummaryPanel";
+import { RuntimeNextActionPanel } from "../components/runtime-next-action/RuntimeNextActionPanel";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
 import { LocalReflectionList } from "../components/runtime/LocalReflectionList";
@@ -40,6 +41,7 @@ import { useServerRuntimeMemoryTimeline } from "../runtime-adapter/useServerRunt
 import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { useProjectAnalysisMemory } from "../runtime-local/useProjectAnalysisMemory";
+import type { RuntimeNextAction } from "../runtime-next-action/runtimeNextActionTypes";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createProjectContinuityInsight } from "../runtime/createProjectContinuityInsight";
@@ -575,6 +577,25 @@ export function App() {
     void handleGitHubAnalyze(true);
   };
 
+  const runtimeNextAction: RuntimeNextAction = {
+    kind: "write-reflection",
+    title:
+      "Write one Reflection explaining why the latest project change was necessary.",
+    description:
+      "Describe the decision behind your latest implementation.",
+    reason:
+      "Runtime can see what changed, but not why it changed.",
+    target: "reflection",
+    confidence: "high",
+    source: "project-state",
+    sourceLabel: "Project activity without Reflection",
+    isActionable: true,
+  } as const;
+
+  const handleNextActionNavigation = () => {
+    // PR-041C
+  };
+
   return (
     <main>
       <GitHubLoginEntry
@@ -696,6 +717,13 @@ export function App() {
 
       {error !== null && runtimeUxMode.mode !== "local-only" ? (
         <RuntimeErrorState error={error} onRetry={handleReflect} />
+      ) : null}
+
+      {runtimeNextAction ? (
+        <RuntimeNextActionPanel
+          action={runtimeNextAction}
+          onNavigate={handleNextActionNavigation}
+        />
       ) : null}
 
       {runtimeV2Response !== null ? (

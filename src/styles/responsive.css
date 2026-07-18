@@ -156,4 +156,26 @@
   .runtime-failure-recovery-actions {
     flex-wrap: wrap;
   }
+
+  .runtime-next-action-panel {
+    padding: 18px;
+  }
+
+  .runtime-next-action-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .runtime-next-action-confidence-group {
+    align-items: flex-start;
+  }
+
+  .runtime-next-action-confidence-level {
+    white-space: normal;
+  }
+
+  .runtime-next-action-navigation {
+    width: 100%;
+    min-width: 0;
+  }
 }
