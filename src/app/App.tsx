@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
@@ -41,7 +45,13 @@ import { useServerRuntimeMemoryTimeline } from "../runtime-adapter/useServerRunt
 import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflectionPersistence";
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { useProjectAnalysisMemory } from "../runtime-local/useProjectAnalysisMemory";
-import type { RuntimeNextAction } from "../runtime-next-action/runtimeNextActionTypes";
+import { createRuntimeNextAction } from "../runtime-next-action/createRuntimeNextAction";
+import {
+  createRuntimeNextActionRuntimeSignals,
+} from "../runtime-next-action/createRuntimeNextActionRuntimeSignals";
+import type {
+  RuntimeNextActionTarget,
+} from "../runtime-next-action/runtimeNextActionTypes";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createProjectContinuityInsight } from "../runtime/createProjectContinuityInsight";
@@ -52,9 +62,14 @@ import type {
   GitHubConnectionState,
   GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
+import type {
+  GitHubSnapshot,
+} from "../types/githubSnapshot";
 import {
   addPblReflection,
+  countPblReflections,
   createPblProject,
+  getCurrentPblMilestone,
   updatePblProjectFocus,
   type PblProject,
 } from "../types/pblProject";
@@ -67,6 +82,18 @@ type ProjectActionState =
   | "analyzing-combined";
 
 export function App() {
+  const projectFocusSectionRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const reflectionSectionRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const runtimeDetailsSectionRef =
+    useRef<HTMLDivElement | null>(null);
+
+  const projectTimelineSectionRef =
+    useRef<HTMLDivElement | null>(null);
+
   const [content, setContent] = useState("");
 
   const [githubConnectionState, setGithubConnectionState] =
@@ -90,6 +117,9 @@ export function App() {
 
   const [runtimeV2Response, setRuntimeV2Response] =
     useState<RuntimeContractV2Response | null>(null);
+
+  const [latestCapturedSnapshot, setLatestCapturedSnapshot] =
+    useState<GitHubSnapshot | null>(null);
 
   const [projectActionState, setProjectActionState] =
     useState<ProjectActionState>("idle");
@@ -279,6 +309,7 @@ export function App() {
     setActiveProject(null);
     setCurrentStep("");
     resetSnapshot();
+    setLatestCapturedSnapshot(null);
     setRuntimeV2Response(null);
     resetMerge();
   };
@@ -313,6 +344,8 @@ export function App() {
 
       setActiveProject(nextProject);
       resetSnapshot();
+      setLatestCapturedSnapshot(null);
+      setRuntimeV2Response(null);
 
       return;
     }
@@ -450,6 +483,8 @@ export function App() {
         return;
       }
 
+      setLatestCapturedSnapshot(capturedSnapshot);
+
       if (includeThought) {
         setActiveProject((currentProject) => {
           if (currentProject === null) {
@@ -558,6 +593,7 @@ export function App() {
         setSelectedRepository(null);
         setActiveProject(null);
         resetSnapshot();
+        setLatestCapturedSnapshot(null);
       }
 
       console.error(
@@ -577,23 +613,145 @@ export function App() {
     void handleGitHubAnalyze(true);
   };
 
-  const runtimeNextAction: RuntimeNextAction = {
-    kind: "write-reflection",
-    title:
-      "Write one Reflection explaining why the latest project change was necessary.",
-    description:
-      "Describe the decision behind your latest implementation.",
-    reason:
-      "Runtime can see what changed, but not why it changed.",
-    target: "reflection",
-    confidence: "high",
-    source: "project-state",
-    sourceLabel: "Project activity without Reflection",
-    isActionable: true,
-  } as const;
+  const runtimeNextActionSignals =
+    createRuntimeNextActionRuntimeSignals(
+      runtimeV2Response
+    );
 
-  const handleNextActionNavigation = () => {
-    // PR-041C
+  const recentCommitCount =
+    latestCapturedSnapshot
+      ?.recentCommits.length ?? 0;
+
+  const recentPullRequestCount =
+    latestCapturedSnapshot
+      ?.recentPullRequests.length ?? 0;
+
+  const reflectionCount =
+    activeProject !== null
+      ? countPblReflections(activeProject)
+      : 0;
+
+  const connectedEventCount =
+    projectAnalysisMemory.events.filter(
+      (event) => event.source === "combined"
+    ).length;
+
+  const currentMilestone =
+    activeProject !== null
+      ? getCurrentPblMilestone(activeProject)
+      : null;
+
+  const runtimeCurrentFocus =
+    currentMilestone?.title.trim() ||
+    currentStep.trim() ||
+    null;
+
+  const runtimeNextAction =
+    createRuntimeNextAction({
+      hasProject:
+        activeProject !== null,
+
+      hasRepository:
+        selectedRepository !== null,
+
+      hasReflectionDraft:
+        content.trim().length > 0,
+
+      hasGitHubSnapshot:
+        latestCapturedSnapshot !== null,
+
+      currentFocus:
+        runtimeCurrentFocus,
+
+      recommendedFocus:
+        runtimeNextActionSignals.recommendedFocus,
+
+      nextInterpretation:
+        runtimeNextActionSignals.nextInterpretation,
+
+      adaptiveCoaching:
+        runtimeNextActionSignals.adaptiveCoaching,
+
+      decisionReviewQuestion:
+        runtimeNextActionSignals
+          .decisionReviewQuestion,
+
+      nextQuestion:
+        runtimeNextActionSignals.nextQuestion,
+
+      recentCommitCount,
+
+      recentPullRequestCount,
+
+      reflectionCount,
+
+      connectedEventCount,
+    });
+
+  const scrollToSection = (
+    element: HTMLElement | null
+  ) => {
+    if (element === null) {
+      return;
+    }
+
+    element.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const handleNextActionNavigation = (
+    target: RuntimeNextActionTarget
+  ) => {
+    switch (target) {
+      case "reflection":
+      case "combined-analysis": {
+        scrollToSection(
+          reflectionSectionRef.current
+        );
+
+        window.setTimeout(() => {
+          const reflectionInput =
+            reflectionSectionRef.current
+              ?.querySelector<HTMLTextAreaElement>(
+                "textarea"
+              );
+
+          reflectionInput?.focus();
+        }, 350);
+
+        return;
+      }
+
+      case "github-analysis":
+      case "current-focus": {
+        scrollToSection(
+          projectFocusSectionRef.current
+        );
+
+        return;
+      }
+
+      case "project-timeline": {
+        scrollToSection(
+          projectTimelineSectionRef.current
+        );
+
+        return;
+      }
+
+      case "runtime-details": {
+        scrollToSection(
+          runtimeDetailsSectionRef.current
+        );
+
+        return;
+      }
+
+      default:
+        return;
+    }
   };
 
   return (
@@ -625,46 +783,50 @@ export function App() {
         </div>
       ) : null}
 
-      <ProjectStartPanel
-        selectedRepository={selectedRepository}
-        project={activeProject}
-        currentStep={currentStep}
-        onChangeCurrentStep={setCurrentStep}
-        onApplyProjectFocus={handleApplyProjectFocus}
-        onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
-        isGitHubAnalyzing={isGitHubAnalyzing}
-        isActionLocked={
-          isSavingThought || isCombinedAnalyzing
-        }
-        startAction={
-          activeProject === null
-            ? projectActionGuidance.startProject
-            : projectActionGuidance.updateProjectFocus
-        }
-        analyzeAction={
-          projectActionGuidance.analyzeGitHubProject
-        }
-      />
+      <div ref={projectFocusSectionRef}>
+        <ProjectStartPanel
+          selectedRepository={selectedRepository}
+          project={activeProject}
+          currentStep={currentStep}
+          onChangeCurrentStep={setCurrentStep}
+          onApplyProjectFocus={handleApplyProjectFocus}
+          onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
+          isGitHubAnalyzing={isGitHubAnalyzing}
+          isActionLocked={
+            isSavingThought || isCombinedAnalyzing
+          }
+          startAction={
+            activeProject === null
+              ? projectActionGuidance.startProject
+              : projectActionGuidance.updateProjectFocus
+          }
+          analyzeAction={
+            projectActionGuidance.analyzeGitHubProject
+          }
+        />
+      </div>
 
-      <ProjectReflectionPanel
-        project={activeProject}
-        selectedRepository={selectedRepository}
-        content={content}
-        onChangeContent={setContent}
-        onSaveThought={handleReflect}
-        onThoughtAndProjectAnalyze={
-          handleThoughtAndProjectAnalyze
-        }
-        isSavingThought={isSavingThought || isLoading}
-        isCombinedAnalyzing={isCombinedAnalyzing}
-        isActionLocked={isGitHubAnalyzing}
-        saveAction={
-          projectActionGuidance.saveThought
-        }
-        combinedAction={
-          projectActionGuidance.thoughtProjectAnalyze
-        }
-      />
+      <div ref={reflectionSectionRef}>
+        <ProjectReflectionPanel
+          project={activeProject}
+          selectedRepository={selectedRepository}
+          content={content}
+          onChangeContent={setContent}
+          onSaveThought={handleReflect}
+          onThoughtAndProjectAnalyze={
+            handleThoughtAndProjectAnalyze
+          }
+          isSavingThought={isSavingThought || isLoading}
+          isCombinedAnalyzing={isCombinedAnalyzing}
+          isActionLocked={isGitHubAnalyzing}
+          saveAction={
+            projectActionGuidance.saveThought
+          }
+          combinedAction={
+            projectActionGuidance.thoughtProjectAnalyze
+          }
+        />
+      </div>
 
       <ProjectSummaryPanel project={activeProject} />
 
@@ -727,9 +889,11 @@ export function App() {
       ) : null}
 
       {runtimeV2Response !== null ? (
-        <RuntimeV2ResultPanel
-          response={runtimeV2Response}
-        />
+        <div ref={runtimeDetailsSectionRef}>
+          <RuntimeV2ResultPanel
+            response={runtimeV2Response}
+          />
+        </div>
       ) : null}
 
       {result !== null ? (
@@ -768,10 +932,12 @@ export function App() {
 
       {activeProject !== null &&
       projectAnalysisMemory.events.length > 0 ? (
-        <ProjectAnalysisMemoryTimeline
-          events={projectAnalysisMemory.events}
-          onClear={projectAnalysisMemory.clearEvents}
-        />
+        <div ref={projectTimelineSectionRef}>
+          <ProjectAnalysisMemoryTimeline
+            events={projectAnalysisMemory.events}
+            onClear={projectAnalysisMemory.clearEvents}
+          />
+        </div>
       ) : null}
 
       {activeProject !== null &&
