@@ -30,23 +30,19 @@ The Runtime Next Action UI Layer gives the learner one immediate answer:
 # Architecture
 
 ```text
-Runtime Response
+Recommendation Candidates
 
 ↓
 
-Runtime Next Action Foundation
+Recommendation Resolution
 
 ↓
 
-RuntimeNextAction
+Runtime Why Explanation
 
 ↓
 
-Runtime Next Action UI Layer
-
-↓
-
-Learner
+Runtime Next Action Presentation
 ```
 
 The Foundation selects the recommendation.
@@ -410,3 +406,28 @@ Runtime Coach
 The learner still controls every action.
 
 Landing makes the next meaningful step easier to understand.
+
+---
+
+# Runtime Why Layer
+
+The Why Layer explains why the selected Runtime Next Action has priority.
+
+It receives the resolved recommendation and exposes:
+
+- summary
+- context
+- priority reason
+- expected outcome
+- explanation priority
+
+The UI displays the summary first and allows the learner to expand the full explanation.
+
+The Why Layer does not expose:
+
+- candidate scores
+- candidate IDs
+- raw Runtime signals
+- project evidence payloads
+
+Those belong to the Runtime Evidence Layer.
