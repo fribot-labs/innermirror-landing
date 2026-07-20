@@ -1,3 +1,7 @@
+import type {
+  RuntimeWhyExplanation,
+} from "./runtimeWhyTypes";
+
 export type RuntimeNextActionKind =
   | "write-reflection"
   | "analyze-github"
@@ -36,6 +40,8 @@ export type RuntimeNextAction = {
   title: string;
   description: string;
   reason: string;
+
+  why?: RuntimeWhyExplanation;
 
   target: RuntimeNextActionTarget;
   confidence: RuntimeNextActionConfidence;
