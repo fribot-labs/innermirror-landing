@@ -178,4 +178,12 @@
     width: 100%;
     min-width: 0;
   }
+
+  .runtime-why-panel__header {
+    flex-direction: column;
+  }
+
+  .runtime-why-panel__priority {
+    align-self: flex-start;
+  }
 }

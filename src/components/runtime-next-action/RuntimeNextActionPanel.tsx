@@ -1,7 +1,10 @@
 import type {
-    RuntimeNextAction,
-    RuntimeNextActionTarget,
+  RuntimeNextAction,
+  RuntimeNextActionTarget,
 } from "../../runtime-next-action/runtimeNextActionTypes";
+import {
+  RuntimeWhyPanel,
+} from "./RuntimeWhyPanel";
 
 type RuntimeNextActionPanelProps = {
   action: RuntimeNextAction;
@@ -116,15 +119,10 @@ export function RuntimeNextActionPanel({
         {action.description}
       </p>
 
-      <div className="runtime-next-action-reason">
-        <p className="runtime-next-action-reason-label">
-          WHY RUNTIME RECOMMENDS THIS
-        </p>
-
-        <p className="runtime-next-action-reason-text">
-          {action.reason}
-        </p>
-      </div>
+      <RuntimeWhyPanel
+        why={action.why}
+        fallbackReason={action.reason}
+      />
 
       {canNavigate ? (
         <button
