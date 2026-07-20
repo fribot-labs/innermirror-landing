@@ -1,9 +1,9 @@
 import type {
-    RuntimeNextAction,
-    RuntimeNextActionConfidence,
-    RuntimeNextActionKind,
-    RuntimeNextActionSource,
-    RuntimeNextActionTarget,
+  RuntimeNextAction,
+  RuntimeNextActionConfidence,
+  RuntimeNextActionKind,
+  RuntimeNextActionSource,
+  RuntimeNextActionTarget,
 } from "./runtimeNextActionTypes";
 
 export type RuntimeRecommendationCategory =
@@ -19,6 +19,12 @@ export type RuntimeRecommendationSpecificity =
   | "low"
   | "medium"
   | "high";
+
+export type RuntimeRecommendationResolutionType =
+  | "single"
+  | "selected"
+  | "merged"
+  | "fallback";
 
 export type RuntimeRecommendationCandidate = {
   id: string;
@@ -68,8 +74,5 @@ export type RuntimeRecommendationResolution = {
   candidateCount: number;
   supportingCandidateIds: string[];
   resolution:
-    | "single"
-    | "selected"
-    | "merged"
-    | "fallback";
+    RuntimeRecommendationResolutionType;
 };
