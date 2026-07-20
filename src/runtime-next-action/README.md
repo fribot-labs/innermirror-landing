@@ -1,18 +1,18 @@
-# Runtime Next Action Foundation
+# Runtime Recommendation Engine
 
-The `runtime-next-action` module translates Runtime analysis into one concrete next action that the learner can immediately understand and execute.
+The `runtime-next-action` module converts Runtime analysis into **one meaningful recommendation** that a learner can immediately understand and execute.
 
 This module belongs to the Landing presentation layer.
 
 It does **not** generate new Runtime intelligence.
 
-Instead, it converts existing Runtime signals into a single human-oriented recommendation.
+Instead, it evaluates multiple Runtime recommendations, project state, and Reflection context, then compresses them into one actionable next step.
 
 ---
 
 # Why this module exists
 
-Runtime currently produces many valuable analysis results.
+Runtime produces multiple independent coaching signals.
 
 Examples include:
 
@@ -20,16 +20,17 @@ Examples include:
 - Adaptive Coaching
 - Decision Review
 - Next Question
-- Project Flow
-- Knowledge Compression
+- Next Interpretation
+- Project Continuity
+- GitHub Context
 
-Each result is meaningful.
+Each signal is individually useful.
 
 However, learners naturally ask a different question first.
 
 > **"What should I do next?"**
 
-This module answers that question.
+The Runtime Recommendation Engine answers that question.
 
 ---
 
@@ -39,10 +40,18 @@ Runtime thinks like an analyzer.
 
 Humans think like decision makers.
 
-Therefore the Landing should transform:
+Landing should therefore transform:
 
 ```text
-Runtime Analysis
+Multiple Runtime Signals
+
+↓
+
+Recommendation Candidates
+
+↓
+
+Recommendation Engine
 
 ↓
 
@@ -50,10 +59,10 @@ One Next Action
 
 ↓
 
-Detailed Explanation
+Detailed Runtime Explanation
 ```
 
-instead of presenting every Runtime signal with equal priority.
+rather than presenting every Runtime signal with equal importance.
 
 ---
 
@@ -61,11 +70,12 @@ instead of presenting every Runtime signal with equal priority.
 
 This module owns:
 
-- selecting the highest-priority action
-- translating Runtime analysis into human actions
-- determining recommendation priority
-- producing a single actionable result
-- preserving Runtime reasoning
+- collecting recommendation candidates
+- evaluating recommendation priority
+- preserving blocking project states
+- resolving conflicting recommendations
+- merging compatible Runtime signals
+- producing one Runtime Next Action
 
 This module does **not** own:
 
@@ -75,6 +85,7 @@ This module does **not** own:
 - Project Flow generation
 - Memory generation
 - Runtime contracts
+- AI reasoning
 
 ---
 
@@ -89,7 +100,19 @@ Runtime Responses
 
 ↓
 
-Runtime Next Action Foundation
+Recommendation Rules
+
+↓
+
+Recommendation Candidates
+
+↓
+
+Recommendation Engine
+
+↓
+
+RuntimeNextAction
 
 ↓
 
@@ -100,9 +123,9 @@ Landing Presentation
 Learner
 ```
 
-The Runtime remains responsible for intelligence.
+Runtime remains responsible for intelligence.
 
-Landing becomes responsible for communication.
+Landing becomes responsible for recommendation.
 
 ---
 
@@ -120,73 +143,278 @@ Defines:
 
 ---
 
+## runtimeRecommendationCandidateTypes.ts
+
+Defines the internal Recommendation Engine model.
+
+Includes:
+
+- RuntimeRecommendationCandidate
+- RuntimeRecommendationCategory
+- RuntimeRecommendationSpecificity
+- ScoredRuntimeRecommendationCandidate
+- RuntimeRecommendationResolution
+
+These types are internal to the Recommendation Engine.
+
+They are never shown directly to the learner.
+
+---
+
 ## runtimeNextActionRules.ts
 
 Contains independent recommendation rules.
 
-Each rule attempts to generate one RuntimeNextAction.
+Each rule produces **one Recommendation Candidate**.
 
 Examples:
 
+- Missing GitHub Snapshot
 - Missing Reflection
 - Missing GitHub Context
 - Recommended Focus
 - Adaptive Coaching
 - Next Question
+- Decision Review
+- Next Interpretation
 - Continuity
-- Fallback
+- Reflection Draft
+- Current Focus Fallback
+- Insufficient Context
 
-Rules should remain independent and reusable.
+Rules remain independent and reusable.
+
+---
+
+## collectRuntimeRecommendationCandidates.ts
+
+Runs every recommendation rule.
+
+Returns every valid Recommendation Candidate.
+
+```text
+Rules
+
+↓
+
+Candidate[]
+
+```
+
+No prioritization occurs here.
+
+---
+
+## scoreRuntimeRecommendationCandidate.ts
+
+Evaluates Recommendation Candidates.
+
+Current scoring considers:
+
+- base priority
+- blocking state
+- actionability
+- Runtime confidence
+- recommendation specificity
+- fallback penalty
+
+Scores are internal ordering values.
+
+They never represent learner performance.
+
+---
+
+## normalizeRuntimeRecommendationCandidates.ts
+
+Groups compatible recommendation candidates.
+
+Current normalization uses:
+
+- category
+- action kind
+- navigation target
+
+Future Runtime semantic grouping can extend this module.
+
+---
+
+## resolveRuntimeRecommendation.ts
+
+The Recommendation Engine.
+
+Responsibilities include:
+
+- blocking-state filtering
+- priority comparison
+- conflict resolution
+- supporting recommendation merge
+- confidence resolution
+
+Returns:
+
+```text
+Candidate[]
+
+↓
+
+RuntimeRecommendationResolution
+
+↓
+
+RuntimeNextAction
+```
 
 ---
 
 ## createRuntimeNextAction.ts
 
-Coordinates rule priority.
+Acts as the Recommendation Engine facade.
 
-It does not contain recommendation logic.
-
-Its responsibility is:
+Coordinates:
 
 ```text
-Rule A
+Normalize Input
 
 ↓
 
-Rule B
+Collect Candidates
 
 ↓
 
-Rule C
+Resolve Recommendation
 
 ↓
 
-Fallback
+RuntimeNextAction
 ```
 
-The first matching action becomes the Runtime Next Action.
+The public Landing API remains unchanged.
 
 ---
 
-# Rule Priority
+# Recommendation Flow
 
-Current recommendation order:
+Current flow:
 
-1. Missing Reflection
-2. Missing GitHub Context
-3. Recommended Focus
-4. Adaptive Coaching
-5. Next Question
-6. Continuity
-7. Fallback
+```text
+Runtime Signals
 
-Only one Runtime Next Action should be returned.
+↓
+
+Recommendation Rules
+
+↓
+
+Recommendation Candidates
+
+↓
+
+Candidate Scoring
+
+↓
+
+Blocking Resolution
+
+↓
+
+Conflict Resolution
+
+↓
+
+Supporting Merge
+
+↓
+
+RuntimeNextAction
+```
+
+Only one RuntimeNextAction is returned.
+
+---
+
+# Blocking Recommendation
+
+Some recommendations represent missing project evidence.
+
+Examples:
+
+- Missing GitHub Snapshot
+- Missing Reflection
+- Missing GitHub Context
+
+These recommendations are marked as:
+
+```text
+isBlocking = true
+```
+
+When any blocking candidate exists, strategic coaching recommendations are temporarily ignored until the required evidence has been collected.
+
+---
+
+# Candidate Priority
+
+Recommendation candidates include:
+
+- basePriority
+- confidence
+- specificity
+- actionability
+- blocking state
+
+These values determine recommendation ordering.
+
+---
+
+# Conflict Resolution
+
+Recommendations are grouped by action direction.
+
+Examples:
+
+```text
+Continue Project Work
+
+vs
+
+Review Project Direction
+```
+
+Conflicting actions are never merged.
+
+Only the strongest candidate becomes the primary recommendation.
+
+---
+
+# Supporting Recommendation Merge
+
+Compatible Runtime recommendations may support one primary recommendation.
+
+Examples:
+
+```text
+Recommended Focus
+
++
+
+Adaptive Coaching
+
++
+
+Next Question
+
+↓
+
+One RuntimeNextAction
+```
+
+Supporting recommendations strengthen confidence and reasoning without creating duplicate learner actions.
 
 ---
 
 # Output Model
 
-Every recommendation contains:
+Every RuntimeNextAction contains:
 
 - title
 - description
@@ -196,39 +424,37 @@ Every recommendation contains:
 - target
 - actionable state
 
-Landing should always display:
+Landing always presents:
 
 ```text
-What to do next
+What should I do?
 
 ↓
 
-Why
+Why should I do it?
 
 ↓
 
 Detailed Runtime Analysis
 ```
 
-instead of exposing every Runtime signal equally.
-
 ---
 
 # Design Principles
 
-## 1. One Action
+## 1. One Recommendation
 
-Runtime may generate many insights.
+Runtime may produce many signals.
 
-Landing should recommend only one next action.
+Landing recommends only one action.
 
 ---
 
 ## 2. Human-first
 
-Recommendations must describe actions.
+Recommendations describe actions.
 
-Not internal Runtime structures.
+Not Runtime implementation.
 
 Good:
 
@@ -246,18 +472,26 @@ Adaptive Coaching recommends Reflection.
 
 ## 3. Runtime remains unchanged
 
-This module never changes Runtime intelligence.
+The Recommendation Engine never modifies Runtime intelligence.
 
-It only changes how humans understand it.
+It only determines how Runtime information should be presented.
 
 ---
 
-## 4. Recommendation before Detail
+## 4. Blocking before Strategy
+
+Missing project evidence must be resolved before strategic coaching.
+
+State recovery always has priority over optimization.
+
+---
+
+## 5. Recommendation before Detail
 
 Users should first understand:
 
 ```text
-What should I do?
+What should I do next?
 ```
 
 Only afterwards should they explore:
@@ -265,6 +499,7 @@ Only afterwards should they explore:
 - Recommended Focus
 - Adaptive Coaching
 - Decision Review
+- Next Interpretation
 - Knowledge Compression
 - Project Flow
 
@@ -272,7 +507,7 @@ Only afterwards should they explore:
 
 # Long-term Goal
 
-Landing gradually evolves from:
+Landing evolves gradually from:
 
 ```text
 Runtime Viewer
@@ -284,20 +519,22 @@ to
 Runtime Coach
 ```
 
-The Runtime Next Action Foundation is the first layer that enables this transition.
+The Runtime Recommendation Engine becomes the decision layer that enables this transition.
 
 ---
 
 # Maintenance Rules
 
-When adding a new Runtime recommendation:
+When adding a new recommendation:
 
-1. Create an independent rule.
+1. Create one independent rule.
 2. Keep the rule focused on one recommendation.
 3. Do not duplicate existing rules.
-4. Preserve deterministic priority.
-5. Return at most one RuntimeNextAction.
-6. Update this README whenever the recommendation model changes.
+4. Return Recommendation Candidates.
+5. Preserve deterministic scoring.
+6. Preserve blocking-state behavior.
+7. Avoid conflicting recommendation merges.
+8. Update this README whenever the Recommendation Engine changes.
 
 ---
 
@@ -309,8 +546,9 @@ This module intentionally avoids:
 - automatic Reflection creation
 - automatic GitHub analysis
 - Runtime contract changes
-- AI inference
+- Runtime inference
+- AI-generated recommendation rules
 
 The learner always makes the final decision.
 
-Landing only recommends the next action.
+Landing only recommends the most meaningful next action.
