@@ -19,6 +19,10 @@ import {
   scoreRuntimeRecommendationCandidate,
 } from "./scoreRuntimeRecommendationCandidate";
 
+import {
+  createRuntimeEvidenceExplanation,
+} from "./createRuntimeEvidenceExplanation";
+
 type RuntimeRecommendationConflictGroup =
   | "project-movement"
   | "reflection-action"
@@ -300,6 +304,13 @@ function createFinalRuntimeNextAction(
      */
     why:
       createRuntimeWhyExplanation({
+        primary,
+        supporting,
+        resolution,
+      }),
+
+    evidence:
+      createRuntimeEvidenceExplanation({
         primary,
         supporting,
         resolution,
