@@ -1,4 +1,7 @@
 import type {
+  RuntimeCandidateEvidence,
+} from "./runtimeEvidenceTypes";
+import type {
   RuntimeRecommendationCandidate,
   RuntimeRecommendationSpecificity,
 } from "./runtimeRecommendationCandidateTypes";
@@ -62,6 +65,25 @@ export function createMissingGitHubSnapshotCandidate({
 
     basePriority: 1000,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value: hasRepository,
+        description:
+          "The project has a selected GitHub repository.",
+        source: "project-state",
+      },
+      {
+        id: "github-snapshot-available",
+        label: "GitHub Snapshot",
+        value: hasGitHubSnapshot,
+        description:
+          "No current implementation Snapshot is available.",
+        source: "github-snapshot",
+      },
+    ],
   };
 }
 
@@ -112,6 +134,47 @@ export function createMissingReflectionCandidate({
 
     basePriority: 950,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "github-snapshot-available",
+        label: "GitHub Snapshot",
+        value: hasGitHubSnapshot,
+        description:
+          "A current GitHub Snapshot is available for the project.",
+        source: "github-snapshot",
+      },
+      {
+        id: "recent-commit-count",
+        label: "Recent commits",
+        value:
+          Math.max(0, recentCommitCount),
+        description:
+          "Recent implementation activity was captured from GitHub.",
+        source: "github-snapshot",
+      },
+      {
+        id: "recent-pull-request-count",
+        label: "Recent pull requests",
+        value:
+          Math.max(
+            0,
+            recentPullRequestCount
+          ),
+        description:
+          "Recent pull request activity was included in the Snapshot.",
+        source: "github-snapshot",
+      },
+      {
+        id: "reflection-count",
+        label: "Reflection records",
+        value:
+          safeReflectionCount,
+        description:
+          "No project-level Reflection currently explains the recent changes.",
+        source: "reflection-state",
+      },
+    ],
   };
 }
 
@@ -157,6 +220,38 @@ export function createMissingGitHubContextCandidate({
 
     basePriority: 900,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "reflection-count",
+        label: "Reflection records",
+        value:
+          safeReflectionCount,
+        description:
+          "Reflection context is available for the project.",
+        source: "reflection-state",
+      },
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value:
+          hasRepository,
+        description:
+          hasRepository
+            ? "A GitHub repository is connected to the project."
+            : "No GitHub repository is currently connected.",
+        source: "project-state",
+      },
+      {
+        id: "github-snapshot-available",
+        label: "GitHub Snapshot",
+        value:
+          hasGitHubSnapshot,
+        description:
+          "No current GitHub Snapshot is available for comparison.",
+        source: "github-snapshot",
+      },
+    ],
   };
 }
 
@@ -172,6 +267,29 @@ export function createRecommendedFocusCandidate({
   if (recommendedFocus === null) {
     return null;
   }
+
+  const recommendedFocusEvidence:
+    RuntimeCandidateEvidence[] = [
+      {
+        id: "recommended-focus",
+        label: "Recommended Focus",
+        value:
+          recommendedFocus,
+        description:
+          "Runtime identified this as the most relevant current direction.",
+        source: "recommended-focus",
+      },
+      {
+        id: "current-focus",
+        label: "Current project focus",
+        value:
+          currentFocus ??
+          "Not specified",
+        description:
+          "The Runtime recommendation was interpreted against the active project focus.",
+        source: "project-state",
+      },
+    ];
 
   const normalizedFocus =
     recommendedFocus.toLowerCase();
@@ -211,6 +329,18 @@ export function createRecommendedFocusCandidate({
 
       basePriority: 700,
       specificity,
+
+      evidence: [
+        ...recommendedFocusEvidence,
+        {
+          id: "recommendation-direction",
+          label: "Recommendation direction",
+          value: "Stabilization",
+          description:
+            "The Recommended Focus was interpreted as a stabilization action.",
+          source: "recommended-focus",
+        },
+      ],
     };
   }
 
@@ -242,6 +372,18 @@ export function createRecommendedFocusCandidate({
 
       basePriority: 690,
       specificity,
+
+      evidence: [
+        ...recommendedFocusEvidence,
+        {
+          id: "recommendation-direction",
+          label: "Recommendation direction",
+          value: "Stabilization",
+          description:
+            "The Recommended Focus was interpreted as a stabilization action.",
+          source: "recommended-focus",
+        },
+      ],
     };
   }
 
@@ -273,6 +415,18 @@ export function createRecommendedFocusCandidate({
 
       basePriority: 680,
       specificity,
+
+      evidence: [
+        ...recommendedFocusEvidence,
+        {
+          id: "recommendation-direction",
+          label: "Recommendation direction",
+          value: "Stabilization",
+          description:
+            "The Recommended Focus was interpreted as a stabilization action.",
+          source: "recommended-focus",
+        },
+      ],
     };
   }
 
@@ -305,6 +459,18 @@ export function createRecommendedFocusCandidate({
 
       basePriority: 670,
       specificity,
+
+      evidence: [
+        ...recommendedFocusEvidence,
+        {
+          id: "recommendation-direction",
+          label: "Recommendation direction",
+          value: "Stabilization",
+          description:
+            "The Recommended Focus was interpreted as a stabilization action.",
+          source: "recommended-focus",
+        },
+      ],
     };
   }
 
@@ -334,11 +500,24 @@ export function createRecommendedFocusCandidate({
 
     basePriority: 650,
     specificity,
+
+      evidence: [
+        ...recommendedFocusEvidence,
+        {
+          id: "recommendation-direction",
+          label: "Recommendation direction",
+          value: "Stabilization",
+          description:
+            "The Recommended Focus was interpreted as a stabilization action.",
+          source: "recommended-focus",
+        },
+      ],
   };
 }
 
 export function createAdaptiveCoachingCandidate({
   adaptiveCoaching,
+  currentFocus,
 }: RuntimeNextActionRuleParams):
   RuntimeRecommendationCandidate | null {
   if (adaptiveCoaching === null) {
@@ -372,6 +551,28 @@ export function createAdaptiveCoachingCandidate({
       resolveRecommendationSpecificity(
         adaptiveCoaching
       ),
+
+    evidence: [
+      {
+        id: "adaptive-coaching",
+        label: "Adaptive Coaching",
+        value:
+          adaptiveCoaching,
+        description:
+          "Runtime generated this coaching direction from the current project and Reflection signals.",
+        source: "adaptive-coaching",
+      },
+      {
+        id: "current-focus",
+        label: "Current project focus",
+        value:
+          currentFocus ??
+          "Not specified",
+        description:
+          "The coaching signal was interpreted against the active project focus.",
+        source: "project-state",
+      },
+    ],
   };
 }
 
@@ -410,6 +611,18 @@ export function createNextQuestionCandidate({
       resolveRecommendationSpecificity(
         nextQuestion
       ),
+
+    evidence: [
+      {
+        id: "next-question",
+        label: "Next Question",
+        value:
+          nextQuestion,
+        description:
+          "Runtime identified this question as the most relevant unresolved reasoning gap.",
+        source: "next-question",
+      },
+    ],
   };
 }
 
@@ -448,6 +661,18 @@ export function createDecisionReviewCandidate({
       resolveRecommendationSpecificity(
         decisionReviewQuestion
       ),
+
+    evidence: [
+      {
+        id: "decision-review-question",
+        label: "Decision Review",
+        value:
+          decisionReviewQuestion,
+        description:
+          "Runtime identified this unresolved decision as requiring further Reflection.",
+        source: "decision-review",
+      },
+    ],
   };
 }
 
@@ -486,6 +711,18 @@ export function createNextInterpretationCandidate({
       resolveRecommendationSpecificity(
         nextInterpretation
       ),
+
+    evidence: [
+      {
+        id: "next-interpretation",
+        label: "Next Interpretation",
+        value:
+          nextInterpretation,
+        description:
+          "Runtime generated this as the likely next interpretation of the project direction.",
+        source: "next-interpretation",
+      },
+    ],
   };
 }
 
@@ -534,6 +771,27 @@ export function createContinuityCandidate({
 
     basePriority: 400,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "connected-event-count",
+        label: "Connected events",
+        value:
+          safeConnectedEventCount,
+        description:
+          "This many project and Reflection events are currently connected.",
+        source: "continuity",
+      },
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value:
+          hasRepository,
+        description:
+          "A connected repository allows Runtime to compare project activity with Reflection.",
+        source: "project-state",
+      },
+    ],
   };
 }
 
@@ -544,6 +802,7 @@ export function createContinuityCandidate({
 export function createReflectionDraftWithGitHubCandidate({
   hasRepository,
   hasReflectionDraft,
+  hasGitHubSnapshot,
 }: RuntimeNextActionRuleParams):
   RuntimeRecommendationCandidate | null {
   if (
@@ -578,6 +837,38 @@ export function createReflectionDraftWithGitHubCandidate({
 
     basePriority: 850,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "reflection-draft-available",
+        label: "Reflection draft",
+        value:
+          hasReflectionDraft,
+        description:
+          "A Reflection draft is ready for analysis.",
+        source: "reflection-state",
+      },
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value:
+          hasRepository,
+        description:
+          "A repository is available for combined analysis.",
+        source: "project-state",
+      },
+      {
+        id: "github-snapshot-available",
+        label: "GitHub Snapshot",
+        value:
+          hasGitHubSnapshot,
+        description:
+          hasGitHubSnapshot
+            ? "A current GitHub Snapshot is available."
+            : "A fresh GitHub Snapshot will be captured during combined analysis.",
+        source: "github-snapshot",
+      },
+    ],
   };
 }
 
@@ -618,6 +909,27 @@ export function createReflectionDraftOnlyCandidate({
 
     basePriority: 840,
     specificity: "high",
+
+    evidence: [
+      {
+        id: "reflection-draft-available",
+        label: "Reflection draft",
+        value:
+          hasReflectionDraft,
+        description:
+          "A Reflection draft is ready for analysis.",
+        source: "reflection-state",
+      },
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value:
+          hasRepository,
+        description:
+          "No repository is available for combined analysis.",
+        source: "project-state",
+      },
+    ],
   };
 }
 
@@ -660,12 +972,43 @@ export function createCurrentFocusFallbackCandidate({
       resolveRecommendationSpecificity(
         currentFocus
       ),
+
+    evidence: [
+      {
+        id: "current-focus",
+        label: "Current project focus",
+        value:
+          currentFocus,
+        description:
+          "The current focus is the strongest available project direction.",
+        source: "project-state",
+      },
+      {
+        id: "stronger-runtime-signal-available",
+        label: "Stronger Runtime signal",
+        value: false,
+        description:
+          "No more specific Runtime recommendation is currently available.",
+        source: "fallback",
+      },
+    ],
   };
 }
 
-export function createInsufficientContextCandidate(
-  _params: RuntimeNextActionRuleParams
-): RuntimeRecommendationCandidate {
+export function createInsufficientContextCandidate({
+  hasRepository,
+  hasGitHubSnapshot,
+  currentFocus,
+  reflectionCount,
+  connectedEventCount,
+}: RuntimeNextActionRuleParams):
+  RuntimeRecommendationCandidate {
+  const safeReflectionCount =
+    Math.max(0, reflectionCount);
+
+  const safeConnectedEventCount =
+    Math.max(0, connectedEventCount);
+
   return {
     id: "insufficient-context",
 
@@ -691,6 +1034,55 @@ export function createInsufficientContextCandidate(
 
     basePriority: 0,
     specificity: "low",
+
+    evidence: [
+      {
+        id: "repository-connected",
+        label: "Repository connected",
+        value:
+          hasRepository,
+        description:
+          "Indicates whether implementation context is currently available.",
+        source: "project-state",
+      },
+      {
+        id: "github-snapshot-available",
+        label: "GitHub Snapshot",
+        value:
+          hasGitHubSnapshot,
+        description:
+          "Indicates whether recent GitHub activity has been captured.",
+        source: "github-snapshot",
+      },
+      {
+        id: "reflection-count",
+        label: "Reflection records",
+        value:
+          safeReflectionCount,
+        description:
+          "The number of available project-level Reflection records.",
+        source: "reflection-state",
+      },
+      {
+        id: "connected-event-count",
+        label: "Connected events",
+        value:
+          safeConnectedEventCount,
+        description:
+          "The number of project events currently connected to Reflection.",
+        source: "continuity",
+      },
+      {
+        id: "current-focus",
+        label: "Current project focus",
+        value:
+          currentFocus ??
+          "Not specified",
+        description:
+          "The current project focus available to Runtime.",
+        source: "project-state",
+      },
+    ],
   };
 }
 
