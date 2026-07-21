@@ -1,4 +1,8 @@
 import type {
+  RuntimeCandidateEvidence,
+} from "./runtimeEvidenceTypes";
+
+import type {
   RuntimeNextAction,
   RuntimeNextActionConfidence,
   RuntimeNextActionKind,
@@ -43,23 +47,22 @@ export type RuntimeRecommendationCandidate = {
   sourceLabel: string;
 
   isActionable: boolean;
-
-  /**
-   * 현재 작업을 진행하기 전에 반드시 해결해야 하는
-   * 상태 결손인지 나타냅니다.
-   */
   isBlocking: boolean;
 
-  /**
-   * 규칙 자체의 기본 중요도입니다.
-   * 최종 점수가 아니라 engine 입력값입니다.
-   */
   basePriority: number;
+  specificity:
+    RuntimeRecommendationSpecificity;
 
   /**
-   * 얼마나 구체적인 행동인지 나타냅니다.
+   * Candidate가 생성된 실제 프로젝트 상태와
+   * Runtime 신호를 구조화해서 보존합니다.
+   *
+   * PR-044A에서는 점진적 마이그레이션을 위해 optional입니다.
+   * 모든 rule에 Evidence가 추가되는 PR-044B 마지막에는
+   * 필수 필드로 전환합니다.
    */
-  specificity: RuntimeRecommendationSpecificity;
+  evidence?:
+    RuntimeCandidateEvidence[];
 };
 
 export type ScoredRuntimeRecommendationCandidate = {

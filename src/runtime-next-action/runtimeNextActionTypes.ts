@@ -1,4 +1,7 @@
 import type {
+  RuntimeEvidenceExplanation,
+} from "./runtimeEvidenceTypes";
+import type {
   RuntimeWhyExplanation,
 } from "./runtimeWhyTypes";
 
@@ -42,6 +45,7 @@ export type RuntimeNextAction = {
   reason: string;
 
   why?: RuntimeWhyExplanation;
+  evidence?: RuntimeEvidenceExplanation;
 
   target: RuntimeNextActionTarget;
   confidence: RuntimeNextActionConfidence;
