@@ -186,4 +186,17 @@
   .runtime-why-panel__priority {
     align-self: flex-start;
   }
+
+  .runtime-evidence-panel__header {
+    flex-direction: column;
+  }
+
+  .runtime-evidence-panel__signal-count {
+    align-self: flex-start;
+  }
+
+  .runtime-evidence-item {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }

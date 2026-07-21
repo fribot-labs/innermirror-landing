@@ -3,6 +3,9 @@ import type {
   RuntimeNextActionTarget,
 } from "../../runtime-next-action/runtimeNextActionTypes";
 import {
+  RuntimeEvidencePanel,
+} from "./RuntimeEvidencePanel";
+import {
   RuntimeWhyPanel,
 } from "./RuntimeWhyPanel";
 
@@ -122,6 +125,10 @@ export function RuntimeNextActionPanel({
       <RuntimeWhyPanel
         why={action.why}
         fallbackReason={action.reason}
+      />
+
+      <RuntimeEvidencePanel
+        evidence={action.evidence}
       />
 
       {canNavigate ? (
