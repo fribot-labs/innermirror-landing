@@ -552,3 +552,28 @@ This module intentionally avoids:
 The learner always makes the final decision.
 
 Landing only recommends the most meaningful next action.
+
+---
+
+## Runtime Evidence Layer
+
+The Runtime Evidence Layer exposes the concrete project-state
+and Runtime observations supporting the selected recommendation.
+
+It displays:
+
+- Evidence summary
+- Primary Evidence
+- Supporting Evidence
+- Project Context
+- Signal count
+
+The Evidence panel is collapsed by default.
+
+The Evidence Layer does not expose:
+
+- candidate scores
+- internal candidate IDs
+- conflict groups
+- raw Runtime payloads
+- Recommendation Engine implementation details
