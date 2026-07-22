@@ -1,0 +1,199 @@
+.runtime-action-history-panel {
+  margin-top: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.72);
+  padding: 1rem;
+}
+
+.runtime-action-history-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.runtime-action-history-panel__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7dd3fc;
+}
+
+.runtime-action-history-panel__title {
+  margin: 0.25rem 0 0;
+  font-size: 1.1rem;
+}
+
+.runtime-action-history-panel__summary {
+  margin: 0.35rem 0 0;
+  color: rgba(226, 232, 240, 0.76);
+}
+
+.runtime-action-history-panel__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+
+.runtime-action-history-panel__stats span {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+  padding: 0.28rem 0.55rem;
+  font-size: 0.75rem;
+}
+
+.runtime-action-history-list {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.runtime-action-history-entry {
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.52);
+  padding: 0.9rem;
+}
+
+.runtime-action-history-entry--current {
+  border-color: rgba(96, 165, 250, 0.65);
+  background: rgba(30, 64, 175, 0.12);
+}
+
+.runtime-action-history-entry__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.runtime-action-history-entry__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.runtime-action-history-status,
+.runtime-action-history-resolution {
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.runtime-action-history-status--current {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+.runtime-action-history-status--completed {
+  background: rgba(34, 197, 94, 0.14);
+  color: #86efac;
+}
+
+.runtime-action-history-status--replaced {
+  background: rgba(148, 163, 184, 0.14);
+  color: #cbd5e1;
+}
+
+.runtime-action-history-status--attention {
+  background: rgba(245, 158, 11, 0.14);
+  color: #fcd34d;
+}
+
+.runtime-action-history-entry__title {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+}
+
+.runtime-action-history-entry__description {
+  margin: 0.55rem 0 0;
+  color: rgba(226, 232, 240, 0.82);
+}
+
+.runtime-action-history-entry__meta,
+.runtime-action-history-entry__counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 0.7rem;
+  font-size: 0.75rem;
+  color: rgba(203, 213, 225, 0.7);
+}
+
+.runtime-action-history-entry__details {
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.9rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding-top: 0.9rem;
+}
+
+.runtime-action-history-entry__detail-label {
+  margin-bottom: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: rgba(186, 230, 253, 0.88);
+  text-transform: uppercase;
+}
+
+.runtime-action-history-panel__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.runtime-action-history-entry__evidence-item {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.runtime-action-history-entry__evidence-title {
+  display: block;
+}
+
+.runtime-action-history-entry__evidence-description {
+  display: block;
+  color: rgba(226, 232, 240, 0.82);
+  line-height: 1.5;
+}
+
+.runtime-action-history-panel__toggle,
+.runtime-action-history-entry__toggle,
+.runtime-action-history-panel__clear {
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 8px;
+  background: rgba(30, 41, 59, 0.72);
+  color: rgba(241, 245, 249, 0.92);
+  padding: 0.45rem 0.65rem;
+  font: inherit;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.runtime-action-history-panel__toggle:hover,
+.runtime-action-history-entry__toggle:hover {
+  border-color: rgba(96, 165, 250, 0.62);
+  background: rgba(30, 64, 175, 0.18);
+}
+
+.runtime-action-history-panel__clear {
+  color: rgba(253, 186, 186, 0.9);
+  border-color: rgba(248, 113, 113, 0.3);
+  background: transparent;
+}
+
+.runtime-action-history-panel__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.runtime-action-history-panel__toggle-icon {
+  display: inline-block;
+  width: 0.8rem;
+  font-size: 0.72rem;
+  line-height: 1;
+}
