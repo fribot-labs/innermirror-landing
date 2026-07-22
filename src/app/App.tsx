@@ -32,6 +32,9 @@ import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResu
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
 import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
+import {
+  useRuntimeActionHistory,
+} from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
@@ -687,6 +690,119 @@ export function App() {
 
       connectedEventCount,
     });
+
+const {
+  history: runtimeActionHistory,
+
+  projectEntries:
+    runtimeActionHistoryEntries,
+
+  projectTransitions:
+    runtimeActionHistoryTransitions,
+
+  activeEntry:
+    activeRuntimeActionHistoryEntry,
+
+  recordNavigation:
+    recordRuntimeActionNavigation,
+
+  clearHistory:
+    clearRuntimeActionHistory,
+
+  clearProjectHistory:
+    clearRuntimeActionProjectHistory,
+} = useRuntimeActionHistory({
+  projectId:
+    activeProject?.id ?? null,
+
+  action:
+    runtimeNextAction,
+
+  observation: {
+    reflectionCount,
+
+    githubSnapshotRevision:
+      latestCapturedSnapshot?.capturedAt ??
+      null,
+
+    currentFocus:
+      runtimeCurrentFocus,
+
+    connectedEventCount,
+
+    runtimeAnalysisRevision:
+      runtimeV2Response !== null
+        ? JSON.stringify(
+            runtimeV2Response
+          )
+        : null,
+  },
+});
+
+useEffect(() => {
+  console.group(
+    "Runtime Action History"
+  );
+
+  console.log(
+    "Full History",
+    runtimeActionHistory
+  );
+
+  console.table(
+    runtimeActionHistoryEntries.map(
+      (entry) => ({
+        title:
+          entry.action.title,
+
+        status:
+          entry.status,
+
+        resolutionState:
+          entry.resolutionState,
+
+        observationCount:
+          entry.observationCount,
+
+        navigationCount:
+          entry.navigationEvents.length,
+
+        completionCount:
+          entry.completionEvidence.length,
+      })
+    )
+  );
+
+  console.table(
+    runtimeActionHistoryTransitions.map(
+      (transition) => ({
+        type:
+          transition.type,
+
+        from:
+          transition.fromEntryId,
+
+        to:
+          transition.toEntryId,
+
+        occurredAt:
+          transition.occurredAt,
+      })
+    )
+  );
+
+  console.log(
+    "Active Entry",
+    activeRuntimeActionHistoryEntry
+  );
+
+  console.groupEnd();
+}, [
+  runtimeActionHistory,
+  runtimeActionHistoryEntries,
+  runtimeActionHistoryTransitions,
+  activeRuntimeActionHistoryEntry,
+]);
 
   const scrollToSection = (
     element: HTMLElement | null
