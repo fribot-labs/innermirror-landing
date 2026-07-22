@@ -20,6 +20,9 @@ import { ProjectAnalysisMemoryTimeline } from "../components/runtime/ProjectAnal
 import { ProjectFlowSummaryPanel } from "../components/runtime/ProjectFlowSummaryPanel";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
+import {
+  RuntimeActionHistoryPanel,
+} from "../components/runtime/RuntimeActionHistoryPanel";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
 import { RuntimeFailureRecoveryNotice } from "../components/runtime/RuntimeFailureRecoveryNotice";
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
@@ -61,6 +64,7 @@ import { createProjectContinuityInsight } from "../runtime/createProjectContinui
 import { createProjectPatternInsight } from "../runtime/createProjectPatternInsight";
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
 import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
+import "../styles/runtime-history.css";
 import type {
   GitHubConnectionState,
   GitHubRepositorySummary,
@@ -691,118 +695,65 @@ export function App() {
       connectedEventCount,
     });
 
-const {
-  history: runtimeActionHistory,
+  const {
+    projectEntries:
+      runtimeActionHistoryEntries,
 
-  projectEntries:
-    runtimeActionHistoryEntries,
+    projectTransitions:
+      runtimeActionHistoryTransitions,
 
-  projectTransitions:
-    runtimeActionHistoryTransitions,
+    activeEntry:
+      activeRuntimeActionHistoryEntry,
 
-  activeEntry:
-    activeRuntimeActionHistoryEntry,
+    recordNavigation:
+      recordRuntimeActionNavigation,
 
-  recordNavigation:
-    recordRuntimeActionNavigation,
+    clearProjectHistory:
+      clearRuntimeActionProjectHistory,
+  } = useRuntimeActionHistory({
+    projectId:
+      activeProject?.id ?? null,
 
-  clearHistory:
-    clearRuntimeActionHistory,
+    action:
+      runtimeNextAction,
 
-  clearProjectHistory:
-    clearRuntimeActionProjectHistory,
-} = useRuntimeActionHistory({
-  projectId:
-    activeProject?.id ?? null,
+    observation: {
+      reflectionCount,
 
-  action:
-    runtimeNextAction,
+      githubSnapshotRevision:
+        latestCapturedSnapshot?.capturedAt ??
+        null,
 
-  observation: {
-    reflectionCount,
+      currentFocus:
+        runtimeCurrentFocus,
 
-    githubSnapshotRevision:
-      latestCapturedSnapshot?.capturedAt ??
-      null,
+      connectedEventCount,
 
-    currentFocus:
-      runtimeCurrentFocus,
+      runtimeAnalysisRevision:
+        runtimeV2Response !== null
+          ? JSON.stringify(
+              runtimeV2Response
+            )
+          : null,
+    },
+  });
 
-    connectedEventCount,
+  /**
+   * 현재 프로젝트의 Runtime Action History를
+   * 사용자 확인 후 삭제합니다.
+   */
+  const handleClearProjectHistory = () => {
+    const confirmed =
+      window.confirm(
+        "Clear past Runtime Action History for this project? The current recommendation will remain."
+      );
 
-    runtimeAnalysisRevision:
-      runtimeV2Response !== null
-        ? JSON.stringify(
-            runtimeV2Response
-          )
-        : null,
-  },
-});
+    if (!confirmed) {
+      return;
+    }
 
-useEffect(() => {
-  console.group(
-    "Runtime Action History"
-  );
-
-  console.log(
-    "Full History",
-    runtimeActionHistory
-  );
-
-  console.table(
-    runtimeActionHistoryEntries.map(
-      (entry) => ({
-        title:
-          entry.action.title,
-
-        status:
-          entry.status,
-
-        resolutionState:
-          entry.resolutionState,
-
-        observationCount:
-          entry.observationCount,
-
-        navigationCount:
-          entry.navigationEvents.length,
-
-        completionCount:
-          entry.completionEvidence.length,
-      })
-    )
-  );
-
-  console.table(
-    runtimeActionHistoryTransitions.map(
-      (transition) => ({
-        type:
-          transition.type,
-
-        from:
-          transition.fromEntryId,
-
-        to:
-          transition.toEntryId,
-
-        occurredAt:
-          transition.occurredAt,
-      })
-    )
-  );
-
-  console.log(
-    "Active Entry",
-    activeRuntimeActionHistoryEntry
-  );
-
-  console.groupEnd();
-}, [
-  runtimeActionHistory,
-  runtimeActionHistoryEntries,
-  runtimeActionHistoryTransitions,
-  activeRuntimeActionHistoryEntry,
-]);
+    clearRuntimeActionProjectHistory();
+  };
 
   const scrollToSection = (
     element: HTMLElement | null
@@ -820,6 +771,10 @@ useEffect(() => {
   const handleNextActionNavigation = (
     target: RuntimeNextActionTarget
   ) => {
+    recordRuntimeActionNavigation(
+      target
+    );
+
     switch (target) {
       case "reflection":
       case "combined-analysis": {
@@ -1001,6 +956,25 @@ useEffect(() => {
         <RuntimeNextActionPanel
           action={runtimeNextAction}
           onNavigate={handleNextActionNavigation}
+        />
+      ) : null}
+
+      {activeProject !== null ? (
+        <RuntimeActionHistoryPanel
+          entries={
+            runtimeActionHistoryEntries
+          }
+          transitions={
+            runtimeActionHistoryTransitions
+          }
+          activeEntryId={
+            activeRuntimeActionHistoryEntry
+              ?.id ??
+            null
+          }
+          onClear={
+            handleClearProjectHistory
+          }
         />
       ) : null}
 
