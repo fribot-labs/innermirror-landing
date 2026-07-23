@@ -53,6 +53,22 @@ Recommendation Candidates
 
 ↓
 
+Base Recommendation Resolution
+
+↓
+
+Recommendation Stability
+
+↓
+
+Stable Runtime Recommendation
+
+↓
+
+Runtime Action History
+
+↓
+
 History Analysis
 
 ↓
@@ -61,19 +77,11 @@ Recommendation Quality
 
 ↓
 
-Recommendation Stability
-
-↓
-
-Adaptive Recommendation Scoring
+Future Adaptive Recommendation Scoring
 
 ↓
 
 Recommendation Evolution
-
-↓
-
-Runtime Recommendation
 ```
 
 Each stage has a single responsibility.
@@ -207,15 +215,30 @@ Introduces
 Goal
 
 ```text
-Current Recommendation
+Resolved Candidate
+
+↓
+
+Challenger Observation
+
+↓
+
+Stability Validation
 
 ↓
 
 Stable Recommendation
+
+↓
+
+Runtime Action History
 ```
 
 The Runtime Recommendation should not change simply because a slightly better candidate appears momentarily.
 
+This stage does not use Recommendation Quality Profiles or History-based score modifiers.
+
+It stabilizes the existing base recommendation result before that recommendation is shown to the user or recorded in Runtime Action History.
 ---
 
 ## PR-046C
@@ -383,3 +406,62 @@ Improved Recommendation
 ```
 
 Recommendation Evolution is therefore a feedback system for Runtime itself, not an evaluation system for the learner.
+
+---
+
+# Stability and History Boundary
+
+Runtime Action History records only Stable Recommendations.
+
+The following states are not recorded:
+
+- temporary challengers
+- rejected challengers
+- short-lived recommendation changes
+- score-only fluctuations
+- rerender-only observations
+
+The intended order is:
+
+```text
+Raw Candidate
+
+↓
+
+Stability Layer
+
+↓
+
+Stable Recommendation
+
+↓
+
+Runtime Action History
+```
+
+---
+
+# Current Development Boundary 수정
+
+```text
+The current implementation stops after Recommendation Quality Analysis.
+The next implementation stage will introduce Recommendation Stability without activating History-based scoring.
+```
+
+---
+
+# Design Principle 보강
+
+present principle:
+
+```text
+History informs Recommendation.
+History never controls Recommendation.
+```
+
+add principle.
+
+```text
+Stability filters Recommendation changes.
+Stability does not improve Recommendation quality.
+```
