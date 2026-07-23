@@ -1,48 +1,16 @@
 import type {
-    CreateRuntimeRecommendationQualityProfileInput,
-    RuntimeRecommendationHistoryFeatures,
-    RuntimeRecommendationQualityConfidence,
-    RuntimeRecommendationQualityOutcome,
-    RuntimeRecommendationQualityPolicy,
-    RuntimeRecommendationQualityProfile,
-    RuntimeRecommendationQualitySignal,
+  CreateRuntimeRecommendationQualityProfileInput,
+  RuntimeRecommendationHistoryFeatures,
+  RuntimeRecommendationQualityConfidence,
+  RuntimeRecommendationQualityOutcome,
+  RuntimeRecommendationQualityPolicy,
+  RuntimeRecommendationQualityProfile,
+  RuntimeRecommendationQualitySignal,
 } from "./runtimeRecommendationQualityTypes";
 
-/* ------------------------------------------------------------------ */
-/* Default Policy */
-/* ------------------------------------------------------------------ */
-
-/**
- * PR-046A Recommendation Quality Analysis에서 사용하는 기본 정책입니다.
- *
- * 이 정책은 Recommendation Candidate의 점수를 직접 변경하지 않습니다.
- * History Feature를 해석하여 confidence와 outcome을 결정할 때만 사용합니다.
- *
- * 실제 Adaptive Score 적용은 PR-046C의 책임입니다.
- */
-export const DEFAULT_RUNTIME_RECOMMENDATION_QUALITY_POLICY:
-  RuntimeRecommendationQualityPolicy = {
-    minimumOccurrencesForDevelopingConfidence:
-      3,
-
-    minimumOccurrencesForEstablishedConfidence:
-      6,
-
-    effectiveCompletionRateThreshold:
-      0.6,
-
-    unstableSupersededRateThreshold:
-      0.5,
-
-    unresolvedRateThreshold:
-      0.5,
-
-    repeatedOccurrenceThreshold:
-      2,
-
-    visitedWithoutCompletionThreshold:
-      2,
-  };
+import {
+  DEFAULT_RUNTIME_RECOMMENDATION_QUALITY_POLICY,
+} from "./runtimeRecommendationQualityPolicy";
 
 /* ------------------------------------------------------------------ */
 /* Public Builder */
@@ -482,6 +450,8 @@ function createRuntimeRecommendationQualitySignals({
     features,
 
     confidence,
+
+    policy,
   });
 
   appendCompletionSignals({
@@ -557,9 +527,13 @@ type AppendQualitySignalsWithPolicyParams =
 
 type AppendHistorySufficiencySignalsParams =
   AppendQualitySignalsBaseParams & {
+
     confidence:
-      RuntimeRecommendationQualityConfidence;
-  };
+        RuntimeRecommendationQualityConfidence;
+
+    policy:
+        RuntimeRecommendationQualityPolicy;
+};
 
 type AppendOutcomeSignalParams =
   AppendQualitySignalsBaseParams & {
@@ -582,6 +556,7 @@ function appendHistorySufficiencySignals({
   signals,
   features,
   confidence,
+  policy,
 }: AppendHistorySufficiencySignalsParams):
   void {
   const totalOccurrences =
@@ -598,12 +573,12 @@ function appendHistorySufficiencySignals({
         ? 1
         : clampUnit(
             1 -
-            totalOccurrences /
-              Math.max(
-                1,
-                DEFAULT_RUNTIME_RECOMMENDATION_QUALITY_POLICY
-                  .minimumOccurrencesForDevelopingConfidence
-              )
+              totalOccurrences /
+                Math.max(
+                  1,
+                  policy
+                    .minimumOccurrencesForDevelopingConfidence
+                )
           );
 
     signals.push({
