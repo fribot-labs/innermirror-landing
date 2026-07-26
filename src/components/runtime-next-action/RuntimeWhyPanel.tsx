@@ -1,10 +1,10 @@
 import {
-    useId,
-    useState,
+  useId,
+  useState,
 } from "react";
 
 import type {
-    RuntimeWhyExplanation,
+  RuntimeWhyExplanation,
 } from "../../runtime-next-action/runtimeWhyTypes";
 
 type RuntimeWhyPanelProps = {
@@ -29,7 +29,10 @@ export function RuntimeWhyPanel({
 
   if (why === undefined) {
     return (
-      <section className="runtime-why-panel">
+      <section
+        className="runtime-why-panel"
+        aria-label="Runtime recommendation reasoning"
+      >
         <p className="runtime-why-panel__eyebrow">
           Why Runtime recommends this
         </p>
@@ -51,6 +54,7 @@ export function RuntimeWhyPanel({
       ]
         .filter(Boolean)
         .join(" ")}
+      aria-label="Runtime recommendation reasoning"
     >
       <div className="runtime-why-panel__header">
         <div className="runtime-why-panel__intro">
@@ -82,7 +86,8 @@ export function RuntimeWhyPanel({
         aria-controls={detailsId}
         onClick={() =>
           setIsExpanded(
-            (current) => !current
+            (current) =>
+              !current
           )
         }
       >
@@ -128,8 +133,11 @@ export function RuntimeWhyPanel({
 }
 
 type RuntimeWhyDetailProps = {
-  label: string;
-  value: string;
+  label:
+    string;
+
+  value:
+    string;
 };
 
 function RuntimeWhyDetail({
@@ -151,7 +159,9 @@ function RuntimeWhyDetail({
 
 function formatWhyPriority(
   priority:
-    RuntimeWhyExplanation["priority"]
+    RuntimeWhyExplanation[
+      "priority"
+    ]
 ): string {
   switch (priority) {
     case "blocking":
