@@ -624,28 +624,56 @@ private Runtime의 실제 응답이 도착하면 이 임시 결과는 정규화�
 
 ## Landing Presentation Boundary
 
-PR-RI03에서는 Recommendation Integration 결과를 Landing 내부 데이터 계약까지 연결합니다.
+PR-RI04부터 Recommendation Integration 결과는 Landing 내부 상태에 정규화된 뒤, 전용 Presentation Model을 통해 Reflection Runtime 화면에 표시됩니다.
 
-하지만 아직 UI에 표시하지 않습니다.
+현재 Presentation 흐름은 다음과 같습니다.
 
-현재 Presentation 계층은 기존 필드를 사용합니다.
+```text
+RuntimeReflectionResult
+        ↓
+recommendationIntegration
+        ↓
+createRuntimeRecommendationPresentation()
+        ↓
+RuntimeRecommendationPresentation
+        ↓
+RuntimeRecommendationSummary
 
-```tsx
-result.summary
-result.pacing
-result.nextQuestion
-result.continuitySignal
+and
+
+RuntimeRecommendationDetails
 ```
 
-새 필드는 내부 상태에 존재하지만 아직 렌더링하지 않습니다.
+UI는 `RuntimeRecommendationIntegrationResult`를 직접 해석하지 않습니다.
 
-```tsx
-result.recommendationIntegration
+대신 다음 Presentation Model을 단일 UI 계약으로 사용합니다.
+
+```ts
+RuntimeRecommendationPresentation
 ```
 
-Presentation Layer 노출은 후속 PR에서 수행합니다.
+이 경계는 다음 책임을 분리합니다.
 
-이 경계를 유지하면 데이터 계약 확장과 UI 설계 변경을 하나의 PR에서 혼합하지 않을 수 있습니다.
+```text
+Runtime Integration
+→ 분석 결과와 진단 상태를 제공
+
+Runtime Adapter
+→ Transport 결과를 검증하고 정규화
+
+Presentation Model
+→ Runtime 값을 사용자 표시용 정보로 변환
+
+Presentation Components
+→ 변환된 정보를 화면에 렌더링
+```
+
+`recommendationIntegration`이 `null`인 경우 Recommendation UI는 렌더링되지 않으며, 기존 Reflection UI는 그대로 유지됩니다.
+
+현재 Presentation은 `ReflectionRuntimePanel` 내부에 연결되어 있습니다.
+
+`RuntimeNextActionPanel`과 Recommendation Presentation을 연결하는 작업은 application-level shared state가 필요하므로 이 PR의 범위에 포함하지 않습니다.
+```
 
 ---
 
@@ -690,15 +718,10 @@ Transport Result를 Landing 내부 Runtime Result로 변환합니다.
 src/
 ├─ runtime-recommendation-integration/
 │  ├─ README.md
-│  │
 │  ├─ runtimeRecommendationIntegrationTypes.ts
-│  │
 │  ├─ runtimeRecommendationIntegrationPipelineTypes.ts
-│  │
 │  ├─ createRuntimeRecommendationIntegrationResult.ts
-│  │
 │  ├─ runRuntimeRecommendationIntegration.ts
-│  │
 │  └─ __tests__/
 │     ├─ createRuntimeRecommendationIntegrationResult.test.ts
 │     └─ runRuntimeRecommendationIntegration.test.ts
@@ -716,8 +739,16 @@ src/
 │  └─ __tests__/
 │     └─ normalizeRuntimeReflectionResult.test.ts
 │
-└─ runtime/
-   └─ createOptimisticReflectionResult.ts
+├─ runtime/
+│  └─ createOptimisticReflectionResult.ts
+│
+└─ components/
+   ├─ runtimeRecommendationPresentation.ts
+   ├─ RuntimeRecommendationSummary.tsx
+   ├─ RuntimeRecommendationDetails.tsx
+   ├─ ReflectionRuntimePanel.tsx
+   └─ __tests__/
+      └─ runtimeRecommendationPresentation.test.ts
 ```
 
 ---
@@ -776,6 +807,19 @@ Expected:
 13 tests passed
 ```
 
+### Runtime Recommendation Presentation
+
+```bash
+npx vitest run \
+  src/components/__tests__/runtimeRecommendationPresentation.test.ts
+```
+
+Expected:
+
+```text
+18 tests passed
+```
+
 ### Full Test Suite
 
 ```bash
@@ -785,8 +829,8 @@ npm test
 Current expected result:
 
 ```text
-Test Files  4 passed
-Tests       72 passed
+Test Files  5 passed
+Tests       90 passed
 ```
 
 ### Production Build
@@ -820,14 +864,29 @@ Runtime Recommendation Integration Pipeline
 Runtime Adapter Normalization
 13 tests passed
 
+Runtime Recommendation Presentation
+18 tests passed
+
 Total
-72 tests passed
+90 tests passed
 
 Production Build
 passed
 ```
 
-이 상태에서 Recommendation Integration 결과는 생성, 조립, 검증, 정규화되어 Landing 내부 상태까지 전달될 수 있습니다.
+이 상태에서 Recommendation Integration 결과는 다음 전체 흐름을 통과할 수 있습니다.
+
+```text
+생성
+→ 조립
+→ 검증
+→ Transport 전달
+→ Adapter 정규화
+→ Presentation 변환
+→ Reflection Runtime 렌더링
+```
+
+Recommendation Integration의 Contract, Pipeline, Adapter, Presentation 경계가 각각 독립적으로 검증된 상태입니다.
 
 ---
 
@@ -876,46 +935,189 @@ RuntimeReflectionResult
       └─ recommendationIntegration
       │
       ▼
-Landing React State
+ReflectionRuntimePanel State
+      │
+      ▼
+Runtime Recommendation Presentation Model
+      │
+      ▼
+Presentation Components
+      │
+      ├─ RuntimeRecommendationSummary
+      └─ RuntimeRecommendationDetails
+      │
+      ▼
+Reflection Runtime Screen
 ```
 
-현재 Presentation Layer는 `recommendationIntegration`을 보관하지만 아직 표시하지 않습니다.
+Recommendation Integration 결과는 Runtime 계약 그대로 렌더링되지 않습니다.
+
+Presentation Model이 Runtime 데이터를 사용자 표시용 구조로 변환하고, Presentation Components가 이를 화면에 표시합니다.
+
+현재 Recommendation Presentation은 Reflection Runtime 화면에 연결되어 있습니다.
+
+다만 `RuntimeNextActionPanel`과는 아직 shared application state를 사용하지 않으므로 직접 연결되어 있지 않습니다.
+
+---
+
+## Runtime Recommendation Presentation
+
+PR-RI04 introduces a dedicated Presentation Layer for Recommendation Integration.
+
+The Runtime Recommendation Integration Result is intentionally not rendered directly.
+
+Instead, it is transformed into a Presentation Model.
+
+```text
+RuntimeRecommendationIntegrationResult
+        ↓
+RuntimeRecommendationPresentation
+        ↓
+Summary Component
+
+and
+
+Details Component
+```
+
+This separation provides several benefits.
+
+```text
+Runtime contracts remain stable.
+
+Presentation wording can evolve independently.
+
+UI components no longer depend on Runtime enums.
+
+Presentation testing becomes independent from Runtime logic.
+```
+
+The Presentation Model becomes the only UI-facing interpretation of Recommendation Integration.
+
+---
+
+## Reflection Runtime Integration
+
+The Reflection Runtime screen now creates a Recommendation Presentation whenever Recommendation Integration is available.
+
+Current flow:
+
+```text
+Private Runtime
+
+↓
+
+Runtime Recommendation Integration
+
+↓
+
+Runtime Adapter
+
+↓
+
+Runtime Reflection Result
+
+↓
+
+Recommendation Presentation
+
+↓
+
+Reflection Runtime Screen
+```
+
+Recommendation Presentation is rendered only when:
+
+`recommendationIntegration`
+
+is available.
+
+When Recommendation Integration is absent:
+
+`recommendationIntegration: null`
+
+the Reflection screen continues using the existing Reflection UI without placeholders.
+
+---
+
+## Presentation Boundary
+
+The Recommendation Presentation Layer intentionally stops at the Reflection Runtime screen.
+
+Current Runtime architecture consists of two independent Runtime flows.
+
+```text
+Reflection Runtime
+
+↓
+
+RuntimeReflectionResult
+
+↓
+
+Recommendation Integration
+
+↓
+
+Presentation
+```
+
+and
+
+```text
+Runtime Next Action
+
+↓
+
+RuntimeNextAction
+```
+
+These Runtime paths currently do not share application-level state.
+
+As a result:
+
+```text
+Recommendation Summary
+
+Recommendation Details
+```
+
+are currently rendered only inside the Reflection Runtime experience.
+
+Sharing Recommendation Presentation with Runtime Next Action requires introducing shared Runtime state.
+
+This responsibility intentionally belongs to a future architectural step.
+
+Keeping Presentation separate from state ownership prevents coupling between UI rendering and Runtime orchestration.
 
 ---
 
 ## Next Step
 
-다음 단계는 Recommendation Integration Presentation Layer입니다.
+The next architectural milestone is Runtime Recommendation shared state.
 
-후속 작업에서는 다음 정보를 사용자에게 표시할 수 있습니다.
-
-```text
-Runtime Executive Summary
-Recommendation State
-Recommendation Changed
-Base Recommendation
-Adaptive Recommendation
-Observation Count
-Confidence Level
-Stability Level
-Drift Level
-Primary Signal
-Primary Risk
-Next Focus
-Integration Status
-```
-
-권장 원칙은 다음과 같습니다.
+Planned architecture:
 
 ```text
-Executive Summary
-→ 기본 사용자 화면에 간결하게 표시
+Runtime Reflection Result
 
-세부 Observation Metrics
-→ Advanced Details에서 표시
+↓
 
-Pipeline Diagnostics
-→ 개발 및 검증용 영역에서 제한적으로 표시
+Shared Runtime State
+
+↓
+
+Runtime Next Action
+
+↓
+
+Recommendation Context
+
+↓
+
+Runtime Action History
 ```
 
-UI는 Pipeline 내부 구조를 그대로 노출하기보다, 사용자가 현재 Reflection의 흐름과 다음 관찰 지점을 이해할 수 있도록 해석된 정보를 제공해야 합니다.
+The current Presentation Layer is intentionally isolated from application state ownership.
+
+Future work will allow Recommendation Integration evidence to be reused consistently across multiple Runtime surfaces without duplicating Presentation logic.
