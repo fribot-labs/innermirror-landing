@@ -2147,6 +2147,11 @@
   gap: 10px;
 }
 
+.runtime-evidence-panel--expanded {
+  border-color:
+    rgba(96, 165, 250, 0.3);
+}
+
 .runtime-evidence-group {
   display: grid;
   gap: 7px;

@@ -1,12 +1,12 @@
 import {
-    useId,
-    useState,
+  useId,
+  useState,
 } from "react";
 
 import type {
-    RuntimeEvidenceExplanation,
-    RuntimeEvidenceGroup,
-    RuntimeEvidenceItem,
+  RuntimeEvidenceExplanation,
+  RuntimeEvidenceGroup,
+  RuntimeEvidenceItem,
 } from "../../runtime-next-action/runtimeEvidenceTypes";
 
 type RuntimeEvidencePanelProps = {
@@ -33,6 +33,10 @@ export function RuntimeEvidencePanel({
     countEvidenceSignals(
       evidence
     );
+
+  const canShowStructuredEvidence =
+    evidence.disclosure ===
+    "structured";
 
   return (
     <section
@@ -65,34 +69,38 @@ export function RuntimeEvidencePanel({
         </span>
       </div>
 
-      <button
-        type="button"
-        className="runtime-evidence-panel__toggle"
-        aria-expanded={isExpanded}
-        aria-controls={detailsId}
-        onClick={() =>
-          setIsExpanded(
-            (current) => !current
-          )
-        }
-      >
-        <span
-          className="runtime-evidence-panel__toggle-icon"
-          aria-hidden="true"
+      {canShowStructuredEvidence ? (
+        <button
+          type="button"
+          className="runtime-evidence-panel__toggle"
+          aria-expanded={isExpanded}
+          aria-controls={detailsId}
+          onClick={() =>
+            setIsExpanded(
+              (current) =>
+                !current
+            )
+          }
         >
-          {isExpanded
-            ? "▾"
-            : "▸"}
-        </span>
+          <span
+            className="runtime-evidence-panel__toggle-icon"
+            aria-hidden="true"
+          >
+            {isExpanded
+              ? "▾"
+              : "▸"}
+          </span>
 
-        <span>
-          {isExpanded
-            ? "Hide recommendation evidence"
-            : "View recommendation evidence"}
-        </span>
-      </button>
+          <span>
+            {isExpanded
+              ? "Hide recommendation evidence"
+              : "View recommendation evidence"}
+          </span>
+        </button>
+      ) : null}
 
-      {isExpanded ? (
+      {canShowStructuredEvidence &&
+      isExpanded ? (
         <div
           id={detailsId}
           className="runtime-evidence-panel__details"
@@ -240,8 +248,34 @@ function countEvidenceSignals(
   evidence:
     RuntimeEvidenceExplanation
 ): number {
+  const primaryCount =
+    evidence.primary.items.length;
+
+  const supportingCount =
+    evidence.supporting.reduce(
+      (
+        total,
+        group
+      ) =>
+        total +
+        group.items.length,
+      0
+    );
+
+  const contextCount =
+    evidence.context.reduce(
+      (
+        total,
+        group
+      ) =>
+        total +
+        group.items.length,
+      0
+    );
+
   return (
-    1 +
-    evidence.supporting.length
+    primaryCount +
+    supportingCount +
+    contextCount
   );
 }
