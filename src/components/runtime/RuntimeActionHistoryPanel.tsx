@@ -12,13 +12,13 @@ import type {
   RuntimeActionTransition,
 } from "../../runtime-action-history/runtimeActionHistoryTypes";
 
-import {
-  RuntimeActionHistoryEntryCard,
-} from "./RuntimeActionHistoryEntryCard";
-
 import type {
   RuntimeRecommendationPresentation,
 } from "../runtimeRecommendationPresentation";
+
+import {
+  RuntimeActionHistoryEntryCard,
+} from "./RuntimeActionHistoryEntryCard";
 
 type RuntimeActionHistoryPanelProps = {
   entries:
@@ -40,6 +40,7 @@ type RuntimeActionHistoryPanelProps = {
 export function RuntimeActionHistoryPanel({
   entries,
   transitions,
+  currentRecommendationPresentation,
   activeEntryId,
   onClear,
 }: RuntimeActionHistoryPanelProps) {
@@ -64,7 +65,8 @@ export function RuntimeActionHistoryPanel({
     );
 
   if (
-    viewModel.totalCount === 0
+    viewModel.totalCount === 0 &&
+    currentRecommendationPresentation === null
   ) {
     return null;
   }
@@ -97,55 +99,135 @@ export function RuntimeActionHistoryPanel({
           </p>
         </div>
 
-        <button
-          type="button"
-          className="runtime-action-history-panel__toggle"
-          onClick={() =>
-            setIsExpanded(
-              (current) =>
-                !current
-            )
-          }
-          aria-expanded={
-            isExpanded
-          }
-        >
-          <span
-            aria-hidden="true"
-            className="runtime-action-history-panel__toggle-icon"
+        {viewModel.totalCount > 0 ? (
+          <button
+            type="button"
+            className="runtime-action-history-panel__toggle"
+            onClick={() =>
+              setIsExpanded(
+                (current) =>
+                  !current
+              )
+            }
+            aria-expanded={
+              isExpanded
+            }
           >
-            {isExpanded
-              ? "▾"
-              : "▸"}
-          </span>
+            <span
+              aria-hidden="true"
+              className="runtime-action-history-panel__toggle-icon"
+            >
+              {isExpanded
+                ? "▾"
+                : "▸"}
+            </span>
 
-          <span>
-            {isExpanded
-              ? "Hide recommendation history"
-              : "Show recommendation history"}
-          </span>
-        </button>
-      </div>
-
-      <div className="runtime-action-history-panel__stats">
-        {viewModel.activeEntryId !== null ? (
-          <span>
-            Current
-          </span>
+            <span>
+              {isExpanded
+                ? "Hide recommendation history"
+                : "Show recommendation history"}
+            </span>
+          </button>
         ) : null}
-
-        <span>
-          Completed{" "}
-          {viewModel.completedCount}
-        </span>
-
-        <span>
-          Repeated{" "}
-          {viewModel.repeatedCount}
-        </span>
       </div>
 
-      {isExpanded ? (
+      {currentRecommendationPresentation ? (
+        <div className="runtime-action-history-current-context">
+          <span className="runtime-action-history-current-context__eyebrow">
+            Current recommendation
+          </span>
+
+          <strong className="runtime-action-history-current-context__state">
+            {
+              currentRecommendationPresentation
+                .recommendationStateLabel
+            }
+          </strong>
+
+          <p className="runtime-action-history-current-context__message">
+            {
+              currentRecommendationPresentation
+                .recommendationChangeMessage
+            }
+          </p>
+
+          <dl className="runtime-action-history-current-context__signals">
+            <div>
+              <dt>
+                Confidence
+              </dt>
+
+              <dd>
+                {
+                  currentRecommendationPresentation
+                    .confidenceLabel
+                }
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Stability
+              </dt>
+
+              <dd>
+                {
+                  currentRecommendationPresentation
+                    .stabilityLabel
+                }
+              </dd>
+            </div>
+
+            <div>
+              <dt>
+                Drift
+              </dt>
+
+              <dd>
+                {
+                  currentRecommendationPresentation
+                    .driftLabel
+                }
+              </dd>
+            </div>
+          </dl>
+
+          {currentRecommendationPresentation.nextFocus !== null ? (
+            <p className="runtime-action-history-current-context__focus">
+              <strong>
+                Next focus:
+              </strong>{" "}
+              {
+                currentRecommendationPresentation
+                  .nextFocus
+              }
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      {viewModel.totalCount > 0 ? (
+        <div className="runtime-action-history-panel__stats">
+          {viewModel.activeEntryId !== null ? (
+            <span>
+              Current
+            </span>
+          ) : null}
+
+          <span>
+            Completed{" "}
+            {viewModel.completedCount}
+          </span>
+
+          <span>
+            Repeated{" "}
+            {viewModel.repeatedCount}
+          </span>
+        </div>
+      ) : null}
+
+      {isExpanded &&
+      viewModel.totalCount > 0 ? (
         <>
           <div className="runtime-action-history-list">
             {viewModel.entries.map(
