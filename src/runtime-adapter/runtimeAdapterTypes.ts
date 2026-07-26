@@ -1,3 +1,7 @@
+import type {
+  RuntimeRecommendationIntegrationResult,
+} from "../runtime-recommendation-integration/runtimeRecommendationIntegrationTypes";
+
 export type LandingReflectionInput = {
   content: string;
   createdAt: string;
@@ -45,7 +49,7 @@ export type RuntimeContinuitySignal = {
   driftToLabel?: string;
 };
 
-export type RuntimeReflectionResult = {
+export type RuntimeReflectionResultBase = {
   contractVersion: RuntimeContractVersion;
   reflectionId: string;
   summary: RuntimeSummary;
@@ -54,9 +58,21 @@ export type RuntimeReflectionResult = {
   continuitySignal: RuntimeContinuitySignal;
 };
 
+export type RuntimeReflectionTransportResult =
+  RuntimeReflectionResultBase & {
+    recommendationIntegration?:
+      RuntimeRecommendationIntegrationResult | null;
+  };
+
+export type RuntimeReflectionResult =
+  RuntimeReflectionResultBase & {
+    recommendationIntegration:
+      RuntimeRecommendationIntegrationResult | null;
+  };
+
 export type RuntimeSuccessResponse = {
   ok: true;
-  result: RuntimeReflectionResult;
+  result: RuntimeReflectionTransportResult;
 };
 
 export type RuntimeErrorResponse = {

@@ -2,11 +2,20 @@ import type {
   LandingReflectionInput,
   RuntimeReflectionResponse,
   RuntimeReflectionResult,
+  RuntimeReflectionTransportResult,
 } from "./runtimeAdapterTypes";
+
+import {
+  normalizeRuntimeReflectionResult,
+} from "./normalizeRuntimeReflectionResult";
 
 import {
   RuntimeAdapterError,
 } from "./runtimeAdapterErrors";
+
+/* ------------------------------------------------------------------ */
+/* Runtime Configuration */
+/* ------------------------------------------------------------------ */
 
 const RUNTIME_BASE_URL =
   getRuntimeBaseUrl();
@@ -23,6 +32,10 @@ const RETRY_COUNT =
     0
   );
 
+/* ------------------------------------------------------------------ */
+/* Public API */
+/* ------------------------------------------------------------------ */
+
 export async function submitReflectionToRuntime(
   content: string
 ): Promise<RuntimeReflectionResult> {
@@ -37,6 +50,10 @@ export async function submitReflectionToRuntime(
     RETRY_COUNT
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Runtime Request */
+/* ------------------------------------------------------------------ */
 
 async function submitReflectionOnce(
   input: LandingReflectionInput
@@ -54,12 +71,17 @@ async function submitReflectionOnce(
       `${RUNTIME_BASE_URL}/runtime/reflection`,
       {
         method: "POST",
+
         headers: {
           "Content-Type":
             "application/json",
         },
-        body: JSON.stringify(input),
-        signal: controller.signal,
+
+        body:
+          JSON.stringify(input),
+
+        signal:
+          controller.signal,
       }
     );
 
@@ -72,16 +94,20 @@ async function submitReflectionOnce(
     }
 
     const data =
-      (await response.json()) as RuntimeReflectionResponse;
+      (await response.json()) as
+        RuntimeReflectionResponse;
 
     if (!data.ok) {
       throw new RuntimeAdapterError(
         normalizeRuntimeErrorCode(
           data.error?.code
         ),
+
         data.error?.message ??
           "Runtime returned an error response.",
-        data.error?.recoverable ?? true
+
+        data.error?.recoverable ??
+          true
       );
     }
 
@@ -112,15 +138,23 @@ async function submitReflectionOnce(
 
     throw new RuntimeAdapterError(
       "RUNTIME_NETWORK_ERROR",
+
       error instanceof Error
         ? error.message
         : "Unknown runtime network error.",
+
       true
     );
   } finally {
-    window.clearTimeout(timeoutId);
+    window.clearTimeout(
+      timeoutId
+    );
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Retry */
+/* ------------------------------------------------------------------ */
 
 async function runWithRetry<T>(
   task: () => Promise<T>,
@@ -145,7 +179,9 @@ async function runWithRetry<T>(
         break;
       }
 
-      if (attempt < retries) {
+      if (
+        attempt < retries
+      ) {
         await delay(
           400 * (attempt + 1)
         );
@@ -153,121 +189,293 @@ async function runWithRetry<T>(
     }
   }
 
-  throw lastError;
+  if (
+    lastError instanceof Error
+  ) {
+    throw lastError;
+  }
+
+  throw new RuntimeAdapterError(
+    "RUNTIME_UNKNOWN_ERROR",
+    "Runtime request failed without a recognized error.",
+    true
+  );
 }
 
 function delay(
   milliseconds: number
 ): Promise<void> {
-  return new Promise((resolve) => {
-    window.setTimeout(
-      resolve,
-      milliseconds
-    );
-  });
+  return new Promise(
+    (resolve) => {
+      window.setTimeout(
+        resolve,
+        milliseconds
+      );
+    }
+  );
 }
 
+/* ------------------------------------------------------------------ */
+/* Runtime Response Validation */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Private Runtime에서 수신한 원시 Transport Result를 검증합니다.
+ *
+ * recommendationIntegration은 이전 Runtime 계약과의 호환성을 위해
+ * 생략될 수 있습니다.
+ *
+ * 허용 상태:
+ *
+ * - undefined
+ * - null
+ * - 최소 Integration Result 구조를 가진 object
+ */
 function validateRuntimeReflectionResult(
   value: unknown
-): asserts value is RuntimeReflectionResult {
+): asserts value is RuntimeReflectionTransportResult {
   if (
-    typeof value !== "object" ||
-    value === null
+    !isRecord(value)
   ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Runtime response is not a valid object.",
-      false
+    throwInvalidRuntimeResponse(
+      "Runtime response is not a valid object."
     );
   }
 
   const result =
-    value as Partial<RuntimeReflectionResult>;
+    value as Partial<
+      RuntimeReflectionTransportResult
+    >;
 
   if (
     result.contractVersion !== "v1"
   ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Runtime contract version mismatch.",
-      false
+    throwInvalidRuntimeResponse(
+      "Runtime contract version mismatch."
     );
   }
 
   if (
     typeof result.reflectionId !==
-    "string"
+      "string" ||
+    result.reflectionId
+      .trim()
+      .length === 0
   ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Missing reflectionId.",
-      false
+    throwInvalidRuntimeResponse(
+      "Missing reflectionId."
     );
   }
 
-  if (
-    typeof result.summary?.text !==
-      "string" ||
-    typeof result.summary
-      ?.confidence !== "number"
-  ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Invalid summary structure.",
-      false
-    );
-  }
+  validateRuntimeSummary(
+    result.summary
+  );
 
+  validateRuntimePacing(
+    result.pacing
+  );
+
+  validateRuntimeNextQuestion(
+    result.nextQuestion
+  );
+
+  validateRuntimeContinuitySignal(
+    result.continuitySignal
+  );
+
+  validateRecommendationIntegration(
+    result.recommendationIntegration
+  );
+}
+
+function validateRuntimeSummary(
+  value:
+    RuntimeReflectionTransportResult[
+      "summary"
+    ] | undefined
+): void {
   if (
-    typeof result.pacing?.message !==
-      "string" ||
-    ![
-      "low",
-      "medium",
-      "high",
-    ].includes(
-      result.pacing?.level ?? ""
+    !isRecord(value) ||
+    typeof value.text !== "string" ||
+    !isFiniteNumber(
+      value.confidence
     )
   ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Invalid pacing structure.",
-      false
-    );
-  }
-
-  if (
-    typeof result.nextQuestion
-      ?.question !== "string"
-  ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Invalid nextQuestion structure.",
-      false
-    );
-  }
-
-  if (
-    typeof result.continuitySignal
-      ?.message !== "string" ||
-    typeof result.continuitySignal
-      ?.strength !== "number"
-  ) {
-    throw new RuntimeAdapterError(
-      "RUNTIME_INVALID_RESPONSE",
-      "Invalid continuitySignal structure.",
-      false
+    throwInvalidRuntimeResponse(
+      "Invalid summary structure."
     );
   }
 }
 
+function validateRuntimePacing(
+  value:
+    RuntimeReflectionTransportResult[
+      "pacing"
+    ] | undefined
+): void {
+  if (
+    !isRecord(value) ||
+    typeof value.message !== "string" ||
+    !isRuntimePacingLevel(
+      value.level
+    )
+  ) {
+    throwInvalidRuntimeResponse(
+      "Invalid pacing structure."
+    );
+  }
+}
+
+function validateRuntimeNextQuestion(
+  value:
+    RuntimeReflectionTransportResult[
+      "nextQuestion"
+    ] | undefined
+): void {
+  if (
+    !isRecord(value) ||
+    typeof value.question !== "string" ||
+    typeof value.reason !== "string"
+  ) {
+    throwInvalidRuntimeResponse(
+      "Invalid nextQuestion structure."
+    );
+  }
+}
+
+function validateRuntimeContinuitySignal(
+  value:
+    RuntimeReflectionTransportResult[
+      "continuitySignal"
+    ] | undefined
+): void {
+  if (
+    !isRecord(value) ||
+    typeof value.message !== "string" ||
+    !isFiniteNumber(
+      value.strength
+    ) ||
+    !isRuntimeContinuityStatus(
+      value.status
+    )
+  ) {
+    throwInvalidRuntimeResponse(
+      "Invalid continuitySignal structure."
+    );
+  }
+}
+
+/**
+ * Recommendation Integration의 전체 내부 계약을 Adapter에서
+ * 중복 검증하지 않습니다.
+ *
+ * PR-RI03에서는 다음 경계만 확인합니다.
+ *
+ * - 값이 없거나 null일 수 있음
+ * - non-null 값은 object여야 함
+ * - executiveSummaryResult가 object여야 함
+ * - diagnostics가 object여야 함
+ */
+function validateRecommendationIntegration(
+  value:
+    RuntimeReflectionTransportResult[
+      "recommendationIntegration"
+    ]
+): void {
+  if (
+    value === undefined ||
+    value === null
+  ) {
+    return;
+  }
+
+  if (
+    !isRecord(value) ||
+    !isRecord(
+      value.executiveSummaryResult
+    ) ||
+    !isRecord(
+      value.diagnostics
+    )
+  ) {
+    throwInvalidRuntimeResponse(
+      "Invalid recommendationIntegration structure."
+    );
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Primitive Validation Helpers */
+/* ------------------------------------------------------------------ */
+
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function isFiniteNumber(
+  value: unknown
+): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value)
+  );
+}
+
+function isRuntimePacingLevel(
+  value: unknown
+): value is
+  RuntimeReflectionTransportResult[
+    "pacing"
+  ]["level"] {
+  return (
+    value === "low" ||
+    value === "medium" ||
+    value === "high"
+  );
+}
+
+function isRuntimeContinuityStatus(
+  value: unknown
+): value is
+  RuntimeReflectionTransportResult[
+    "continuitySignal"
+  ]["status"] {
+  return (
+    value === "new" ||
+    value === "weak" ||
+    value === "forming" ||
+    value === "strong"
+  );
+}
+
+function throwInvalidRuntimeResponse(
+  message: string
+): never {
+  throw new RuntimeAdapterError(
+    "RUNTIME_INVALID_RESPONSE",
+    message,
+    false
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Runtime Error Normalization */
+/* ------------------------------------------------------------------ */
+
 function normalizeRuntimeErrorCode(
   code: string | undefined
-): "RUNTIME_TIMEOUT" |
-  "RUNTIME_NETWORK_ERROR" |
-  "RUNTIME_INVALID_RESPONSE" |
-  "RUNTIME_SERVER_ERROR" |
-  "RUNTIME_UNKNOWN_ERROR" {
+):
+  | "RUNTIME_TIMEOUT"
+  | "RUNTIME_NETWORK_ERROR"
+  | "RUNTIME_INVALID_RESPONSE"
+  | "RUNTIME_SERVER_ERROR"
+  | "RUNTIME_UNKNOWN_ERROR" {
   if (
     code === "RUNTIME_TIMEOUT" ||
     code === "RUNTIME_NETWORK_ERROR" ||
@@ -281,15 +489,20 @@ function normalizeRuntimeErrorCode(
   return "RUNTIME_SERVER_ERROR";
 }
 
+/* ------------------------------------------------------------------ */
+/* Runtime Environment */
+/* ------------------------------------------------------------------ */
+
 function getRuntimeBaseUrl(): string {
   const value =
-    import.meta.env.VITE_RUNTIME_API_URL;
+    import.meta.env
+      .VITE_RUNTIME_API_URL;
 
   if (
     typeof value === "string" &&
     value.trim().length > 0
   ) {
-    return value;
+    return value.trim();
   }
 
   return "http://localhost:4000";
@@ -305,75 +518,12 @@ function getRuntimeNumberEnv(
   const parsed =
     Number(value);
 
-  if (Number.isFinite(parsed)) {
+  if (
+    Number.isFinite(parsed) &&
+    parsed >= 0
+  ) {
     return parsed;
   }
 
   return fallback;
-}
-
-function normalizeRuntimeReflectionResult(
-  result: RuntimeReflectionResult
-): RuntimeReflectionResult {
-  return {
-    ...result,
-    continuitySignal: {
-      ...result.continuitySignal,
-
-      relatedSummary:
-        result.continuitySignal
-          .relatedSummary ??
-        "A similar Reflection flow appeared earlier.",
-
-      relatedTimeLabel:
-        result.continuitySignal
-          .relatedTimeLabel ??
-        "Recent flow",
-
-      bridgeKind:
-        result.continuitySignal
-          .bridgeKind ??
-        "weak-signal",
-
-      longGapDays:
-        result.continuitySignal.longGapDays ?? 0,
-
-      driftStrength:
-        result.continuitySignal.driftStrength ?? "none",
-
-      driftDirection:
-        result.continuitySignal.driftDirection ?? "stable",
-
-      driftFromLabel:
-        normalizeDriftDisplayLabel(
-          result.continuitySignal.driftFromLabel,
-          "Previous thought flow"
-        ),
-
-      driftToLabel:
-        normalizeDriftDisplayLabel(
-          result.continuitySignal.driftToLabel,
-          "Current thought flow"
-        ),
-    },
-  };
-}
-
-function normalizeDriftDisplayLabel(
-  value: string | undefined,
-  fallback: string
-): string {
-  if (!value) {
-    return fallback;
-  }
-
-  if (value === "기존 생각 흐름") {
-    return "Previous thought flow";
-  }
-
-  if (value === "현재 생각 흐름") {
-    return "Current thought flow";
-  }
-
-  return value;
 }
