@@ -1,8 +1,10 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
+import { deriveRuntimeRecommendationPresentation } from "../components/deriveRuntimeRecommendationPresentation";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
@@ -295,6 +297,15 @@ export function App() {
   const longGapRecoverySurfaceData = createLongGapRecoverySurfaceData(result);
 
   const identityDriftSurfaceData = createIdentityDriftSurfaceData(result);
+
+  const recommendationPresentation =
+    useMemo(
+      () =>
+        deriveRuntimeRecommendationPresentation(
+          result
+        ),
+      [result]
+    );
 
   const handleConnectGitHub = () => {
     window.location.href =
@@ -955,7 +966,12 @@ export function App() {
       {runtimeNextAction ? (
         <RuntimeNextActionPanel
           action={runtimeNextAction}
-          onNavigate={handleNextActionNavigation}
+          recommendationPresentation={
+            recommendationPresentation
+          }
+          onNavigate={
+            handleNextActionNavigation
+          }
         />
       ) : null}
 
@@ -971,6 +987,9 @@ export function App() {
             activeRuntimeActionHistoryEntry
               ?.id ??
             null
+          }
+          currentRecommendationPresentation={
+            recommendationPresentation
           }
           onClear={
             handleClearProjectHistory

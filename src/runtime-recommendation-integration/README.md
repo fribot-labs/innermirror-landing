@@ -670,10 +670,35 @@ Presentation Components
 
 `recommendationIntegration`이 `null`인 경우 Recommendation UI는 렌더링되지 않으며, 기존 Reflection UI는 그대로 유지됩니다.
 
-현재 Presentation은 `ReflectionRuntimePanel` 내부에 연결되어 있습니다.
+현재 Recommendation Presentation은 App에서 공유 Runtime Reflection Result로부터 파생됩니다.
 
-`RuntimeNextActionPanel`과 Recommendation Presentation을 연결하는 작업은 application-level shared state가 필요하므로 이 PR의 범위에 포함하지 않습니다.
+Presentation 흐름은 다음과 같습니다.
+
+```text
+useRuntimeReflection()
+
+        ↓
+
+RuntimeReflectionResult
+
+        ↓
+
+deriveRuntimeRecommendationPresentation()
+
+        ↓
+
+RuntimeRecommendationPresentation
+
+        ├─ RuntimeReflectionResultView
+        ├─ RuntimeNextActionPanel
+        └─ RuntimeActionHistoryPanel
 ```
+
+Presentation은 Runtime Result로부터 매번 새로 계산되며 별도의 mutable state로 저장되지 않습니다.
+
+이 구조는 Recommendation Presentation이 Runtime UI 전체에서 일관된 의미를 유지하도록 합니다.
+
+현재 RuntimeNextActionPanel과 RuntimeActionHistoryPanel은 동일한 Presentation을 전달받을 수 있지만, Recommendation Context를 화면에 표시하는 작업은 다음 단계에서 수행됩니다.
 
 ---
 
@@ -743,12 +768,14 @@ src/
 │  └─ createOptimisticReflectionResult.ts
 │
 └─ components/
-   ├─ runtimeRecommendationPresentation.ts
-   ├─ RuntimeRecommendationSummary.tsx
-   ├─ RuntimeRecommendationDetails.tsx
-   ├─ ReflectionRuntimePanel.tsx
-   └─ __tests__/
-      └─ runtimeRecommendationPresentation.test.ts
+  ├─ runtimeRecommendationPresentation.ts
+  ├─ deriveRuntimeRecommendationPresentation.ts
+  ├─ RuntimeRecommendationSummary.tsx
+  ├─ RuntimeRecommendationDetails.tsx
+  ├─ ReflectionRuntimePanel.tsx
+  └─ __tests__/
+    ├─ runtimeRecommendationPresentation.test.ts
+    └─ deriveRuntimeRecommendationPresentation.test.ts
 ```
 
 ---
@@ -829,8 +856,34 @@ npm test
 Current expected result:
 
 ```text
-Test Files  5 passed
-Tests       90 passed
+### Shared Recommendation Presentation
+
+```bash
+npx vitest run \
+  src/components/__tests__/deriveRuntimeRecommendationPresentation.test.ts
+```
+
+Expected:
+
+```text
+5 tests passed
+```
+
+---
+
+### Full Test Suite
+
+```bash
+npm test
+```
+
+Expected:
+
+```text
+Test Files  6 passed
+
+Tests       95 passed
+```
 ```
 
 ### Production Build
@@ -867,8 +920,11 @@ Runtime Adapter Normalization
 Runtime Recommendation Presentation
 18 tests passed
 
+Shared Recommendation Presentation
+5 tests passed
+
 Total
-90 tests passed
+95 tests passed
 
 Production Build
 passed
@@ -928,26 +984,25 @@ Public Runtime Adapter
       ▼
 RuntimeReflectionResult
       │
-      ├─ summary
-      ├─ pacing
-      ├─ nextQuestion
-      ├─ continuitySignal
-      └─ recommendationIntegration
+      ▼
+App Shared Runtime State
       │
       ▼
-ReflectionRuntimePanel State
+deriveRuntimeRecommendationPresentation()
       │
       ▼
-Runtime Recommendation Presentation Model
+RuntimeRecommendationPresentation
+      │
+      ├─ RuntimeReflectionResultView
+      │     ├─ RuntimeRecommendationSummary
+      │     └─ RuntimeRecommendationDetails
+      │
+      ├─ RuntimeNextActionPanel
+      │
+      └─ RuntimeActionHistoryPanel
       │
       ▼
-Presentation Components
-      │
-      ├─ RuntimeRecommendationSummary
-      └─ RuntimeRecommendationDetails
-      │
-      ▼
-Reflection Runtime Screen
+Runtime UI
 ```
 
 Recommendation Integration 결과는 Runtime 계약 그대로 렌더링되지 않습니다.
@@ -993,6 +1048,12 @@ Presentation testing becomes independent from Runtime logic.
 ```
 
 The Presentation Model becomes the only UI-facing interpretation of Recommendation Integration.
+
+PR-RI05 further separates Presentation creation from Presentation consumption.
+
+The Presentation Model is now derived once from the shared Runtime Reflection Result and reused across multiple Runtime UI surfaces.
+
+This prevents duplicated Presentation logic while ensuring consistent Recommendation interpretation throughout the Runtime experience.
 
 ---
 
@@ -1094,20 +1155,12 @@ Keeping Presentation separate from state ownership prevents coupling between UI 
 
 ## Next Step
 
-The next architectural milestone is Runtime Recommendation shared state.
+The next architectural milestone is Recommendation Context Presentation.
 
-Planned architecture:
+Planned direction:
 
 ```text
-Runtime Reflection Result
-
-↓
-
-Shared Runtime State
-
-↓
-
-Runtime Next Action
+Runtime Recommendation Presentation
 
 ↓
 
@@ -1115,9 +1168,15 @@ Recommendation Context
 
 ↓
 
-Runtime Action History
+RuntimeNextActionPanel
+
+↓
+
+RuntimeActionHistoryPanel
+
+↓
+
+Shared Recommendation UX
 ```
 
-The current Presentation Layer is intentionally isolated from application state ownership.
-
-Future work will allow Recommendation Integration evidence to be reused consistently across multiple Runtime surfaces without duplicating Presentation logic.
+Future work will expose Recommendation change explanation, Confidence, Stability, Drift, and Next Focus directly inside Runtime navigation surfaces while continuing to use the shared Presentation Model introduced in PR-RI05.
