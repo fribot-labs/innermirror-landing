@@ -1,20 +1,24 @@
 import {
-    useMemo,
-    useState,
+  useMemo,
+  useState,
 } from "react";
 
 import {
-    createRuntimeActionHistoryViewModel,
+  createRuntimeActionHistoryViewModel,
 } from "../../runtime-action-history/createRuntimeActionHistoryViewModel";
 
 import type {
-    RuntimeActionHistoryEntry,
-    RuntimeActionTransition,
+  RuntimeActionHistoryEntry,
+  RuntimeActionTransition,
 } from "../../runtime-action-history/runtimeActionHistoryTypes";
 
 import {
-    RuntimeActionHistoryEntryCard,
+  RuntimeActionHistoryEntryCard,
 } from "./RuntimeActionHistoryEntryCard";
+
+import type {
+  RuntimeRecommendationPresentation,
+} from "../runtimeRecommendationPresentation";
 
 type RuntimeActionHistoryPanelProps = {
   entries:
@@ -22,6 +26,9 @@ type RuntimeActionHistoryPanelProps = {
 
   transitions:
     RuntimeActionTransition[];
+
+  currentRecommendationPresentation?:
+    RuntimeRecommendationPresentation | null;
 
   activeEntryId:
     string | null;
