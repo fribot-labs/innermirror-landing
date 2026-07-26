@@ -88,6 +88,34 @@
   .runtime-memory-timeline-list-older {
     padding: 0 0.9rem 0.9rem;
   }
+
+  .runtime-next-action-header,
+  .runtime-action-history-panel__header,
+  .runtime-recommendation-context__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .runtime-next-action-confidence-group {
+    align-items: flex-start;
+  }
+
+  .runtime-recommendation-context__status {
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .runtime-recommendation-context__signals,
+  .runtime-action-history-current-context__signals {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-recommendation-context__signals div,
+  .runtime-action-history-current-context__signals div {
+    justify-content: space-between;
+    border-radius: 9px;
+  }
 }
 
 @media (max-width: 900px) {

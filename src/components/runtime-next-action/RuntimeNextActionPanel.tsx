@@ -98,14 +98,19 @@ function getNavigationLabel(
 
 export function RuntimeNextActionPanel({
   action,
-  recommendationPresentation =
-    null,
+  recommendationPresentation,
   onNavigate,
 }: RuntimeNextActionPanelProps) {
   const canNavigate =
     action.isActionable &&
     action.target !== null &&
     onNavigate !== undefined;
+
+  const shouldShowRecommendationContext =
+    recommendationPresentation !== null &&
+    recommendationPresentation !== undefined &&
+    recommendationPresentation.tone !==
+      "unavailable";
 
   return (
     <section
@@ -150,6 +155,14 @@ export function RuntimeNextActionPanel({
         {action.description}
       </p>
 
+      {shouldShowRecommendationContext ? (
+        <RuntimeRecommendationContext
+          presentation={
+            recommendationPresentation
+          }
+        />
+      ) : null}
+
       <RuntimeWhyPanel
         why={action.why}
         fallbackReason={
@@ -162,14 +175,6 @@ export function RuntimeNextActionPanel({
           action.evidence
         }
       />
-
-      {recommendationPresentation !== null ? (
-        <RuntimeRecommendationContext
-          presentation={
-            recommendationPresentation
-          }
-        />
-      ) : null}
 
       {canNavigate ? (
         <button

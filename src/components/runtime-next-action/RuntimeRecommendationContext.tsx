@@ -1,5 +1,5 @@
 import type {
-    RuntimeRecommendationPresentation,
+  RuntimeRecommendationPresentation,
 } from "../runtimeRecommendationPresentation";
 
 export type RuntimeRecommendationContextProps = {
@@ -12,12 +12,10 @@ export function RuntimeRecommendationContext({
 }: RuntimeRecommendationContextProps) {
   return (
     <section
-      className={
-        [
-          "runtime-recommendation-context",
-          `runtime-recommendation-context--${presentation.tone}`,
-        ].join(" ")
-      }
+      className={[
+        "runtime-recommendation-context",
+        `runtime-recommendation-context--${presentation.tone}`,
+      ].join(" ")}
       aria-label="Runtime recommendation context"
     >
       <header className="runtime-recommendation-context__header">
@@ -26,34 +24,85 @@ export function RuntimeRecommendationContext({
         </span>
 
         <strong className="runtime-recommendation-context__status">
-          {presentation.integrationStatusLabel}
+          {
+            presentation
+              .integrationStatusLabel
+          }
         </strong>
       </header>
 
       <p className="runtime-recommendation-context__state">
-        {presentation.recommendationStateLabel}
+        {
+          presentation
+            .recommendationStateLabel
+        }
+      </p>
+
+      <p className="runtime-recommendation-context__message">
+        {
+          presentation
+            .recommendationChangeMessage
+        }
       </p>
 
       <dl className="runtime-recommendation-context__signals">
         <div>
-          <dt>Stability</dt>
+          <dt>
+            Confidence
+          </dt>
 
           <dd>
-            {presentation.stabilityLabel}
+            {
+              presentation
+                .confidenceLabel
+            }
           </dd>
         </div>
 
         <div>
-          <dt>Drift</dt>
+          <dt>
+            Stability
+          </dt>
 
           <dd>
-            {presentation.driftLabel}
+            {
+              presentation
+                .stabilityLabel
+            }
+          </dd>
+        </div>
+
+        <div>
+          <dt>
+            Drift
+          </dt>
+
+          <dd>
+            {
+              presentation
+                .driftLabel
+            }
           </dd>
         </div>
       </dl>
 
+      {presentation.nextFocus !== null ? (
+        <p className="runtime-recommendation-context__focus">
+          <strong>
+            Next focus:
+          </strong>{" "}
+          {
+            presentation
+              .nextFocus
+          }
+        </p>
+      ) : null}
+
       <p className="runtime-recommendation-context__observations">
-        {presentation.observationCountLabel}
+        {
+          presentation
+            .observationCountLabel
+        }
       </p>
     </section>
   );
