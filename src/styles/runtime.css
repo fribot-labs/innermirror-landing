@@ -1565,6 +1565,91 @@
   line-height: 1.45;
 }
 
+.runtime-recommendation-context {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid
+    rgba(148, 163, 184, 0.28);
+  border-radius: 0.75rem;
+  background:
+    rgba(15, 23, 42, 0.28);
+}
+
+.runtime-recommendation-context__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.runtime-recommendation-context-header span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runtime-recommendation-context-header strong {
+  font-size: 0.78rem;
+}
+
+.runtime-recommendation-context__eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.runtime-recommendation-context__status {
+  font-size: 0.76rem;
+  text-align: right;
+}
+
+.runtime-recommendation-context__state {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.runtime-recommendation-context__signals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.runtime-recommendation-context__signals div {
+  display: flex;
+  gap: 0.35rem;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid
+    rgba(148, 163, 184, 0.22);
+  border-radius: 999px;
+}
+
+.runtime-recommendation-context__signals dt,
+.runtime-recommendation-context__signals dd {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.runtime-recommendation-context__signals dt {
+  opacity: 0.7;
+}
+
+.runtime-recommendation-context__signals dd {
+  font-weight: 600;
+}
+
+.runtime-recommendation-context__observations {
+  margin: 0;
+  font-size: 0.78rem;
+  opacity: 0.8;
+}
+
 /* -------------------------------------------------
    Runtime Why
 -------------------------------------------------- */

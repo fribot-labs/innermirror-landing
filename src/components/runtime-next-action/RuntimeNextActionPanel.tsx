@@ -2,23 +2,41 @@ import type {
   RuntimeNextAction,
   RuntimeNextActionTarget,
 } from "../../runtime-next-action/runtimeNextActionTypes";
+
+import type {
+  RuntimeRecommendationPresentation,
+} from "../runtimeRecommendationPresentation";
+
 import {
   RuntimeEvidencePanel,
 } from "./RuntimeEvidencePanel";
+
+import {
+  RuntimeRecommendationContext,
+} from "./RuntimeRecommendationContext";
+
 import {
   RuntimeWhyPanel,
 } from "./RuntimeWhyPanel";
 
 type RuntimeNextActionPanelProps = {
-  action: RuntimeNextAction;
+  action:
+    RuntimeNextAction;
+
+  recommendationPresentation?:
+    RuntimeRecommendationPresentation | null;
 
   onNavigate?: (
-    target: RuntimeNextActionTarget
+    target:
+      RuntimeNextActionTarget
   ) => void;
 };
 
 function getConfidenceLabel(
-  confidence: RuntimeNextAction["confidence"]
+  confidence:
+    RuntimeNextAction[
+      "confidence"
+    ]
 ): string {
   switch (confidence) {
     case "high":
@@ -33,7 +51,10 @@ function getConfidenceLabel(
 }
 
 function getConfidenceLevelLabel(
-  confidence: RuntimeNextAction["confidence"]
+  confidence:
+    RuntimeNextAction[
+      "confidence"
+    ]
 ): string {
   switch (confidence) {
     case "high":
@@ -48,7 +69,8 @@ function getConfidenceLevelLabel(
 }
 
 function getNavigationLabel(
-  target: RuntimeNextActionTarget
+  target:
+    RuntimeNextActionTarget
 ): string {
   switch (target) {
     case "reflection":
@@ -76,6 +98,8 @@ function getNavigationLabel(
 
 export function RuntimeNextActionPanel({
   action,
+  recommendationPresentation =
+    null,
   onNavigate,
 }: RuntimeNextActionPanelProps) {
   const canNavigate =
@@ -101,12 +125,16 @@ export function RuntimeNextActionPanel({
 
         <div className="runtime-next-action-confidence-group">
           <span className="runtime-next-action-confidence">
-            {getConfidenceLabel(action.confidence)}
+            {getConfidenceLabel(
+              action.confidence
+            )}
           </span>
 
           <span className="runtime-next-action-confidence-level">
             Runtime confidence:{" "}
-            {getConfidenceLevelLabel(action.confidence)}
+            {getConfidenceLevelLabel(
+              action.confidence
+            )}
           </span>
         </div>
       </header>
@@ -124,12 +152,24 @@ export function RuntimeNextActionPanel({
 
       <RuntimeWhyPanel
         why={action.why}
-        fallbackReason={action.reason}
+        fallbackReason={
+          action.reason
+        }
       />
 
       <RuntimeEvidencePanel
-        evidence={action.evidence}
+        evidence={
+          action.evidence
+        }
       />
+
+      {recommendationPresentation !== null ? (
+        <RuntimeRecommendationContext
+          presentation={
+            recommendationPresentation
+          }
+        />
+      ) : null}
 
       {canNavigate ? (
         <button
@@ -140,16 +180,21 @@ export function RuntimeNextActionPanel({
               action.target !== null &&
               onNavigate !== undefined
             ) {
-              onNavigate(action.target);
+              onNavigate(
+                action.target
+              );
             }
           }}
         >
-          {getNavigationLabel(action.target)}
+          {getNavigationLabel(
+            action.target
+          )}
         </button>
       ) : null}
 
       <p className="runtime-next-action-source">
-        Based on {action.sourceLabel}
+        Based on{" "}
+        {action.sourceLabel}
       </p>
     </section>
   );
