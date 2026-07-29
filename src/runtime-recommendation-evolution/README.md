@@ -1,8 +1,24 @@
 # Runtime Recommendation Evolution
 
-The Runtime Recommendation Evolution layer enables Runtime recommendations to improve through accumulated project history.
+The Runtime Recommendation Evolution layer provides the long-term reasoning engine that enables Runtime recommendations to improve through accumulated Recommendation history.
 
-Unlike the Runtime Action History module, which records recommendation lifecycles, this module analyzes historical outcomes and gradually improves how Runtime selects future recommendations.
+Unlike the Runtime Action History layer, which records what happened, Recommendation Evolution analyzes historical behavior, discovers learning patterns, predicts future recommendation trajectories, and continuously improves Runtime recommendation quality.
+
+The Recommendation Evolution engine is composed of three independent reasoning layers:
+
+```text
+Recommendation Evolution Memory
+
+↓
+
+Recommendation Adaptive Learning
+
+↓
+
+Recommendation Predictive Intelligence
+```
+
+Each layer has a single responsibility and communicates only through explicit contracts.
 
 ---
 
@@ -12,21 +28,26 @@ Runtime Recommendation Evolution does **not** evaluate users.
 
 Its purpose is to continuously improve the Runtime Recommendation Engine itself.
 
-The system observes:
+The engine continuously observes:
 
 - which recommendations are completed
-- which recommendations are repeatedly replaced
+- which recommendations repeatedly reappear
 - which recommendations remain unresolved
-- which recommendations repeatedly return
-- how recommendation quality changes over time
+- which recommendation strategies become stable
+- which recommendation paths improve project continuity
+- how recommendation quality evolves over time
 
-The result is a Runtime that gradually learns how its own recommendations perform within each project.
+The objective is not to judge the learner.
+
+The objective is to improve Runtime recommendations through accumulated evidence.
 
 ---
 
-# Design Principle
+# Core Design Principles
 
-Recommendation Evolution follows one principle:
+Recommendation Evolution follows four principles.
+
+## Principle 1
 
 ```text
 History informs Recommendation.
@@ -34,15 +55,57 @@ History informs Recommendation.
 History never controls Recommendation.
 ```
 
-History provides additional evidence.
+Historical evidence influences Runtime.
 
-The current project state always remains the primary source of recommendation selection.
+It never replaces the current project context.
 
-Adaptive behavior may adjust recommendation priority, but it never replaces the Runtime Recommendation Engine.
+---
+
+## Principle 2
+
+```text
+Stability filters Recommendation changes.
+
+Stability does not improve Recommendation quality.
+```
+
+Recommendation Stability prevents unnecessary recommendation switching.
+
+Quality and Stability are intentionally separated.
+
+---
+
+## Principle 3
+
+```text
+Prediction estimates.
+
+Runtime decides.
+```
+
+Prediction calculates possible future Recommendation evolution.
+
+Runtime determines how those predictions are presented to the user.
+
+---
+
+## Principle 4
+
+```text
+Evidence accumulates.
+
+Confidence evolves.
+```
+
+The Recommendation Engine never assumes certainty.
+
+Confidence grows only through accumulated Recommendation history.
 
 ---
 
 # Architecture
+
+The current Recommendation Evolution architecture is:
 
 ```text
 Runtime Signals
@@ -69,321 +132,546 @@ Runtime Action History
 
 ↓
 
-History Analysis
+Recommendation Evolution Memory
 
 ↓
 
-Recommendation Quality
+Recommendation Memory Analysis
 
 ↓
 
-Future Adaptive Recommendation Scoring
+Recommendation Adaptive Learning
 
 ↓
 
-Recommendation Evolution
+Recommendation Prediction Context
+
+↓
+
+State Prediction
+
+↓
+
+Strategy Prediction
+
+↓
+
+Runtime Decision Prediction
+
+↓
+
+Risk Prediction
+
+↓
+
+Opportunity Prediction
+
+↓
+
+Conflict Detection
+
+↓
+
+Statistics
+
+↓
+
+Scores
+
+↓
+
+Signals
+
+↓
+
+Prediction Presentation
+
+↓
+
+Recommendation Predictive Update
 ```
 
-Each stage has a single responsibility.
+Every stage has one clearly defined responsibility.
 
 ---
 
-# Module Responsibilities
+# Layer Responsibilities
 
-## runtimeRecommendationQualityTypes.ts
+## REI04 — Recommendation Evolution Memory
 
-Defines all data contracts used throughout Recommendation Evolution.
+Purpose
 
-Includes:
+Maintain long-term Recommendation history.
 
-- History Features
-- Quality Profile
-- Quality Signals
-- Quality Policy
-- Diagnostics
-- Project Quality Summary
+Responsibilities
 
-This file contains no business logic.
+- store Recommendation history
+- preserve Recommendation continuity
+- compare Recommendation transitions
+- generate Recommendation Memory Analysis
 
----
+Output
 
-## runtimeRecommendationQualityPolicy.ts
+- Recommendation Evolution Memory
+- Recommendation Evolution Memory Analysis
 
-Provides configurable thresholds for Recommendation Quality analysis.
+Question answered:
 
-Examples:
-
-- minimum history required
-- completion threshold
-- unresolved threshold
-- superseded threshold
-- repetition threshold
-
-The policy is intentionally separated so future Runtime versions can experiment without changing builders.
+```text
+What has happened?
+```
 
 ---
 
-## createRuntimeRecommendationHistoryFeatures.ts
+## REI05 — Recommendation Adaptive Learning
 
-Transforms Runtime Action History into normalized History Features.
+Purpose
 
-Responsibilities:
+Discover long-term Recommendation behavior.
 
-- aggregate occurrences
-- calculate counts
-- calculate rates
-- calculate averages
-- calculate temporal features
-- identify latest recommendation state
+Responsibilities
 
-This builder records observable facts only.
+- analyze Recommendation history
+- identify recurring patterns
+- generate adaptation rules
+- estimate Runtime adjustments
 
-No recommendation quality decisions are made here.
+Output
+
+- Recommendation Adaptive Learning Analysis
+
+Question answered:
+
+```text
+What have we learned?
+```
 
 ---
 
-## createRuntimeRecommendationQualityProfile.ts
+## REI06 — Recommendation Predictive Intelligence
 
-Interprets History Features.
+Purpose
 
-Responsibilities:
+Estimate future Recommendation evolution.
 
-- determine confidence
-- determine quality outcome
-- create structured quality signals
-- produce Recommendation Quality Profile
+Responsibilities
 
-This builder performs analysis only.
+- State Prediction
+- Strategy Prediction
+- Runtime Decision Prediction
+- Risk Prediction
+- Opportunity Prediction
+- Prediction Conflict Detection
+- Predictive Presentation
 
-It does not modify Runtime Recommendation scores.
+Output
+
+- Recommendation Predictive Intelligence
+- Recommendation Predictive Presentation
+- Recommendation Predictive Update Result
+
+Question answered:
+
+```text
+What is likely to happen next?
+```
+
+---
+
+# Predictive Intelligence Pipeline
+
+REI06 executes the following pipeline.
+
+```text
+Recommendation Evolution Memory
+
+↓
+
+Memory Analysis
+
+↓
+
+Adaptive Learning
+
+↓
+
+Prediction Context
+
+↓
+
+State Prediction
+
+↓
+
+Strategy Prediction
+
+↓
+
+Runtime Decision Prediction
+
+↓
+
+Risk Prediction
+
+↓
+
+Opportunity Prediction
+
+↓
+
+Conflict Detection
+
+↓
+
+Statistics
+
+↓
+
+Scores
+
+↓
+
+Signals
+
+↓
+
+Presentation
+
+↓
+
+Update Result
+```
+
+The Prediction pipeline is fully validated before Runtime consumes the result.
+
+---
+
+# Prediction Philosophy
+
+Prediction intentionally avoids deterministic recommendations.
+
+The engine preserves:
+
+- multiple future candidates
+- uncertainty
+- confidence
+- evidence
+- conflicts
+- opportunities
+- risks
+
+Prediction exists to estimate.
+
+Prediction does not determine Runtime behavior.
 
 ---
 
 # Recommendation Evolution Roadmap
 
-The Recommendation Evolution system is intentionally introduced in several stages.
+The Recommendation Evolution system is intentionally introduced through several stages.
 
 ---
 
-## PR-046A
+## REI04
 
-### Recommendation Quality Analysis Foundation
+### Recommendation Evolution Memory
 
 Purpose
 
 ```text
-History
+Recommendation History
 
 ↓
 
-History Features
+Memory
 
 ↓
 
-Quality Profile
+Memory Analysis
 ```
 
-Completed responsibilities
+Completed
 
-- History feature extraction
-- Recommendation quality analysis
-- Diagnostics foundation
-- Configurable quality policies
-
-This stage is read-only.
-
-No Runtime behavior changes.
+- Recommendation Memory
+- Memory Analysis
+- Long-term comparison
+- Recommendation continuity
 
 ---
 
-## PR-046B
+## REI05
 
-### Recommendation Stability Foundation
+### Recommendation Adaptive Learning
 
 Purpose
-
-Prevent unstable recommendation switching.
-
-Introduces
-
-- stable recommendation
-- challenger recommendation
-- hysteresis
-- observation threshold
-- minimum dwell time
-
-Goal
 
 ```text
-Resolved Candidate
+Memory
 
 ↓
 
-Challenger Observation
+Learning Observation
 
 ↓
 
-Stability Validation
+Patterns
 
 ↓
 
-Stable Recommendation
+Adaptation Rules
 
 ↓
 
-Runtime Action History
+Runtime Adjustment
 ```
 
-The Runtime Recommendation should not change simply because a slightly better candidate appears momentarily.
+Completed
 
-This stage does not use Recommendation Quality Profiles or History-based score modifiers.
+- Learning Observation
+- Pattern discovery
+- Adaptation Rules
+- Runtime Adjustment
 
-It stabilizes the existing base recommendation result before that recommendation is shown to the user or recorded in Runtime Action History.
+Adaptive Learning remains analytical.
+
+It does not directly modify Runtime behavior.
+
 ---
 
-## PR-046C
+## REI06
 
-### Adaptive Recommendation Scoring
+### Recommendation Predictive Intelligence
 
 Purpose
-
-Apply small History-based score adjustments.
-
-Architecture
 
 ```text
-Base Score
-
-+
-
-Adaptive Modifier
+Memory
 
 ↓
 
-Final Score
+Adaptive Learning
+
+↓
+
+Prediction Context
+
+↓
+
+Prediction
+
+↓
+
+Presentation
 ```
 
-History provides a bounded modifier.
+Completed
 
-Current project context always remains dominant.
-
----
-
-## PR-046D
-
-### Unresolved Recommendation Learning
-
-Purpose
-
-Avoid repeating ineffective recommendations indefinitely.
-
-The Runtime begins recognizing patterns such as:
-
-- repeated recommendation
-- visited without completion
-- unresolved recommendation
-- frequently replaced recommendation
-
-The goal is not to judge the learner.
-
-The goal is to improve Runtime recommendations.
+- Prediction Context
+- State Prediction
+- Strategy Prediction
+- Runtime Decision Prediction
+- Risk Prediction
+- Opportunity Prediction
+- Conflict Detection
+- Prediction Statistics
+- Prediction Scores
+- Prediction Signals
+- Predictive Presentation
+- Integration Test
 
 ---
 
-## PR-046E
+# Prediction Statistics
 
-### Recommendation Evolution Controller
+Prediction Statistics summarize generated predictive artifacts.
 
-Purpose
+Statistics include:
 
-Combine every previous layer into one Recommendation Evolution pipeline.
+- Memory Entry Count
+- Comparison Count
+- Learning Observation Count
+- Predicted State Count
+- Predicted Strategy Count
+- Predicted Runtime Decision Count
+- Predicted Risk Count
+- Predicted Opportunity Count
+- Conflict Count
+- Signal Count
 
-Architecture
+Signal Count is finalized only after Prediction Signals have been generated.
+
+This guarantees complete internal consistency throughout the Prediction pipeline.
+
+---
+
+# Validation
+
+Every Recommendation Predictive Analysis passes explicit validation.
+
+Validation includes:
+
+- identity consistency
+- history consistency
+- timestamp consistency
+- statistics consistency
+- prediction consistency
+- signal consistency
+- presentation consistency
+
+Prediction validation is considered part of the public Recommendation contract.
+
+---
+
+# Integration Testing
+
+REI06 includes complete Integration Tests.
+
+The Integration pipeline executes without mocks.
+
+Verified flow:
 
 ```text
-History
+Memory
 
 ↓
 
-Quality
+Memory Analysis
 
 ↓
 
-Stability
+Adaptive Learning
 
 ↓
 
-Adaptive Score
+Prediction Context
 
 ↓
 
-Evolution Controller
+Prediction
 
 ↓
 
-Runtime Recommendation
+Presentation
+
+↓
+
+Update Result
 ```
 
-This becomes the primary Recommendation orchestration layer.
+Verified items include:
+
+- Memory identity
+- History identity
+- Timestamp consistency
+- Prediction ordering
+- Probability normalization
+- Statistics consistency
+- Presentation consistency
+- Input immutability
+
+The Integration Test serves as the primary regression safety layer for future Runtime development.
+
+---
+
+# Runtime Boundary
+
+Recommendation Evolution intentionally stops at Prediction.
+
+Recommendation Evolution does **not**:
+
+- execute Runtime actions
+- choose user behavior
+- modify Recommendation Memory
+- update Landing UI
+- orchestrate Runtime behavior
+
+Those responsibilities belong to Runtime Integration.
+
+---
+
+# Runtime Relationship
+
+```text
+Recommendation Evolution
+
+↓
+
+Runtime Recommendation Integration
+
+↓
+
+Runtime Presentation
+
+↓
+
+Landing
+```
+
+Recommendation Evolution remains completely independent from Runtime orchestration.
 
 ---
 
 # Current Development Boundary
 
-The current implementation stops after Recommendation Quality Analysis.
-
-Current Runtime behavior is intentionally unchanged.
+The current implementation includes:
 
 ```text
-History
+Recommendation Evolution Memory
 
 ↓
 
-History Features
+Recommendation Adaptive Learning
 
 ↓
 
-Quality Profile
+Recommendation Predictive Intelligence
+
+↓
+
+Integration Validation
 ```
 
-The following capabilities are **not yet active**:
+The following capabilities are intentionally outside the current implementation:
 
-- Recommendation stabilization
-- Adaptive scoring
-- Recommendation replacement
-- Recommendation evolution
+- Runtime orchestration
+- Runtime Recommendation Integration
+- Landing integration
+- Runtime coaching selection
+- Runtime action execution
 
-These responsibilities belong to later PRs.
+These responsibilities belong to later MVP stages.
 
 ---
 
 # Long-Term Vision
 
-The Recommendation Evolution layer enables Runtime to continuously refine its coaching behavior.
+Recommendation Evolution enables Runtime to continuously improve through accumulated Recommendation evidence.
 
-Future Runtime versions will gradually answer questions such as:
+Future Runtime versions will answer questions such as:
 
 ```text
-Which recommendations consistently help?
+Which recommendations consistently succeed?
 
-Which recommendations frequently fail?
+Which recommendation strategies frequently fail?
 
-Which recommendations repeat without progress?
+Which recommendation transitions improve continuity?
 
-Which recommendation order produces better project continuity?
+Which recommendation order produces better long-term project evolution?
+
+Which recommendation patterns should Runtime prioritize?
 ```
 
-The objective is not to make Runtime more opinionated.
+Recommendation Evolution is therefore a continuous Recommendation learning engine.
 
-The objective is to make Runtime increasingly consistent, explainable, and adaptive while respecting the current project context.
+It improves Runtime itself.
+
+It does not evaluate the learner.
 
 ---
 
 # Design Philosophy
 
-Runtime Recommendation Evolution does not attempt to predict what the user wants.
-
-Instead, it continuously improves how Runtime understands the effectiveness of its own recommendations.
+Recommendation Evolution is a feedback system for Runtime.
 
 ```text
 Project State
@@ -398,70 +686,19 @@ Observed Result
 
 ↓
 
-Recommendation Quality
+Recommendation Evolution
 
 ↓
 
-Improved Recommendation
-```
-
-Recommendation Evolution is therefore a feedback system for Runtime itself, not an evaluation system for the learner.
-
----
-
-# Stability and History Boundary
-
-Runtime Action History records only Stable Recommendations.
-
-The following states are not recorded:
-
-- temporary challengers
-- rejected challengers
-- short-lived recommendation changes
-- score-only fluctuations
-- rerender-only observations
-
-The intended order is:
-
-```text
-Raw Candidate
+Adaptive Learning
 
 ↓
 
-Stability Layer
+Prediction
 
 ↓
 
-Stable Recommendation
-
-↓
-
-Runtime Action History
+Improved Future Recommendation
 ```
 
----
-
-# Current Development Boundary 수정
-
-```text
-The current implementation stops after Recommendation Quality Analysis.
-The next implementation stage will introduce Recommendation Stability without activating History-based scoring.
-```
-
----
-
-# Design Principle 보강
-
-present principle:
-
-```text
-History informs Recommendation.
-History never controls Recommendation.
-```
-
-add principle.
-
-```text
-Stability filters Recommendation changes.
-Stability does not improve Recommendation quality.
-```
+The engine continuously accumulates evidence, improves prediction quality, and prepares increasingly reliable Recommendation guidance while always respecting the current project context.
