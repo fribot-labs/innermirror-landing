@@ -1,91 +1,91 @@
 import {
-    createEmptyRecommendationPredictionScores,
-    createEmptyRecommendationPredictionStatistics,
-    getPrimaryRecommendationPredictedOpportunity,
-    getPrimaryRecommendationPredictedRisk,
-    getPrimaryRecommendationPredictedRuntimeDecision,
-    getPrimaryRecommendationPredictedState,
-    getPrimaryRecommendationPredictedStrategy,
-    isRecommendationPredictionHorizon,
-    isRecommendationPredictionSeverity,
-    isRecommendationPredictionSignalType,
-    isRecommendationPredictiveIntelligenceState,
+  createEmptyRecommendationPredictionScores,
+  createEmptyRecommendationPredictionStatistics,
+  getPrimaryRecommendationPredictedOpportunity,
+  getPrimaryRecommendationPredictedRisk,
+  getPrimaryRecommendationPredictedRuntimeDecision,
+  getPrimaryRecommendationPredictedState,
+  getPrimaryRecommendationPredictedStrategy,
+  isRecommendationPredictionHorizon,
+  isRecommendationPredictionSeverity,
+  isRecommendationPredictionSignalType,
+  isRecommendationPredictiveIntelligenceState,
 } from "./recommendationPredictiveIntelligenceTypes";
 
 import {
-    createRecommendationPredictionContext,
-    validateRecommendationPredictionContext,
+  createRecommendationPredictionContext,
+  validateRecommendationPredictionContext,
 } from "./createRecommendationPredictionContext";
 
 import {
-    cloneRecommendationPredictedState,
-    predictNextRecommendationStates,
-    validateRecommendationPredictedStates,
+  cloneRecommendationPredictedState,
+  predictNextRecommendationStates,
+  validateRecommendationPredictedStates,
 } from "./predictNextRecommendationStates";
 
 import {
-    cloneRecommendationPredictedStrategy,
-    predictNextRecommendationStrategies,
-    validateRecommendationPredictedStrategies,
+  cloneRecommendationPredictedStrategy,
+  predictNextRecommendationStrategies,
+  validateRecommendationPredictedStrategies,
 } from "./predictNextRecommendationStrategies";
 
 import {
-    cloneRecommendationPredictedRuntimeDecision,
-    predictRecommendationRuntimeDecisions,
-    validateRecommendationPredictedRuntimeDecisions,
+  cloneRecommendationPredictedRuntimeDecision,
+  predictRecommendationRuntimeDecisions,
+  validateRecommendationPredictedRuntimeDecisions,
 } from "./predictRuntimeDecisions";
 
 import {
-    cloneRecommendationPredictedRisk,
-    predictRecommendationRisks,
-    validateRecommendationPredictedRisks,
+  cloneRecommendationPredictedRisk,
+  predictRecommendationRisks,
+  validateRecommendationPredictedRisks,
 } from "./predictRecommendationRisks";
 
 import {
-    cloneRecommendationPredictedOpportunity,
-    predictRecommendationOpportunities,
-    validateRecommendationPredictedOpportunities,
+  cloneRecommendationPredictedOpportunity,
+  predictRecommendationOpportunities,
+  validateRecommendationPredictedOpportunities,
 } from "./predictRecommendationOpportunities";
 
 import {
-    cloneRecommendationPredictionConflict,
-    detectRecommendationPredictionConflicts,
-    normalizeRecommendationOpportunityPredictions,
-    normalizeRecommendationRiskPredictions,
-    normalizeRecommendationRuntimeDecisionPredictions,
-    normalizeRecommendationStatePredictions,
-    normalizeRecommendationStrategyPredictions,
-    validateRecommendationPredictionConflicts,
+  cloneRecommendationPredictionConflict,
+  detectRecommendationPredictionConflicts,
+  normalizeRecommendationOpportunityPredictions,
+  normalizeRecommendationRiskPredictions,
+  normalizeRecommendationRuntimeDecisionPredictions,
+  normalizeRecommendationStatePredictions,
+  normalizeRecommendationStrategyPredictions,
+  validateRecommendationPredictionConflicts,
 } from "./normalizeRecommendationPredictions";
 
 import {
-    validateRecommendationEvolutionMemory,
+  validateRecommendationEvolutionMemory,
 } from "./appendRecommendationEvolutionMemory";
 
 import {
-    validateRecommendationEvolutionMemoryAnalysis,
+  validateRecommendationEvolutionMemoryAnalysis,
 } from "./analyzeRecommendationEvolutionMemory";
 
 import {
-    validateRecommendationAdaptiveLearningAnalysis,
+  validateRecommendationAdaptiveLearningAnalysis,
 } from "./analyzeRecommendationAdaptiveLearning";
 
 import type {
-    AnalyzeRecommendationPredictiveIntelligenceParams,
-    RecommendationPredictedOpportunity,
-    RecommendationPredictedRisk,
-    RecommendationPredictedRuntimeDecision,
-    RecommendationPredictedState,
-    RecommendationPredictedStrategy,
-    RecommendationPredictionConflict,
-    RecommendationPredictionScores,
-    RecommendationPredictionSeverity,
-    RecommendationPredictionSignal,
-    RecommendationPredictionSignalType,
-    RecommendationPredictionStatistics,
-    RecommendationPredictiveIntelligence,
-    RecommendationPredictiveIntelligenceState,
-    ValidateRecommendationPredictiveIntelligenceParams,
+  AnalyzeRecommendationPredictiveIntelligenceParams,
+  RecommendationPredictedOpportunity,
+  RecommendationPredictedRisk,
+  RecommendationPredictedRuntimeDecision,
+  RecommendationPredictedState,
+  RecommendationPredictedStrategy,
+  RecommendationPredictionConflict,
+  RecommendationPredictionScores,
+  RecommendationPredictionSeverity,
+  RecommendationPredictionSignal,
+  RecommendationPredictionSignalType,
+  RecommendationPredictionStatistics,
+  RecommendationPredictiveIntelligence,
+  RecommendationPredictiveIntelligenceState,
+  ValidateRecommendationPredictiveIntelligenceParams,
 } from "./recommendationPredictiveIntelligenceTypes";
 
 /* ------------------------------------------------------------------ */
@@ -396,7 +396,7 @@ export function analyzeRecommendationPredictiveIntelligence(
         params.createConflictId,
     });
 
-  const statistics =
+  const initialStatistics =
     createRecommendationPredictionStatistics({
       memoryEntryCount:
         params.memory.entries.length,
@@ -443,10 +443,10 @@ export function analyzeRecommendationPredictiveIntelligence(
   const state =
     resolveRecommendationPredictiveIntelligenceState({
       memoryEntryCount:
-        statistics.memoryEntryCount,
+        initialStatistics.memoryEntryCount,
 
       comparisonCount:
-        statistics.comparisonCount,
+        initialStatistics.comparisonCount,
 
       scores,
 
@@ -483,6 +483,14 @@ export function analyzeRecommendationPredictiveIntelligence(
       createSignalId:
         params.createSignalId,
     });
+
+  const statistics:
+    RecommendationPredictionStatistics = {
+    ...initialStatistics,
+
+    signalCount:
+      signals.length,
+  };
 
   const primarySignalType =
     resolvePrimaryRecommendationPredictionSignalType(
