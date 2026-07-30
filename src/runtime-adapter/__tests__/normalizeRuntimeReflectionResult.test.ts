@@ -1,19 +1,19 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import type {
-    RuntimeRecommendationIntegrationResult,
+  RuntimeRecommendationIntegrationResult,
 } from "../../runtime-recommendation-integration/runtimeRecommendationIntegrationTypes";
 
 import type {
-    RuntimeReflectionTransportResult,
+  RuntimeReflectionTransportResult,
 } from "../runtimeAdapterTypes";
 
 import {
-    normalizeRuntimeReflectionResult,
+  normalizeRuntimeReflectionResult,
 } from "../normalizeRuntimeReflectionResult";
 
 /* ------------------------------------------------------------------ */
@@ -481,6 +481,9 @@ function createRuntimeRecommendationIntegrationResult():
       },
     },
 
+    predictiveIntelligenceResult:
+      null,
+
     diagnostics: {
       generatedAt:
         GENERATED_AT,
@@ -696,6 +699,11 @@ describe(
           integrationResult
             .observationSummary
         );
+
+        expect(
+          normalizedIntegration
+            ?.predictiveIntelligenceResult
+        ).toBeNull();
       }
     );
 
@@ -787,6 +795,11 @@ describe(
         ).toBe(
           "Stable Adaptive pattern"
         );
+
+        expect(
+          integrationResult
+            .predictiveIntelligenceResult
+        ).toBeNull();
       }
     );
   }

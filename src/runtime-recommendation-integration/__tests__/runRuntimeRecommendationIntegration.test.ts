@@ -1,37 +1,37 @@
 import {
-    describe,
-    expect,
-    it,
-    vi,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 import type { RuntimeNextAction } from "../../runtime-next-action/runtimeNextActionTypes";
 
 import type {
-    CompareBaseAndAdaptiveRuntimeRecommendationsResult,
+  CompareBaseAndAdaptiveRuntimeRecommendationsResult,
 } from "../../runtime-recommendation-evolution/compareBaseAndAdaptiveRuntimeRecommendations";
 
 import type {
-    CreateAdaptiveRecommendationObservationSummaryResult,
-    RuntimeRecommendationAdaptiveObservationSummary,
+  CreateAdaptiveRecommendationObservationSummaryResult,
+  RuntimeRecommendationAdaptiveObservationSummary,
 } from "../../runtime-recommendation-evolution/createAdaptiveRecommendationObservationSummary";
 
 import type {
-    CreateRuntimeExecutiveSummaryResult,
+  CreateRuntimeExecutiveSummaryResult,
 } from "../../runtime-recommendation-evolution/createRuntimeExecutiveSummary";
 
 import type {
-    RuntimeRecommendationIntegrationResult,
+  RuntimeRecommendationIntegrationResult,
 } from "../runtimeRecommendationIntegrationTypes";
 
 import type {
-    RunRuntimeRecommendationIntegrationParams,
-    RuntimeRecommendationIntegrationDependencies,
+  RunRuntimeRecommendationIntegrationParams,
+  RuntimeRecommendationIntegrationDependencies,
 } from "../runtimeRecommendationIntegrationPipelineTypes";
 
 import {
-    executeRuntimeRecommendationIntegrationPipeline,
-    runRuntimeRecommendationIntegration,
+  executeRuntimeRecommendationIntegrationPipeline,
+  runRuntimeRecommendationIntegration,
 } from "../runRuntimeRecommendationIntegration";
 
 /* ------------------------------------------------------------------ */
@@ -271,6 +271,9 @@ function createIntegrationResult():
 
     executiveSummaryResult:
       createExecutiveSummaryResult(),
+
+    predictiveIntelligenceResult:
+      null,
 
     diagnostics: {
       generatedAt: GENERATED_AT,
@@ -817,6 +820,9 @@ describe(
             observationSummaryResult.summary,
 
           executiveSummaryResult,
+
+          predictiveIntelligenceResult:
+              null,
 
           generatedAt:
             GENERATED_AT,

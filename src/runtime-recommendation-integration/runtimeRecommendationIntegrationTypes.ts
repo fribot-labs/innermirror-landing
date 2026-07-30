@@ -1,28 +1,35 @@
-import type { RuntimeNextAction } from "../runtime-next-action/runtimeNextActionTypes";
+import type {
+  RuntimeNextAction,
+} from "../runtime-next-action/runtimeNextActionTypes";
 
 import type {
-    CompareBaseAndAdaptiveRuntimeRecommendationsResult,
+  CompareBaseAndAdaptiveRuntimeRecommendationsResult,
 } from "../runtime-recommendation-evolution/compareBaseAndAdaptiveRuntimeRecommendations";
 
 import type {
-    RuntimeRecommendationAdaptiveObservationSummary,
+  RuntimeRecommendationAdaptiveObservationSummary,
 } from "../runtime-recommendation-evolution/createAdaptiveRecommendationObservationSummary";
 
 import type {
-    CreateRuntimeExecutiveSummaryResult,
+  CreateRuntimeExecutiveSummaryResult,
 } from "../runtime-recommendation-evolution/createRuntimeExecutiveSummary";
+
+import type {
+  RecommendationPredictiveIntelligenceUpdateResult,
+} from "../runtime-recommendation-evolution";
 
 /**
  * Describes the overall completeness of the Runtime Recommendation
  * Integration result.
  *
  * complete:
- * Every required Recommendation Evolution source is available and the
- * Executive Summary is complete.
+ * Every required Recommendation Evolution source is available, the
+ * Executive Summary is complete, and Predictive Intelligence is available.
  *
  * partial:
  * At least one useful source is available, but one or more required
- * integration sources are missing or the Executive Summary is partial.
+ * integration sources are missing, the Executive Summary is partial,
+ * or Predictive Intelligence is unavailable.
  *
  * insufficient-data:
  * No meaningful Runtime Recommendation Integration evidence is available.
@@ -41,6 +48,7 @@ export type RuntimeRecommendationIntegrationStatus =
  * → Recommendation Comparison
  * → Observation Summary
  * → Executive Summary
+ * → Predictive Intelligence
  */
 export type RuntimeRecommendationIntegrationReason =
   | "recommendation-integration-complete"
@@ -53,9 +61,9 @@ export type RuntimeRecommendationIntegrationReason =
 /**
  * Identifies each major stage represented by the Integration Contract.
  *
- * PR-RI01 defines only the contract for these stages.
- * It does not execute the stages. Pipeline execution is introduced
- * separately by PR-RI02.
+ * The contract records completed domain stages without executing them.
+ * Pipeline execution remains the responsibility of the Integration
+ * Pipeline.
  */
 export type RuntimeRecommendationIntegrationStage =
   | "runtime-next-action"
@@ -69,6 +77,10 @@ export type RuntimeRecommendationIntegrationStage =
  * Base and Adaptive Recommendation availability is derived from the
  * Recommendation Comparison snapshots rather than candidate identifiers
  * alone.
+ *
+ * Predictive Intelligence availability represents the presence of a
+ * validated Predictive Intelligence Update Result. The semantic state
+ * of that Prediction remains part of the Predictive domain result.
  */
 export type RuntimeRecommendationIntegrationAvailability = {
   runtimeNextActionAvailable: boolean;
@@ -113,6 +125,10 @@ export type RuntimeRecommendationIntegrationDiagnostics = {
  * executiveSummaryResult is intentionally non-null. The Executive
  * Summary generator can represent partial and insufficient-data states
  * as valid summary results even when earlier sources are unavailable.
+ *
+ * predictiveIntelligenceResult is nullable because Predictive
+ * Intelligence may not yet have enough historical evidence or may not
+ * have been executed by the current Integration Pipeline.
  */
 export type RuntimeRecommendationIntegrationResult = {
   runtimeNextAction: RuntimeNextAction | null;
@@ -123,9 +139,14 @@ export type RuntimeRecommendationIntegrationResult = {
   observationSummary:
     RuntimeRecommendationAdaptiveObservationSummary | null;
 
-  executiveSummaryResult: CreateRuntimeExecutiveSummaryResult;
+  executiveSummaryResult:
+    CreateRuntimeExecutiveSummaryResult;
 
-  diagnostics: RuntimeRecommendationIntegrationDiagnostics;
+  predictiveIntelligenceResult:
+    RecommendationPredictiveIntelligenceUpdateResult | null;
+
+  diagnostics:
+    RuntimeRecommendationIntegrationDiagnostics;
 };
 
 /**
@@ -141,10 +162,11 @@ export type RuntimeRecommendationIntegrationResult = {
  * - compare Recommendation Winners;
  * - create an Observation Summary;
  * - create an Executive Summary;
+ * - create Predictive Intelligence;
  * - persist Recommendation observations.
  *
- * Those orchestration responsibilities belong to later integration
- * stages.
+ * Those orchestration responsibilities belong to the Integration
+ * Pipeline.
  */
 export type CreateRuntimeRecommendationIntegrationResultParams = {
   runtimeNextAction: RuntimeNextAction | null;
@@ -155,7 +177,11 @@ export type CreateRuntimeRecommendationIntegrationResultParams = {
   observationSummary:
     RuntimeRecommendationAdaptiveObservationSummary | null;
 
-  executiveSummaryResult: CreateRuntimeExecutiveSummaryResult;
+  executiveSummaryResult:
+    CreateRuntimeExecutiveSummaryResult;
+
+  predictiveIntelligenceResult:
+    RecommendationPredictiveIntelligenceUpdateResult | null;
 
   /**
    * Optional deterministic timestamp used by tests or callers.
@@ -170,7 +196,8 @@ export type CreateRuntimeRecommendationIntegrationResultParams = {
    * boundary.
    *
    * The result assembler should combine these warnings with Executive
-   * Summary diagnostics, remove blank values, and remove duplicates.
+   * Summary and Predictive Intelligence diagnostics, remove blank
+   * values, and remove duplicates.
    */
   warnings?: string[];
 };
