@@ -375,6 +375,9 @@ function createPipelineParams({
         "observationSummaryInput"
       ],
 
+    predictiveInput:
+      null,
+
     policy: {
       observationSummary: {
         decimalPlaces: 3,
@@ -437,6 +440,9 @@ function createMockDependencies({
   createExecutiveSummary:
     ReturnType<typeof vi.fn>;
 
+  updatePredictiveIntelligence:
+    ReturnType<typeof vi.fn>;
+
   createIntegrationResult:
     ReturnType<typeof vi.fn>;
 } {
@@ -491,6 +497,21 @@ function createMockDependencies({
       }
     );
 
+  const updatePredictiveIntelligence =
+    vi.fn(
+      (
+        _params: Parameters<
+          RuntimeRecommendationIntegrationDependencies[
+            "updatePredictiveIntelligence"
+          ]
+        >[0]
+      ) => {
+        throw new Error(
+          "Predictive Intelligence mock should not be called."
+        );
+      }
+    );
+
   const createIntegrationResult =
     vi.fn(
       (
@@ -513,6 +534,7 @@ function createMockDependencies({
       compareRecommendations,
       createObservationSummary,
       createExecutiveSummary,
+      updatePredictiveIntelligence,
       createIntegrationResult,
     };
 
@@ -521,6 +543,7 @@ function createMockDependencies({
     compareRecommendations,
     createObservationSummary,
     createExecutiveSummary,
+    updatePredictiveIntelligence,
     createIntegrationResult,
   };
 }
