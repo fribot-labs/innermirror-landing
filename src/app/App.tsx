@@ -22,9 +22,7 @@ import { ProjectAnalysisMemoryTimeline } from "../components/runtime/ProjectAnal
 import { ProjectFlowSummaryPanel } from "../components/runtime/ProjectFlowSummaryPanel";
 import { ReflectionContinuitySurface } from "../components/runtime/ReflectionContinuitySurface";
 import { ReturningThemeSurface } from "../components/runtime/ReturningThemeSurface";
-import {
-  RuntimeActionHistoryPanel,
-} from "../components/runtime/RuntimeActionHistoryPanel";
+import { RuntimeActionHistoryPanel } from "../components/runtime/RuntimeActionHistoryPanel";
 import { RuntimeBoundaryStatusBanner } from "../components/runtime/RuntimeBoundaryStatusBanner";
 import { RuntimeFailureRecoveryNotice } from "../components/runtime/RuntimeFailureRecoveryNotice";
 import { RuntimeFallbackModeNotice } from "../components/runtime/RuntimeFallbackModeNotice";
@@ -33,13 +31,13 @@ import { RuntimeStreamingMergeSurface } from "../components/runtime/RuntimeStrea
 import { RuntimeV2ResultPanel } from "../components/runtime/RuntimeV2ResultPanel";
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
+import { RuntimePredictionPanel } from "../components/RuntimePredictionPanel";
+import type { RuntimePredictivePresentation } from "../components/runtimePredictivePresentationTypes";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
 import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
-import {
-  useRuntimeActionHistory,
-} from "../runtime-action-history/useRuntimeActionHistory";
+import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
 import { createServerRuntimeMemoryTimelineData } from "../runtime-adapter/createServerRuntimeMemoryTimelineData";
@@ -54,12 +52,8 @@ import { useLocalReflectionPersistence } from "../runtime-local/useLocalReflecti
 import { useOfflineSyncRecovery } from "../runtime-local/useOfflineSyncRecovery";
 import { useProjectAnalysisMemory } from "../runtime-local/useProjectAnalysisMemory";
 import { createRuntimeNextAction } from "../runtime-next-action/createRuntimeNextAction";
-import {
-  createRuntimeNextActionRuntimeSignals,
-} from "../runtime-next-action/createRuntimeNextActionRuntimeSignals";
-import type {
-  RuntimeNextActionTarget,
-} from "../runtime-next-action/runtimeNextActionTypes";
+import { createRuntimeNextActionRuntimeSignals } from "../runtime-next-action/createRuntimeNextActionRuntimeSignals";
+import type { RuntimeNextActionTarget } from "../runtime-next-action/runtimeNextActionTypes";
 import { createIdentityDriftSurfaceData } from "../runtime/createIdentityDriftSurfaceData";
 import { createLongGapRecoverySurfaceData } from "../runtime/createLongGapRecoverySurfaceData";
 import { createProjectContinuityInsight } from "../runtime/createProjectContinuityInsight";
@@ -67,6 +61,7 @@ import { createProjectPatternInsight } from "../runtime/createProjectPatternInsi
 import { mapReturningThemeSurfaceData } from "../runtime/mapReturningThemeSurfaceData";
 import { toReflectionContinuitySurfaceData } from "../runtime/toReflectionContinuitySurfaceData";
 import "../styles/runtime-history.css";
+import "../styles/runtime-prediction.css";
 import type {
   GitHubConnectionState,
   GitHubRepositorySummary,
@@ -89,6 +84,106 @@ type ProjectActionState =
   | "saving-thought"
   | "analyzing-github"
   | "analyzing-combined";
+
+/**
+ * Temporary RI06 visual verification fixture.
+ *
+ * PR-RI07에서 실제 Predictive Intelligence 결과로 교체합니다.
+ */
+const runtimePredictionPreview:
+  RuntimePredictivePresentation = {
+    status:
+      "available",
+
+    headline:
+      "Likely Recommendation Evolution",
+
+    summary:
+      "The current reflection trajectory suggests that the recommendation is becoming more stable.",
+
+    primaryPrediction:
+      "Preserve the current recommendation while continuing observation.",
+
+    statePrediction: {
+      label:
+        "Likely State",
+
+      value:
+        "Recommendation Stable",
+
+      confidence:
+        0.86,
+    },
+
+    strategyPrediction: {
+      label:
+        "Likely Strategy",
+
+      value:
+        "Preserve Current Recommendation",
+
+      confidence:
+        0.79,
+    },
+
+    decisionPrediction: {
+      label:
+        "Likely Runtime Decision",
+
+      value:
+        "Continue Observation",
+
+      confidence:
+        0.74,
+    },
+
+    risk: {
+      title:
+        "Premature Commitment",
+
+      description:
+        "The current direction may be accepted before enough evidence has accumulated.",
+
+      emphasis:
+        "high",
+    },
+
+    opportunity: {
+      title:
+        "Evidence Continuity",
+
+      description:
+        "Additional reflections may strengthen the continuity of the recommendation trajectory.",
+
+      emphasis:
+        "moderate",
+    },
+
+    confidence: {
+      score:
+        0.82,
+
+      percentage:
+        82,
+
+      disclosure:
+        "This confidence is a conditional estimate based on the currently available evidence.",
+    },
+
+    evidence: [
+      "Repeated recommendation stability",
+      "Consistent reflection direction",
+      "Low decision divergence",
+    ],
+
+    warnings: [
+      "Prediction remains conditional.",
+      "Future reflection evidence may change the result.",
+    ],
+
+    predictedAt:
+      "2026-07-30T08:00:00.000Z",
+  };
 
 export function App() {
   const projectFocusSectionRef =
@@ -995,6 +1090,16 @@ export function App() {
             handleClearProjectHistory
           }
         />
+      ) : null}
+
+      {runtimeV2Response !== null ? (
+        <div className="runtime-prediction-preview">
+          <RuntimePredictionPanel
+            presentation={
+              runtimePredictionPreview
+            }
+          />
+        </div>
       ) : null}
 
       {runtimeV2Response !== null ? (
