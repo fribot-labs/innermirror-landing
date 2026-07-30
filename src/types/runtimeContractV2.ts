@@ -1,3 +1,6 @@
+import type {
+  RuntimeRecommendationIntegrationResult,
+} from "../runtime-recommendation-integration/runtimeRecommendationIntegrationTypes";
 import type { GitHubSnapshot } from "./githubSnapshot";
 
 /**
@@ -164,6 +167,9 @@ export type RuntimeContractV2Output = {
   projectIdentity?: RuntimeProjectIdentity;
   knowledgeCompression?: RuntimeKnowledgeCompression;
   insightSynthesis?: RuntimeInsightSynthesis;
+
+  recommendationIntegration?:
+    RuntimeRecommendationIntegrationResult | null;
 };
 
 export type RuntimeContractV2Response = {

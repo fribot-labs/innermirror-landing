@@ -4,6 +4,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { deriveRuntimePredictivePresentation } from "../components/deriveRuntimePredictivePresentation";
 import { deriveRuntimeRecommendationPresentation } from "../components/deriveRuntimeRecommendationPresentation";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
@@ -32,7 +33,6 @@ import { RuntimeV2ResultPanel } from "../components/runtime/RuntimeV2ResultPanel
 import { RuntimeErrorState } from "../components/RuntimeErrorState";
 import { RuntimeLoadingState } from "../components/RuntimeLoadingState";
 import { RuntimePredictionPanel } from "../components/RuntimePredictionPanel";
-import type { RuntimePredictivePresentation } from "../components/runtimePredictivePresentationTypes";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
@@ -84,106 +84,6 @@ type ProjectActionState =
   | "saving-thought"
   | "analyzing-github"
   | "analyzing-combined";
-
-/**
- * Temporary RI06 visual verification fixture.
- *
- * PR-RI07에서 실제 Predictive Intelligence 결과로 교체합니다.
- */
-const runtimePredictionPreview:
-  RuntimePredictivePresentation = {
-    status:
-      "available",
-
-    headline:
-      "Likely Recommendation Evolution",
-
-    summary:
-      "The current reflection trajectory suggests that the recommendation is becoming more stable.",
-
-    primaryPrediction:
-      "Preserve the current recommendation while continuing observation.",
-
-    statePrediction: {
-      label:
-        "Likely State",
-
-      value:
-        "Recommendation Stable",
-
-      confidence:
-        0.86,
-    },
-
-    strategyPrediction: {
-      label:
-        "Likely Strategy",
-
-      value:
-        "Preserve Current Recommendation",
-
-      confidence:
-        0.79,
-    },
-
-    decisionPrediction: {
-      label:
-        "Likely Runtime Decision",
-
-      value:
-        "Continue Observation",
-
-      confidence:
-        0.74,
-    },
-
-    risk: {
-      title:
-        "Premature Commitment",
-
-      description:
-        "The current direction may be accepted before enough evidence has accumulated.",
-
-      emphasis:
-        "high",
-    },
-
-    opportunity: {
-      title:
-        "Evidence Continuity",
-
-      description:
-        "Additional reflections may strengthen the continuity of the recommendation trajectory.",
-
-      emphasis:
-        "moderate",
-    },
-
-    confidence: {
-      score:
-        0.82,
-
-      percentage:
-        82,
-
-      disclosure:
-        "This confidence is a conditional estimate based on the currently available evidence.",
-    },
-
-    evidence: [
-      "Repeated recommendation stability",
-      "Consistent reflection direction",
-      "Low decision divergence",
-    ],
-
-    warnings: [
-      "Prediction remains conditional.",
-      "Future reflection evidence may change the result.",
-    ],
-
-    predictedAt:
-      "2026-07-30T08:00:00.000Z",
-  };
 
 export function App() {
   const projectFocusSectionRef =
@@ -400,6 +300,43 @@ export function App() {
           result
         ),
       [result]
+    );
+
+  const reflectionPredictiveResult =
+    result
+      ?.recommendationIntegration
+      ?.predictiveIntelligenceResult ??
+    null;
+
+  const runtimeV2PredictiveResult =
+    runtimeV2Response
+      ?.data
+      .recommendationIntegration
+      ?.predictiveIntelligenceResult ??
+    null;
+
+  /**
+   * Runtime V2 결과를 우선 사용합니다.
+   *
+   * Project Analyze와 Reflection + GitHub는 runtimeV2Response를
+   * 최신 결과로 갱신합니다.
+   *
+   * Runtime V2 결과에 Prediction이 없으면 Reflection Runtime의
+   * Prediction 결과를 fallback으로 사용합니다.
+   */
+  const predictiveIntelligenceResult =
+    runtimeV2PredictiveResult ??
+    reflectionPredictiveResult;
+
+  const runtimePredictivePresentation =
+    useMemo(
+      () =>
+        deriveRuntimePredictivePresentation(
+          predictiveIntelligenceResult
+        ),
+      [
+        predictiveIntelligenceResult,
+      ]
     );
 
   const handleConnectGitHub = () => {
@@ -1092,11 +1029,11 @@ export function App() {
         />
       ) : null}
 
-      {runtimeV2Response !== null ? (
-        <div className="runtime-prediction-preview">
+      {runtimePredictivePresentation !== null ? (
+        <div className="runtime-prediction-region">
           <RuntimePredictionPanel
             presentation={
-              runtimePredictionPreview
+              runtimePredictivePresentation
             }
           />
         </div>
