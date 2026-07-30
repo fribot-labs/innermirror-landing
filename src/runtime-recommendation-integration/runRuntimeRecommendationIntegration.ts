@@ -1,32 +1,32 @@
 import {
-    compareBaseAndAdaptiveRuntimeRecommendations,
+  compareBaseAndAdaptiveRuntimeRecommendations,
 } from "../runtime-recommendation-evolution/compareBaseAndAdaptiveRuntimeRecommendations";
 
 import {
-    createAdaptiveRecommendationObservationSummary,
+  createAdaptiveRecommendationObservationSummary,
 } from "../runtime-recommendation-evolution/createAdaptiveRecommendationObservationSummary";
 
 import {
-    createRuntimeExecutiveSummary,
+  createRuntimeExecutiveSummary,
 } from "../runtime-recommendation-evolution/createRuntimeExecutiveSummary";
 
 import {
-    normalizeGeneratedAt,
+  normalizeGeneratedAt,
 } from "../runtime-recommendation-evolution/runtimeRecommendationMath";
 
 import {
-    createRuntimeRecommendationIntegrationResult,
+  createRuntimeRecommendationIntegrationResult,
 } from "./createRuntimeRecommendationIntegrationResult";
 
 import type {
-    RunRuntimeRecommendationIntegrationParams,
-    RunRuntimeRecommendationIntegrationResult,
-    RuntimeRecommendationIntegrationDependencies,
-    RuntimeRecommendationIntegrationPipelineResults,
+  RunRuntimeRecommendationIntegrationParams,
+  RunRuntimeRecommendationIntegrationResult,
+  RuntimeRecommendationIntegrationDependencies,
+  RuntimeRecommendationIntegrationPipelineResults,
 } from "./runtimeRecommendationIntegrationPipelineTypes";
 
 /* ------------------------------------------------------------------ */
-/* Default Dependencies */
+/* Default Dependencies                                               */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -52,7 +52,7 @@ export const DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES:
   };
 
 /* ------------------------------------------------------------------ */
-/* Public Pipeline API */
+/* Public Pipeline API                                                */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -74,6 +74,10 @@ export const DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES:
  * 3. Runtime Executive Summary
  * 4. Runtime Recommendation Integration Result
  *
+ * PR-RI04A에서는 Predictive Intelligence 실행을 아직 연결하지
+ * 않습니다. Integration Result에는 nullable Predictive 슬롯만
+ * 전달하며 값은 null입니다.
+ *
  * 예상 가능한 데이터 부족은 각 도메인 결과의 partial 또는
  * insufficient-data 상태로 표현합니다.
  *
@@ -81,22 +85,24 @@ export const DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES:
  * 숨기지 않고 호출자에게 그대로 전달합니다.
  */
 export function runRuntimeRecommendationIntegration(
-  params: RunRuntimeRecommendationIntegrationParams,
+  params:
+    RunRuntimeRecommendationIntegrationParams,
+
   dependencies:
     RuntimeRecommendationIntegrationDependencies =
-      DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES
+      DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES,
 ): RunRuntimeRecommendationIntegrationResult {
   const pipelineResults =
     executeRuntimeRecommendationIntegrationPipeline(
       params,
-      dependencies
+      dependencies,
     );
 
   return pipelineResults.integrationResult;
 }
 
 /* ------------------------------------------------------------------ */
-/* Pipeline Execution */
+/* Pipeline Execution                                                 */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -118,17 +124,21 @@ export function executeRuntimeRecommendationIntegrationPipeline(
     policy,
     generatedAt,
     warnings,
-  }: RunRuntimeRecommendationIntegrationParams,
+  }:
+    RunRuntimeRecommendationIntegrationParams,
+
   dependencies:
     RuntimeRecommendationIntegrationDependencies =
-      DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES
+      DEFAULT_RUNTIME_RECOMMENDATION_INTEGRATION_DEPENDENCIES,
 ): RuntimeRecommendationIntegrationPipelineResults {
   validateRuntimeRecommendationIntegrationDependencies(
-    dependencies
+    dependencies,
   );
 
   const normalizedGeneratedAt =
-    normalizeGeneratedAt(generatedAt);
+    normalizeGeneratedAt(
+      generatedAt,
+    );
 
   /*
    * Stage 1 — Recommendation Comparison
@@ -139,7 +149,9 @@ export function executeRuntimeRecommendationIntegrationPipeline(
   const recommendationComparison =
     dependencies.compareRecommendations({
       ...comparisonInput,
-      generatedAt: normalizedGeneratedAt,
+
+      generatedAt:
+        normalizedGeneratedAt,
     });
 
   /*
@@ -158,8 +170,12 @@ export function executeRuntimeRecommendationIntegrationPipeline(
   const observationSummaryResult =
     dependencies.createObservationSummary({
       ...observationSummaryInput,
-      policy: policy?.observationSummary,
-      generatedAt: normalizedGeneratedAt,
+
+      policy:
+        policy?.observationSummary,
+
+      generatedAt:
+        normalizedGeneratedAt,
     });
 
   /*
@@ -171,17 +187,27 @@ export function executeRuntimeRecommendationIntegrationPipeline(
   const executiveSummaryResult =
     dependencies.createExecutiveSummary({
       runtimeNextAction,
+
       recommendationComparison,
+
       observationSummary:
         observationSummaryResult.summary,
-      policy: policy?.executiveSummary,
-      generatedAt: normalizedGeneratedAt,
+
+      policy:
+        policy?.executiveSummary,
+
+      generatedAt:
+        normalizedGeneratedAt,
     });
 
   /*
    * Stage 4 — Integration Result
    *
    * PR-RI01에서 정의한 공식 Integration Contract를 조립합니다.
+   *
+   * PR-RI04A에서는 Predictive Intelligence 결과를 생성하지
+   * 않습니다. 대신 새로 추가된 nullable 슬롯에 null을 명시적으로
+   * 전달하여 기존 Runtime 동작을 유지합니다.
    *
    * Pipeline은 warnings를 정규화하지 않습니다.
    * 공백 제거와 중복 제거는 Integration Result assembler의
@@ -190,24 +216,36 @@ export function executeRuntimeRecommendationIntegrationPipeline(
   const integrationResult =
     dependencies.createIntegrationResult({
       runtimeNextAction,
+
       recommendationComparison,
+
       observationSummary:
         observationSummaryResult.summary,
+
       executiveSummaryResult,
-      generatedAt: normalizedGeneratedAt,
+
+      predictiveIntelligenceResult:
+        null,
+
+      generatedAt:
+        normalizedGeneratedAt,
+
       warnings,
     });
 
   return {
     recommendationComparison,
+
     observationSummaryResult,
+
     executiveSummaryResult,
+
     integrationResult,
   };
 }
 
 /* ------------------------------------------------------------------ */
-/* Dependency Validation */
+/* Dependency Validation                                              */
 /* ------------------------------------------------------------------ */
 
 /**
@@ -221,7 +259,7 @@ export function executeRuntimeRecommendationIntegrationPipeline(
  */
 function validateRuntimeRecommendationIntegrationDependencies(
   dependencies:
-    RuntimeRecommendationIntegrationDependencies
+    RuntimeRecommendationIntegrationDependencies,
 ): void {
   const dependencyEntries = [
     [
@@ -249,13 +287,16 @@ function validateRuntimeRecommendationIntegrationDependencies(
     ] of dependencyEntries
   ) {
     if (
-      typeof dependency !== "function"
+      typeof dependency !==
+      "function"
     ) {
       throw new Error(
         [
           "Runtime Recommendation Integration Pipeline received an invalid dependency.",
           `dependency="${dependencyName}"`,
-        ].join(" ")
+        ].join(
+          " ",
+        ),
       );
     }
   }

@@ -1,24 +1,26 @@
 import {
-    cloneRuntimeExecutiveSummary,
-    cloneRuntimeExecutiveSummaryDiagnostics,
-    cloneRuntimeExecutiveSummaryPolicy,
+  cloneRuntimeExecutiveSummary,
+  cloneRuntimeExecutiveSummaryDiagnostics,
+  cloneRuntimeExecutiveSummaryPolicy,
 } from "../runtime-recommendation-evolution/createRuntimeExecutiveSummary";
 
-import { normalizeGeneratedAt } from "../runtime-recommendation-evolution/runtimeRecommendationMath";
+import {
+  normalizeGeneratedAt,
+} from "../runtime-recommendation-evolution/runtimeRecommendationMath";
 
 import type {
-    CreateRuntimeExecutiveSummaryResult,
-    RuntimeExecutiveSummaryStatus,
+  CreateRuntimeExecutiveSummaryResult,
+  RuntimeExecutiveSummaryStatus,
 } from "../runtime-recommendation-evolution/createRuntimeExecutiveSummary";
 
 import type {
-    CreateRuntimeRecommendationIntegrationResultParams,
-    RuntimeRecommendationIntegrationAvailability,
-    RuntimeRecommendationIntegrationDiagnostics,
-    RuntimeRecommendationIntegrationReason,
-    RuntimeRecommendationIntegrationResult,
-    RuntimeRecommendationIntegrationStage,
-    RuntimeRecommendationIntegrationStatus,
+  CreateRuntimeRecommendationIntegrationResultParams,
+  RuntimeRecommendationIntegrationAvailability,
+  RuntimeRecommendationIntegrationDiagnostics,
+  RuntimeRecommendationIntegrationReason,
+  RuntimeRecommendationIntegrationResult,
+  RuntimeRecommendationIntegrationStage,
+  RuntimeRecommendationIntegrationStatus,
 } from "./runtimeRecommendationIntegrationTypes";
 
 export const RUNTIME_RECOMMENDATION_INTEGRATION_STAGES:
@@ -44,41 +46,57 @@ export const TOTAL_RUNTIME_RECOMMENDATION_INTEGRATION_STAGE_COUNT =
  * - records completed stages;
  * - combines and normalizes warnings;
  * - creates integration diagnostics;
+ * - preserves an optional Predictive Intelligence result;
  * - returns defensively cloned result values.
+ *
+ * Predictive Intelligence is intentionally not included in the current
+ * completeness calculation. PR-RI04A only introduces a nullable contract
+ * slot. Pipeline execution and Predictive availability diagnostics belong
+ * to a later integration stage.
  */
 export function createRuntimeRecommendationIntegrationResult({
   runtimeNextAction,
   recommendationComparison,
   observationSummary,
   executiveSummaryResult,
+  predictiveIntelligenceResult,
   generatedAt,
   warnings,
 }: CreateRuntimeRecommendationIntegrationResultParams):
   RuntimeRecommendationIntegrationResult {
   const availability =
     resolveRuntimeRecommendationIntegrationAvailability({
-      runtimeNextActionAvailable: runtimeNextAction !== null,
+      runtimeNextActionAvailable:
+        runtimeNextAction !== null,
+
       recommendationComparison,
-      observationSummaryAvailable: observationSummary !== null,
+
+      observationSummaryAvailable:
+        observationSummary !== null,
+
       executiveSummaryResult,
     });
 
-  const status = resolveRuntimeRecommendationIntegrationStatus({
-    availability,
-    executiveSummaryStatus:
-      executiveSummaryResult.executiveSummary.status,
-  });
+  const status =
+    resolveRuntimeRecommendationIntegrationStatus({
+      availability,
 
-  const reason = resolveRuntimeRecommendationIntegrationReason({
-    availability,
-    status,
-    executiveSummaryStatus:
-      executiveSummaryResult.executiveSummary.status,
-  });
+      executiveSummaryStatus:
+        executiveSummaryResult.executiveSummary.status,
+    });
+
+  const reason =
+    resolveRuntimeRecommendationIntegrationReason({
+      availability,
+      status,
+
+      executiveSummaryStatus:
+        executiveSummaryResult.executiveSummary.status,
+    });
 
   const completedStages =
     resolveRuntimeRecommendationIntegrationCompletedStages(
-      availability
+      availability,
     );
 
   const normalizedWarnings =
@@ -87,57 +105,87 @@ export function createRuntimeRecommendationIntegrationResult({
       executiveSummaryResult,
     });
 
-  const diagnostics: RuntimeRecommendationIntegrationDiagnostics = {
-    generatedAt: normalizeGeneratedAt(generatedAt),
-    status,
-    reason,
-    availability: {
-      ...availability,
-    },
-    completedStages: [...completedStages],
-    completedStageCount: completedStages.length,
-    totalStageCount:
-      TOTAL_RUNTIME_RECOMMENDATION_INTEGRATION_STAGE_COUNT,
-    warningCount: normalizedWarnings.length,
-    warnings: [...normalizedWarnings],
-  };
+  const diagnostics:
+    RuntimeRecommendationIntegrationDiagnostics = {
+      generatedAt:
+        normalizeGeneratedAt(
+          generatedAt,
+        ),
 
-  const result: RuntimeRecommendationIntegrationResult = {
-    runtimeNextAction:
-      cloneRuntimeRecommendationIntegrationValue(
-        runtimeNextAction
-      ),
+      status,
 
-    recommendationComparison:
-      cloneRuntimeRecommendationIntegrationValue(
-        recommendationComparison
-      ),
+      reason,
 
-    observationSummary:
-      cloneRuntimeRecommendationIntegrationValue(
-        observationSummary
-      ),
+      availability: {
+        ...availability,
+      },
 
-    executiveSummaryResult:
-      cloneCreateRuntimeExecutiveSummaryResult(
-        executiveSummaryResult
-      ),
+      completedStages: [
+        ...completedStages,
+      ],
 
-    diagnostics:
-      cloneRuntimeRecommendationIntegrationDiagnostics(
-        diagnostics
-      ),
-  };
+      completedStageCount:
+        completedStages.length,
 
-  return cloneRuntimeRecommendationIntegrationResult(result);
+      totalStageCount:
+        TOTAL_RUNTIME_RECOMMENDATION_INTEGRATION_STAGE_COUNT,
+
+      warningCount:
+        normalizedWarnings.length,
+
+      warnings: [
+        ...normalizedWarnings,
+      ],
+    };
+
+  const result:
+    RuntimeRecommendationIntegrationResult = {
+      runtimeNextAction:
+        cloneRuntimeRecommendationIntegrationValue(
+          runtimeNextAction,
+        ),
+
+      recommendationComparison:
+        cloneRuntimeRecommendationIntegrationValue(
+          recommendationComparison,
+        ),
+
+      observationSummary:
+        cloneRuntimeRecommendationIntegrationValue(
+          observationSummary,
+        ),
+
+      executiveSummaryResult:
+        cloneCreateRuntimeExecutiveSummaryResult(
+          executiveSummaryResult,
+        ),
+
+      predictiveIntelligenceResult:
+        cloneRuntimeRecommendationIntegrationValue(
+          predictiveIntelligenceResult,
+        ),
+
+      diagnostics:
+        cloneRuntimeRecommendationIntegrationDiagnostics(
+          diagnostics,
+        ),
+    };
+
+  return cloneRuntimeRecommendationIntegrationResult(
+    result,
+  );
 }
 
 /**
- * Resolves the availability of each Integration Contract source.
+ * Resolves the availability of each active Integration Contract source.
  *
  * Base and Adaptive Recommendation availability is derived from Winner
  * snapshots rather than candidate IDs because a candidate identifier
  * alone does not guarantee that a usable Recommendation snapshot exists.
+ *
+ * Predictive Intelligence is not included in availability during
+ * PR-RI04A. This stage only prepares the nullable Predictive result slot
+ * while preserving the existing completeness behavior.
  */
 export function resolveRuntimeRecommendationIntegrationAvailability({
   runtimeNextActionAvailable,
@@ -145,23 +193,38 @@ export function resolveRuntimeRecommendationIntegrationAvailability({
   observationSummaryAvailable,
   executiveSummaryResult,
 }: {
-  runtimeNextActionAvailable: boolean;
+  runtimeNextActionAvailable:
+    boolean;
+
   recommendationComparison:
-    CreateRuntimeRecommendationIntegrationResultParams["recommendationComparison"];
-  observationSummaryAvailable: boolean;
-  executiveSummaryResult: CreateRuntimeExecutiveSummaryResult;
+    CreateRuntimeRecommendationIntegrationResultParams[
+      "recommendationComparison"
+    ];
+
+  observationSummaryAvailable:
+    boolean;
+
+  executiveSummaryResult:
+    CreateRuntimeExecutiveSummaryResult;
 }): RuntimeRecommendationIntegrationAvailability {
   return {
     runtimeNextActionAvailable,
+
     recommendationComparisonAvailable:
       recommendationComparison !== null,
+
     observationSummaryAvailable,
+
     executiveSummaryAvailable:
       executiveSummaryResult !== null,
+
     baseRecommendationAvailable:
-      recommendationComparison?.baseWinnerSnapshot != null,
+      recommendationComparison?.baseWinnerSnapshot !=
+      null,
+
     adaptiveRecommendationAvailable:
-      recommendationComparison?.adaptiveWinnerSnapshot != null,
+      recommendationComparison?.adaptiveWinnerSnapshot !=
+      null,
   };
 }
 
@@ -172,23 +235,30 @@ export function resolveRuntimeRecommendationIntegrationAvailability({
  *
  * 1. When none of the three source stages is available, the result is
  *    insufficient-data.
- * 2. When any source stage is unavailable, the result is partial.
+ * 2. When any required source stage is unavailable, the result is partial.
  * 3. When the Executive Summary is not complete, the result is partial.
  * 4. Otherwise, the Integration result is complete.
+ *
+ * Predictive Intelligence does not affect status during PR-RI04A.
  */
 export function resolveRuntimeRecommendationIntegrationStatus({
   availability,
   executiveSummaryStatus,
 }: {
-  availability: RuntimeRecommendationIntegrationAvailability;
-  executiveSummaryStatus: RuntimeExecutiveSummaryStatus;
+  availability:
+    RuntimeRecommendationIntegrationAvailability;
+
+  executiveSummaryStatus:
+    RuntimeExecutiveSummaryStatus;
 }): RuntimeRecommendationIntegrationStatus {
   const sourceEvidenceAvailable =
     availability.runtimeNextActionAvailable ||
     availability.recommendationComparisonAvailable ||
     availability.observationSummaryAvailable;
 
-  if (!sourceEvidenceAvailable) {
+  if (
+    !sourceEvidenceAvailable
+  ) {
     return "insufficient-data";
   }
 
@@ -197,7 +267,8 @@ export function resolveRuntimeRecommendationIntegrationStatus({
     !availability.recommendationComparisonAvailable ||
     !availability.observationSummaryAvailable ||
     !availability.executiveSummaryAvailable ||
-    executiveSummaryStatus !== "complete"
+    executiveSummaryStatus !==
+      "complete"
   ) {
     return "partial";
   }
@@ -207,36 +278,54 @@ export function resolveRuntimeRecommendationIntegrationStatus({
 
 /**
  * Explains the Integration status according to the earliest unavailable
- * or incomplete stage.
+ * or incomplete active stage.
+ *
+ * Predictive Intelligence is intentionally excluded from reason resolution
+ * during PR-RI04A.
  */
 export function resolveRuntimeRecommendationIntegrationReason({
   availability,
   status,
   executiveSummaryStatus,
 }: {
-  availability: RuntimeRecommendationIntegrationAvailability;
-  status: RuntimeRecommendationIntegrationStatus;
-  executiveSummaryStatus: RuntimeExecutiveSummaryStatus;
+  availability:
+    RuntimeRecommendationIntegrationAvailability;
+
+  status:
+    RuntimeRecommendationIntegrationStatus;
+
+  executiveSummaryStatus:
+    RuntimeExecutiveSummaryStatus;
 }): RuntimeRecommendationIntegrationReason {
-  if (status === "insufficient-data") {
+  if (
+    status ===
+    "insufficient-data"
+  ) {
     return "no-recommendation-integration-evidence";
   }
 
-  if (!availability.runtimeNextActionAvailable) {
+  if (
+    !availability.runtimeNextActionAvailable
+  ) {
     return "runtime-next-action-unavailable";
   }
 
-  if (!availability.recommendationComparisonAvailable) {
+  if (
+    !availability.recommendationComparisonAvailable
+  ) {
     return "recommendation-comparison-unavailable";
   }
 
-  if (!availability.observationSummaryAvailable) {
+  if (
+    !availability.observationSummaryAvailable
+  ) {
     return "observation-summary-unavailable";
   }
 
   if (
     !availability.executiveSummaryAvailable ||
-    executiveSummaryStatus !== "complete"
+    executiveSummaryStatus !==
+      "complete"
   ) {
     return "executive-summary-partial";
   }
@@ -245,33 +334,53 @@ export function resolveRuntimeRecommendationIntegrationReason({
 }
 
 /**
- * Returns all Integration stages represented by available results.
+ * Returns all active Integration stages represented by available results.
  *
  * A stage is considered completed when its result object is available.
  * An Executive Summary with partial or insufficient-data status still
  * represents a completed Executive Summary stage because the summary
  * generator produced a valid interpretation result.
+ *
+ * Predictive Intelligence is not included as a completed stage during
+ * PR-RI04A.
  */
 export function resolveRuntimeRecommendationIntegrationCompletedStages(
-  availability: RuntimeRecommendationIntegrationAvailability
+  availability:
+    RuntimeRecommendationIntegrationAvailability,
 ): RuntimeRecommendationIntegrationStage[] {
   const completedStages:
     RuntimeRecommendationIntegrationStage[] = [];
 
-  if (availability.runtimeNextActionAvailable) {
-    completedStages.push("runtime-next-action");
+  if (
+    availability.runtimeNextActionAvailable
+  ) {
+    completedStages.push(
+      "runtime-next-action",
+    );
   }
 
-  if (availability.recommendationComparisonAvailable) {
-    completedStages.push("recommendation-comparison");
+  if (
+    availability.recommendationComparisonAvailable
+  ) {
+    completedStages.push(
+      "recommendation-comparison",
+    );
   }
 
-  if (availability.observationSummaryAvailable) {
-    completedStages.push("observation-summary");
+  if (
+    availability.observationSummaryAvailable
+  ) {
+    completedStages.push(
+      "observation-summary",
+    );
   }
 
-  if (availability.executiveSummaryAvailable) {
-    completedStages.push("executive-summary");
+  if (
+    availability.executiveSummaryAvailable
+  ) {
+    completedStages.push(
+      "executive-summary",
+    );
   }
 
   return completedStages;
@@ -286,16 +395,26 @@ export function resolveRuntimeRecommendationIntegrationCompletedStages(
  * - removes blank warnings;
  * - removes duplicates;
  * - preserves the first occurrence order.
+ *
+ * Predictive Intelligence warnings are not collected here during
+ * PR-RI04A because Predictive Pipeline execution is not yet active.
  */
 export function collectRuntimeRecommendationIntegrationWarnings({
   warnings,
   executiveSummaryResult,
 }: {
-  warnings?: string[];
-  executiveSummaryResult: CreateRuntimeExecutiveSummaryResult;
+  warnings?:
+    string[];
+
+  executiveSummaryResult:
+    CreateRuntimeExecutiveSummaryResult;
 }): string[] {
   const collectedWarnings = [
-    ...(warnings ?? []),
+    ...(
+      warnings ??
+      []
+    ),
+
     ...executiveSummaryResult.diagnostics.warnings,
   ];
 
@@ -303,11 +422,25 @@ export function collectRuntimeRecommendationIntegrationWarnings({
     ...new Set(
       collectedWarnings
         .filter(
-          (warning): warning is string =>
-            typeof warning === "string"
+          (
+            warning,
+          ): warning is string =>
+            typeof warning ===
+            "string",
         )
-        .map((warning) => warning.trim())
-        .filter((warning) => warning.length > 0)
+        .map(
+          (
+            warning,
+          ) =>
+            warning.trim(),
+        )
+        .filter(
+          (
+            warning,
+          ) =>
+            warning.length >
+            0,
+        ),
     ),
   ];
 }
@@ -317,19 +450,24 @@ export function collectRuntimeRecommendationIntegrationWarnings({
  * the clone helpers defined by its owning module.
  */
 export function cloneCreateRuntimeExecutiveSummaryResult(
-  result: CreateRuntimeExecutiveSummaryResult
+  result:
+    CreateRuntimeExecutiveSummaryResult,
 ): CreateRuntimeExecutiveSummaryResult {
   return {
     executiveSummary:
-      cloneRuntimeExecutiveSummary(result.executiveSummary),
+      cloneRuntimeExecutiveSummary(
+        result.executiveSummary,
+      ),
 
     diagnostics:
       cloneRuntimeExecutiveSummaryDiagnostics(
-        result.diagnostics
+        result.diagnostics,
       ),
 
     policy:
-      cloneRuntimeExecutiveSummaryPolicy(result.policy),
+      cloneRuntimeExecutiveSummaryPolicy(
+        result.policy,
+      ),
   };
 }
 
@@ -337,7 +475,8 @@ export function cloneCreateRuntimeExecutiveSummaryResult(
  * Creates a defensive clone of Integration diagnostics.
  */
 export function cloneRuntimeRecommendationIntegrationDiagnostics(
-  diagnostics: RuntimeRecommendationIntegrationDiagnostics
+  diagnostics:
+    RuntimeRecommendationIntegrationDiagnostics,
 ): RuntimeRecommendationIntegrationDiagnostics {
   return {
     ...diagnostics,
@@ -358,34 +497,44 @@ export function cloneRuntimeRecommendationIntegrationDiagnostics(
 
 /**
  * Creates a defensive clone of the complete Integration result.
+ *
+ * Predictive Intelligence is preserved as its original domain result
+ * structure while being defensively cloned to prevent callers from
+ * mutating the source Prediction result through the Integration object.
  */
 export function cloneRuntimeRecommendationIntegrationResult(
-  result: RuntimeRecommendationIntegrationResult
+  result:
+    RuntimeRecommendationIntegrationResult,
 ): RuntimeRecommendationIntegrationResult {
   return {
     runtimeNextAction:
       cloneRuntimeRecommendationIntegrationValue(
-        result.runtimeNextAction
+        result.runtimeNextAction,
       ),
 
     recommendationComparison:
       cloneRuntimeRecommendationIntegrationValue(
-        result.recommendationComparison
+        result.recommendationComparison,
       ),
 
     observationSummary:
       cloneRuntimeRecommendationIntegrationValue(
-        result.observationSummary
+        result.observationSummary,
       ),
 
     executiveSummaryResult:
       cloneCreateRuntimeExecutiveSummaryResult(
-        result.executiveSummaryResult
+        result.executiveSummaryResult,
+      ),
+
+    predictiveIntelligenceResult:
+      cloneRuntimeRecommendationIntegrationValue(
+        result.predictiveIntelligenceResult,
       ),
 
     diagnostics:
       cloneRuntimeRecommendationIntegrationDiagnostics(
-        result.diagnostics
+        result.diagnostics,
       ),
   };
 }
@@ -398,32 +547,70 @@ export function cloneRuntimeRecommendationIntegrationResult(
  * objects, arrays, primitives, and nullable values.
  */
 function cloneRuntimeRecommendationIntegrationValue<T>(
-  value: T
+  value:
+    T,
 ): T {
   if (
-    value === null ||
-    value === undefined ||
-    typeof value !== "object"
+    value ===
+      null ||
+    value ===
+      undefined ||
+    typeof value !==
+      "object"
   ) {
     return value;
   }
 
-  if (value instanceof Date) {
-    return new Date(value.getTime()) as T;
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) =>
-      cloneRuntimeRecommendationIntegrationValue(item)
+  if (
+    value instanceof
+      Date
+  ) {
+    return new Date(
+      value.getTime(),
     ) as T;
   }
 
-  const source = value as Record<string, unknown>;
-  const clone: Record<string, unknown> = {};
+  if (
+    Array.isArray(
+      value,
+    )
+  ) {
+    return value.map(
+      (
+        item,
+      ) =>
+        cloneRuntimeRecommendationIntegrationValue(
+          item,
+        ),
+    ) as T;
+  }
 
-  for (const [key, item] of Object.entries(source)) {
-    clone[key] =
-      cloneRuntimeRecommendationIntegrationValue(item);
+  const source =
+    value as Record<
+      string,
+      unknown
+    >;
+
+  const clone:
+    Record<
+      string,
+      unknown
+    > = {};
+
+  for (
+    const [
+      key,
+      item,
+    ] of Object.entries(
+      source,
+    )
+  ) {
+    clone[
+      key
+    ] =
+      cloneRuntimeRecommendationIntegrationValue(
+        item,
+      );
   }
 
   return clone as T;
