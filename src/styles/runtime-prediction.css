@@ -1,0 +1,299 @@
+/* ------------------------------------------------------------------ */
+/* Runtime Prediction Preview                                        */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-preview {
+  width: 100%;
+  margin-top: 1.5rem;
+}
+
+/* ------------------------------------------------------------------ */
+/* Runtime Prediction Panel                                          */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-panel {
+  display: grid;
+  gap: 1.25rem;
+  width: 100%;
+  padding: 1.25rem;
+  box-sizing: border-box;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.46);
+}
+
+.runtime-prediction-panel--empty,
+.runtime-prediction-panel--insufficient,
+.runtime-prediction-panel--unavailable {
+  min-height: 10rem;
+}
+
+.runtime-prediction-header {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.runtime-prediction-header-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.runtime-prediction-eyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.runtime-prediction-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 999px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.runtime-prediction-status--insufficient,
+.runtime-prediction-status--unavailable {
+  opacity: 0.76;
+}
+
+.runtime-prediction-heading {
+  margin: 0;
+  font-size: clamp(1.2rem, 2.4vw, 1.65rem);
+  line-height: 1.3;
+}
+
+.runtime-prediction-summary {
+  max-width: 48rem;
+  margin: 0;
+  line-height: 1.65;
+  opacity: 0.82;
+}
+
+/* ------------------------------------------------------------------ */
+/* Primary Prediction                                                 */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-primary {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.85rem;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.runtime-prediction-section-title {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.4;
+  opacity: 0.72;
+}
+
+.runtime-prediction-primary-value {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+/* ------------------------------------------------------------------ */
+/* Prediction Items                                                   */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+  gap: 0.75rem;
+}
+
+.runtime-prediction-item {
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.runtime-prediction-item-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  opacity: 0.66;
+}
+
+.runtime-prediction-item-value {
+  overflow-wrap: anywhere;
+  font-size: 0.96rem;
+  line-height: 1.45;
+}
+
+.runtime-prediction-item-confidence {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  opacity: 0.64;
+}
+
+/* ------------------------------------------------------------------ */
+/* Confidence                                                         */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-confidence {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.8rem;
+}
+
+.runtime-prediction-confidence-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.runtime-prediction-confidence-value {
+  font-size: 1.1rem;
+}
+
+.runtime-prediction-confidence-progress {
+  width: 100%;
+  height: 0.55rem;
+}
+
+.runtime-prediction-confidence-disclosure {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  opacity: 0.7;
+}
+
+/* ------------------------------------------------------------------ */
+/* Risk and Opportunity                                               */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-insight-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(
+      2,
+      minmax(0, 1fr)
+    );
+  gap: 0.75rem;
+}
+
+.runtime-prediction-insight {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.runtime-prediction-insight-kind {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.68;
+}
+
+.runtime-prediction-insight-title {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.runtime-prediction-insight-description {
+  margin: 0;
+  line-height: 1.6;
+  opacity: 0.8;
+}
+
+/* ------------------------------------------------------------------ */
+/* Evidence and Warnings                                              */
+/* ------------------------------------------------------------------ */
+
+.runtime-prediction-section {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 0.8rem;
+}
+
+.runtime-prediction-warnings {
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.runtime-prediction-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 1.25rem;
+  line-height: 1.55;
+}
+
+.runtime-prediction-footer {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  opacity: 0.58;
+}
+
+/* ------------------------------------------------------------------ */
+/* Responsive                                                         */
+/* ------------------------------------------------------------------ */
+
+@media (max-width: 860px) {
+  .runtime-prediction-grid,
+  .runtime-prediction-insight-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .runtime-prediction-panel {
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 0.85rem;
+  }
+
+  .runtime-prediction-header-meta,
+  .runtime-prediction-confidence-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .runtime-prediction-primary,
+  .runtime-prediction-item,
+  .runtime-prediction-confidence,
+  .runtime-prediction-insight,
+  .runtime-prediction-section {
+    padding: 0.85rem;
+  }
+}
