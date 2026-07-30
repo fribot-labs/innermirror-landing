@@ -573,6 +573,86 @@ The Integration Test serves as the primary regression safety layer for future Ru
 
 ---
 
+# Public API
+
+Recommendation Predictive Intelligence is exposed through a single public entry point.
+
+External Runtime components and future PBL integrations should access the Prediction pipeline only through the module Public Boundary.
+
+```text
+Runtime / PBL
+
+↓
+
+runtime-recommendation-evolution/index.ts
+
+↓
+
+updateRecommendationPredictiveIntelligence()
+
+↓
+
+RecommendationPredictiveIntelligenceUpdateResult
+```
+
+The Update Result includes both the validated Prediction Analysis and the generated Presentation.
+
+```text
+RecommendationPredictiveIntelligenceUpdateResult
+
+├─ analysis
+
+├─ presentation
+
+└─ predictedAt
+```
+
+---
+
+## Public Contracts
+
+The following contracts are officially supported for external use.
+
+- RecommendationPredictiveIntelligence
+- RecommendationPredictivePresentation
+- RecommendationPredictiveIntelligenceUpdateResult
+- UpdateRecommendationPredictiveIntelligenceParams
+
+These contracts provide a stable integration boundary for Runtime and future PBL services.
+
+---
+
+## Internal Implementation Boundary
+
+External modules must not directly import internal Prediction builders.
+
+The following implementation modules remain intentionally private.
+
+- Prediction Context
+- State Prediction
+- Strategy Prediction
+- Runtime Decision Prediction
+- Risk Prediction
+- Opportunity Prediction
+- Prediction Normalization
+- Predictive Intelligence Analysis
+
+These modules may change internally without affecting the Public API.
+
+---
+
+## Presentation Policy
+
+The Presentation contract is public.
+
+The Presentation Builder remains internal.
+
+Each Predictive Intelligence execution produces one validated Presentation that is included in the Update Result.
+
+This guarantees that Runtime and future PBL integrations consume the same validated Prediction output while allowing internal Presentation logic to evolve independently.
+
+---
+
 # Runtime Boundary
 
 Recommendation Evolution intentionally stops at Prediction.
