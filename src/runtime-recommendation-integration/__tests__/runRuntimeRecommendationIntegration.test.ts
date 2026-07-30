@@ -34,12 +34,23 @@ import {
   runRuntimeRecommendationIntegration,
 } from "../runRuntimeRecommendationIntegration";
 
+import type {
+  RecommendationPredictiveIntelligenceUpdateResult,
+} from "../../runtime-recommendation-evolution";
+
 /* ------------------------------------------------------------------ */
 /* Test Constants */
 /* ------------------------------------------------------------------ */
 
 const GENERATED_AT =
   "2026-07-26T03:00:00.000Z";
+
+type RuntimePredictiveTestInput =
+  NonNullable<
+    RunRuntimeRecommendationIntegrationParams[
+      "predictiveInput"
+    ]
+  >;
 
 /* ------------------------------------------------------------------ */
 /* Test Fixtures */
@@ -257,6 +268,254 @@ function createExecutiveSummaryResult():
   };
 }
 
+function createPredictiveIntelligenceResult():
+  RecommendationPredictiveIntelligenceUpdateResult {
+  return {
+    analysis: {
+      state: "predicting",
+      predictedAt: GENERATED_AT,
+    },
+
+    presentation: {
+      headline:
+        "A stable recommendation transition is predicted.",
+
+      createdAt:
+        GENERATED_AT,
+    },
+
+    predictedAt:
+      GENERATED_AT,
+  } as unknown as
+    RecommendationPredictiveIntelligenceUpdateResult;
+}
+
+function createPredictiveInput():
+  RuntimePredictiveTestInput {
+  const memory = {
+    id:
+      "recommendation-memory-1",
+
+    historyId:
+      "recommendation-history-1",
+
+    entries:
+      [],
+
+    version:
+      1,
+
+    createdAt:
+      GENERATED_AT,
+
+    updatedAt:
+      GENERATED_AT,
+  } as unknown as
+    RuntimePredictiveTestInput[
+      "memory"
+    ];
+
+  const memoryAnalysis = {
+    version:
+      1,
+
+    memoryId:
+      "recommendation-memory-1",
+
+    historyId:
+      "recommendation-history-1",
+
+    state:
+      "stable",
+
+    confidence:
+      "high",
+
+    statistics: {
+      entryCount:
+        0,
+
+      comparisonCount:
+        0,
+
+      stateCounts:
+        {},
+
+      strategyCounts:
+        {},
+
+      stateChangeCount:
+        0,
+
+      strategyChangeCount:
+        0,
+
+      observeStreak:
+        0,
+
+      maintainStreak:
+        0,
+
+      stalledStreak:
+        0,
+
+      fragmentedStreak:
+        0,
+
+      advancingStreak:
+        0,
+
+      averageScores:
+        {},
+
+      latestScoreChanges:
+        null,
+    },
+
+    scores: {
+      longTermStability:
+        0,
+
+      longTermProgress:
+        0,
+
+      longTermRisk:
+        0,
+
+      recovery:
+        0,
+    },
+
+    comparisons:
+      [],
+
+    signals:
+      [],
+
+    primarySignalType:
+      null,
+
+    reasoning:
+      [],
+
+    analyzedAt:
+      GENERATED_AT,
+  } as unknown as
+    RuntimePredictiveTestInput[
+      "memoryAnalysis"
+    ];
+
+  const adaptiveLearningAnalysis = {
+    version:
+      1,
+
+    memoryId:
+      "recommendation-memory-1",
+
+    historyId:
+      "recommendation-history-1",
+
+    sourceMemoryAnalyzedAt:
+      GENERATED_AT,
+
+    state:
+      "learning",
+
+    statistics:
+      {},
+
+    scores: {
+      evidenceStrength:
+        0.7,
+
+      learningConfidence:
+        0.72,
+
+      adaptationReadiness:
+        0.68,
+
+      conflictRisk:
+        0.1,
+    },
+
+    observations:
+      [],
+
+    patterns:
+      [],
+
+    adaptationRules:
+      [],
+
+    runtimeAdjustment: {
+      strategyPreferenceAdjustments:
+        {},
+
+      decisionPreferenceAdjustments:
+        {},
+
+      signalConfidenceAdjustments:
+        {},
+
+      evidenceRequirementAdjustment:
+        0,
+
+      newRecommendationThresholdAdjustment:
+        0,
+
+      redirectionThresholdAdjustment:
+        0,
+
+      stabilizationPreferenceAdjustment:
+        0,
+
+      recoveryPreferenceAdjustment:
+        0,
+    },
+
+    primaryPatternType:
+      null,
+
+    reasoning:
+      [],
+
+    analyzedAt:
+      GENERATED_AT,
+  } as unknown as
+    RuntimePredictiveTestInput[
+      "adaptiveLearningAnalysis"
+    ];
+
+  return {
+    memory,
+
+    memoryAnalysis,
+
+    adaptiveLearningAnalysis,
+
+    horizon:
+      "next-evaluation",
+
+    recentEntryLimit:
+      5,
+
+    recentComparisonLimit:
+      5,
+
+    maximumStateCandidateCount:
+      3,
+
+    maximumStrategyCandidateCount:
+      3,
+
+    maximumDecisionCandidateCount:
+      4,
+
+    minimumCandidateProbability:
+      0.05,
+  };
+}
+
 function createIntegrationResult():
   RuntimeRecommendationIntegrationResult {
   return {
@@ -318,13 +577,24 @@ function createIntegrationResult():
 function createPipelineParams({
   runtimeNextAction =
     createRuntimeNextAction(),
-  generatedAt = GENERATED_AT,
+
+  predictiveInput =
+    null,
+
+  generatedAt =
+    GENERATED_AT,
+
   warnings = [
     "Pipeline source warning.",
   ],
 }: {
   runtimeNextAction?:
     RuntimeNextAction | null;
+
+  predictiveInput?:
+    RunRuntimeRecommendationIntegrationParams[
+      "predictiveInput"
+    ];
 
   generatedAt?:
     string;
@@ -375,8 +645,7 @@ function createPipelineParams({
         "observationSummaryInput"
       ],
 
-    predictiveInput:
-      null,
+    predictiveInput,
 
     policy: {
       observationSummary: {
@@ -412,6 +681,9 @@ function createMockDependencies({
   integrationResult =
     createIntegrationResult(),
 
+  predictiveIntelligenceResult =
+    createPredictiveIntelligenceResult(),
+
   calls,
 }: {
   recommendationComparison?:
@@ -425,6 +697,9 @@ function createMockDependencies({
 
   integrationResult?:
     RuntimeRecommendationIntegrationResult;
+
+  predictiveIntelligenceResult?:
+    RecommendationPredictiveIntelligenceUpdateResult;
 
   calls?: string[];
 } = {}): {
@@ -506,9 +781,11 @@ function createMockDependencies({
           ]
         >[0]
       ) => {
-        throw new Error(
-          "Predictive Intelligence mock should not be called."
+        calls?.push(
+          "predictive-intelligence"
         );
+
+        return predictiveIntelligenceResult;
       }
     );
 
@@ -587,6 +864,7 @@ describe(
           compareRecommendations,
           createObservationSummary,
           createExecutiveSummary,
+          updatePredictiveIntelligence,
           createIntegrationResult,
         } = createMockDependencies();
 
@@ -606,6 +884,10 @@ describe(
         expect(
           createExecutiveSummary
         ).toHaveBeenCalledTimes(1);
+
+        expect(
+          updatePredictiveIntelligence
+        ).not.toHaveBeenCalled();
 
         expect(
           createIntegrationResult
@@ -688,6 +970,10 @@ describe(
         expect(
           result.executiveSummaryResult
         ).toBe(executiveSummaryResult);
+
+        expect(
+          result.predictiveIntelligenceResult
+        ).toBeNull();
 
         expect(
           result.integrationResult
@@ -1044,6 +1330,248 @@ describe(
         );
       }
     );
+
+    it(
+      "skips Predictive Intelligence when predictive input is unavailable",
+      () => {
+        const {
+          dependencies,
+          updatePredictiveIntelligence,
+          createIntegrationResult,
+        } = createMockDependencies();
+
+        const result =
+          executeRuntimeRecommendationIntegrationPipeline(
+            createPipelineParams(),
+            dependencies
+          );
+
+        expect(
+          updatePredictiveIntelligence
+        ).not.toHaveBeenCalled();
+
+        expect(
+          result.predictiveIntelligenceResult
+        ).toBeNull();
+
+        expect(
+          createIntegrationResult
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            predictiveIntelligenceResult:
+              null,
+          })
+        );
+      }
+    );
+
+    it(
+      "executes Predictive Intelligence when predictive input is available",
+      () => {
+        const {
+          dependencies,
+          updatePredictiveIntelligence,
+        } = createMockDependencies();
+
+        executeRuntimeRecommendationIntegrationPipeline(
+          createPipelineParams({
+            predictiveInput:
+              createPredictiveInput(),
+          }),
+          dependencies
+        );
+
+        expect(
+          updatePredictiveIntelligence
+        ).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it(
+      "passes Predictive input, normalized predictedAt, and ID factories to the Predictive stage",
+      () => {
+        const predictiveInput =
+          createPredictiveInput();
+
+        const generatedAt =
+          "2026-07-30T04:00:00.000Z";
+
+        const {
+          dependencies,
+          updatePredictiveIntelligence,
+        } = createMockDependencies();
+
+        executeRuntimeRecommendationIntegrationPipeline(
+          createPipelineParams({
+            predictiveInput,
+            generatedAt,
+          }),
+          dependencies
+        );
+
+        expect(
+          updatePredictiveIntelligence
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...predictiveInput,
+
+            predictedAt:
+              generatedAt,
+
+            createStatePredictionId:
+              expect.any(Function),
+
+            createStrategyPredictionId:
+              expect.any(Function),
+
+            createDecisionPredictionId:
+              expect.any(Function),
+
+            createRiskPredictionId:
+              expect.any(Function),
+
+            createOpportunityPredictionId:
+              expect.any(Function),
+
+            createConflictId:
+              expect.any(Function),
+
+            createSignalId:
+              expect.any(Function),
+          })
+        );
+      }
+    );
+
+    it(
+      "uses one shared timestamp for Predictive Intelligence and Integration assembly",
+      () => {
+        const generatedAt =
+          "2026-07-30T05:30:00.000Z";
+
+        const {
+          dependencies,
+          updatePredictiveIntelligence,
+          createIntegrationResult,
+        } = createMockDependencies();
+
+        executeRuntimeRecommendationIntegrationPipeline(
+          createPipelineParams({
+            predictiveInput:
+              createPredictiveInput(),
+
+            generatedAt,
+          }),
+          dependencies
+        );
+
+        expect(
+          updatePredictiveIntelligence
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            predictedAt:
+              generatedAt,
+          })
+        );
+
+        expect(
+          createIntegrationResult
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            generatedAt,
+          })
+        );
+      }
+    );
+
+    it(
+      "passes the Predictive Intelligence result to the Integration assembler",
+      () => {
+        const predictiveIntelligenceResult =
+          createPredictiveIntelligenceResult();
+
+        const {
+          dependencies,
+          createIntegrationResult,
+        } = createMockDependencies({
+          predictiveIntelligenceResult,
+        });
+
+        executeRuntimeRecommendationIntegrationPipeline(
+          createPipelineParams({
+            predictiveInput:
+              createPredictiveInput(),
+          }),
+          dependencies
+        );
+
+        expect(
+          createIntegrationResult
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            predictiveIntelligenceResult,
+          })
+        );
+      }
+    );
+
+    it(
+      "preserves the Predictive Intelligence result in the Pipeline intermediate results",
+      () => {
+        const predictiveIntelligenceResult =
+          createPredictiveIntelligenceResult();
+
+        const {
+          dependencies,
+        } = createMockDependencies({
+          predictiveIntelligenceResult,
+        });
+
+        const result =
+          executeRuntimeRecommendationIntegrationPipeline(
+            createPipelineParams({
+              predictiveInput:
+                createPredictiveInput(),
+            }),
+            dependencies
+          );
+
+        expect(
+          result.predictiveIntelligenceResult
+        ).toBe(
+          predictiveIntelligenceResult
+        );
+      }
+    );
+
+    it(
+      "preserves the Pipeline execution order when Predictive Intelligence runs",
+      () => {
+        const calls: string[] = [];
+
+        const {
+          dependencies,
+        } = createMockDependencies({
+          calls,
+        });
+
+        executeRuntimeRecommendationIntegrationPipeline(
+          createPipelineParams({
+            predictiveInput:
+              createPredictiveInput(),
+          }),
+          dependencies
+        );
+
+        expect(calls).toEqual([
+          "recommendation-comparison",
+          "observation-summary",
+          "executive-summary",
+          "predictive-intelligence",
+          "integration-result",
+        ]);
+      }
+    );
   }
 );
 
@@ -1233,6 +1761,68 @@ describe(
           )
         ).toThrow(
           'dependency="createExecutiveSummary"'
+        );
+      }
+    );
+
+    it(
+      "propagates Predictive Intelligence errors and does not assemble a final result",
+      () => {
+        const {
+          dependencies,
+          updatePredictiveIntelligence,
+          createIntegrationResult,
+        } = createMockDependencies();
+
+        updatePredictiveIntelligence
+          .mockImplementationOnce(
+            () => {
+              throw new Error(
+                "Predictive Intelligence failed"
+              );
+            }
+          );
+
+        expect(() =>
+          runRuntimeRecommendationIntegration(
+            createPipelineParams({
+              predictiveInput:
+                createPredictiveInput(),
+            }),
+            dependencies
+          )
+        ).toThrow(
+          "Predictive Intelligence failed"
+        );
+
+        expect(
+          createIntegrationResult
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects an invalid Predictive Intelligence dependency",
+      () => {
+        const {
+          dependencies,
+        } = createMockDependencies();
+
+        const invalidDependencies = {
+          ...dependencies,
+
+          updatePredictiveIntelligence:
+            undefined,
+        } as unknown as
+          RuntimeRecommendationIntegrationDependencies;
+
+        expect(() =>
+          runRuntimeRecommendationIntegration(
+            createPipelineParams(),
+            invalidDependencies
+          )
+        ).toThrow(
+          'dependency="updatePredictiveIntelligence"'
         );
       }
     );
