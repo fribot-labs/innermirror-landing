@@ -235,4 +235,20 @@
     grid-template-columns: 1fr;
     gap: 4px;
   }
+
+  .runtime-v2-recommendation-insight {
+    gap: 12px;
+
+    padding: 14px;
+  }
+
+  .runtime-v2-recommendation-insight-meta {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .runtime-v2-recommendation-insight-meta > span,
+  .runtime-v2-recommendation-insight-meta > time {
+    width: 100%;
+  }
 }

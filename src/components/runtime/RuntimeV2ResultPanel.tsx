@@ -1,5 +1,8 @@
 import { RUNTIME_TERMINOLOGY } from "../../constants/runtimeTerminology";
 import {
+  deriveRuntimeV2RecommendationInsightPresentation,
+} from "../../runtime-presentation/deriveRuntimeV2RecommendationInsightPresentation";
+import {
   deriveRuntimeV2RecommendationPresentation,
 } from "../../runtime-presentation/deriveRuntimeV2RecommendationPresentation";
 import {
@@ -16,6 +19,9 @@ import { KnowledgeCompressionPanel } from "./KnowledgeCompressionPanel";
 import { ProjectIdentityPanel } from "./ProjectIdentityPanel";
 import { RuntimeInsightSynthesisPanel } from "./RuntimeInsightSynthesisPanel";
 import {
+  RuntimeV2RecommendationInsight,
+} from "./RuntimeV2RecommendationInsight";
+import {
   RuntimeV2RecommendationPanel,
 } from "./RuntimeV2RecommendationPanel";
 
@@ -28,8 +34,6 @@ export function RuntimeV2ResultPanel({
 }: RuntimeV2ResultPanelProps) {
   const { meta, data } = response;
 
-  const result = response.data;
-
   const recommendationPresentation =
     deriveRuntimeV2RecommendationPresentation(
       data.recommendation
@@ -38,6 +42,12 @@ export function RuntimeV2ResultPanel({
   const recommendationTimelinePresentation =
     deriveRuntimeV2RecommendationTimelinePresentation(
       data.recommendation
+    );
+
+  const recommendationInsightPresentation =
+    deriveRuntimeV2RecommendationInsightPresentation(
+      data.recommendation
+        ?.insight
     );
 
   return (
@@ -67,6 +77,14 @@ export function RuntimeV2ResultPanel({
           }
           timelinePresentation={
             recommendationTimelinePresentation
+          }
+        />
+      ) : null}
+
+      {recommendationInsightPresentation ? (
+        <RuntimeV2RecommendationInsight
+          presentation={
+            recommendationInsightPresentation
           }
         />
       ) : null}
