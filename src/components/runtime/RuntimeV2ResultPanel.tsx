@@ -2,6 +2,9 @@ import { RUNTIME_TERMINOLOGY } from "../../constants/runtimeTerminology";
 import {
   deriveRuntimeV2RecommendationPresentation,
 } from "../../runtime-presentation/deriveRuntimeV2RecommendationPresentation";
+import {
+  deriveRuntimeV2RecommendationTimelinePresentation,
+} from "../../runtime-presentation/deriveRuntimeV2RecommendationTimelinePresentation";
 import type {
   RuntimeCoaching,
   RuntimeContractV2Response,
@@ -32,6 +35,11 @@ export function RuntimeV2ResultPanel({
       data.recommendation
     );
 
+  const recommendationTimelinePresentation =
+    deriveRuntimeV2RecommendationTimelinePresentation(
+      data.recommendation
+    );
+
   return (
     <section className="runtime-v2-result-panel">
       <div className="runtime-v2-result-panel-header">
@@ -56,6 +64,9 @@ export function RuntimeV2ResultPanel({
         <RuntimeV2RecommendationPanel
           presentation={
             recommendationPresentation
+          }
+          timelinePresentation={
+            recommendationTimelinePresentation
           }
         />
       ) : null}
