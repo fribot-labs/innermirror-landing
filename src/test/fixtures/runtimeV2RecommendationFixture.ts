@@ -1,12 +1,12 @@
 import type {
-    RuntimeV2Recommendation,
-    RuntimeV2RecommendationComparison,
-    RuntimeV2RecommendationEvolution,
-    RuntimeV2RecommendationIntegrationResult,
-    RuntimeV2RecommendationObservation,
-    RuntimeV2RecommendationPrediction,
-    RuntimeV2RecommendationState,
-    RuntimeV2RecommendationTimeline,
+  RuntimeV2Recommendation,
+  RuntimeV2RecommendationComparison,
+  RuntimeV2RecommendationEvolution,
+  RuntimeV2RecommendationIntegrationResult,
+  RuntimeV2RecommendationObservation,
+  RuntimeV2RecommendationPrediction,
+  RuntimeV2RecommendationState,
+  RuntimeV2RecommendationTimeline,
 } from "../../types/runtimeV2Recommendation";
 
 export const RUNTIME_V2_RECOMMENDATION_FIXTURE_ID =
@@ -574,4 +574,118 @@ export function createRuntimeV2RecommendationResultFixture(
         : {}
     ),
   };
+}
+
+export function createRuntimeV2RecommendationTimelineResultFixture(): RuntimeV2RecommendationIntegrationResult {
+  const previousRecommendation =
+    createRuntimeV2RecommendationFixture({
+      id:
+        "recommendation-ri11-previous",
+
+      direction:
+        "reflection-strengthening",
+
+      title:
+        "Strengthen Reflection reasoning",
+
+      createdAt:
+        "2026-07-31T09:00:00.000Z",
+    });
+
+  const previousState =
+    createRuntimeV2RecommendationStateFixture({
+      recommendationId:
+        previousRecommendation.id,
+
+      status:
+        "superseded",
+
+      createdAt:
+        previousRecommendation.createdAt,
+
+      updatedAt:
+        "2026-08-01T09:00:00.000Z",
+
+      supersededAt:
+        "2026-08-01T09:00:00.000Z",
+    });
+
+  const currentRecommendation =
+    createRuntimeV2RecommendationFixture();
+
+  const currentState =
+    createRuntimeV2RecommendationStateFixture();
+
+  return createRuntimeV2RecommendationResultFixture({
+    recommendationOverrides:
+      currentRecommendation,
+
+    timelineOverrides: {
+      entries: [
+        {
+          recommendation:
+            previousRecommendation,
+
+          state:
+            previousState,
+        },
+        {
+          recommendation:
+            currentRecommendation,
+
+          state:
+            currentState,
+        },
+      ],
+
+      currentRecommendationId:
+        currentRecommendation.id,
+    },
+
+    comparisonOverrides: {
+      previousRecommendationId:
+        previousRecommendation.id,
+
+      currentRecommendationId:
+        currentRecommendation.id,
+
+      changeType:
+        "shifted",
+
+      previousDirection:
+        previousRecommendation.direction,
+
+      currentDirection:
+        currentRecommendation.direction,
+
+      summary:
+        "Recommendation shifted from Reflection strengthening to Runtime stabilization.",
+
+      changedFields: [
+        "direction",
+        "title",
+        "recommendedAction",
+      ],
+    },
+
+    evolutionOverrides: {
+      pattern:
+        "strategic-shift",
+
+      previousDirection:
+        previousRecommendation.direction,
+
+      currentDirection:
+        currentRecommendation.direction,
+
+      summary:
+        "Runtime Recommendation changed after the project entered an integration stabilization phase.",
+
+      transitionCount:
+        1,
+    },
+
+    includePrediction:
+      true,
+  });
 }

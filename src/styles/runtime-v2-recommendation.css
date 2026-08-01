@@ -291,3 +291,209 @@
   color: #cffafe;
   line-height: 1.5;
 }
+
+/* =======================================================
+   Recommendation Timeline
+   ======================================================= */
+
+.runtime-v2-recommendation-timeline-details {
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(15, 23, 42, 0.24);
+}
+
+.runtime-v2-recommendation-timeline-details > summary {
+  padding: 0.85rem 1rem;
+  color: #dbeafe;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.runtime-v2-recommendation-timeline-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.runtime-v2-recommendation-timeline-details > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 0.45rem;
+  transition: transform 160ms ease;
+}
+
+.runtime-v2-recommendation-timeline-details[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.runtime-v2-recommendation-timeline {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.runtime-v2-recommendation-timeline-header {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.runtime-v2-recommendation-timeline-header > span,
+.runtime-v2-recommendation-timeline-change > span,
+.runtime-v2-recommendation-timeline-evolution > span {
+  color: #93c5fd;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.runtime-v2-recommendation-timeline-header h4 {
+  margin: 0;
+  color: #f8fafc;
+}
+
+.runtime-v2-recommendation-timeline-header p {
+  margin: 0;
+  color: #94a3b8;
+  line-height: 1.55;
+}
+
+.runtime-v2-recommendation-timeline-list {
+  position: relative;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.runtime-v2-recommendation-timeline-list::before {
+  content: "";
+  position: absolute;
+  top: 0.8rem;
+  bottom: 0.8rem;
+  left: 0.45rem;
+  width: 1px;
+  background: rgba(96, 165, 250, 0.25);
+}
+
+.runtime-v2-recommendation-timeline-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.runtime-v2-recommendation-timeline-marker {
+  position: relative;
+  z-index: 1;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-top: 0.55rem;
+  border: 2px solid #60a5fa;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.runtime-v2-recommendation-timeline-item-current
+  .runtime-v2-recommendation-timeline-marker {
+  background: #60a5fa;
+  box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.12);
+}
+
+.runtime-v2-recommendation-timeline-item-content {
+  display: grid;
+  gap: 0.45rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.34);
+}
+
+.runtime-v2-recommendation-timeline-item-current
+  .runtime-v2-recommendation-timeline-item-content {
+  border-color: rgba(96, 165, 250, 0.36);
+  background: rgba(30, 64, 175, 0.12);
+}
+
+.runtime-v2-recommendation-timeline-item-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  color: #94a3b8;
+  font-size: 0.72rem;
+}
+
+.runtime-v2-recommendation-timeline-item-content > strong {
+  color: #f8fafc;
+}
+
+.runtime-v2-recommendation-timeline-item-content > p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.55;
+}
+
+.runtime-v2-recommendation-timeline-item-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.runtime-v2-recommendation-timeline-item-labels span {
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(96, 165, 250, 0.1);
+  color: #bfdbfe;
+  font-size: 0.7rem;
+}
+
+.runtime-v2-recommendation-timeline-prediction {
+  margin-left: 1.75rem;
+  padding: 0.85rem;
+  border: 1px dashed rgba(34, 211, 238, 0.34);
+  border-radius: 10px;
+  background: rgba(8, 145, 178, 0.08);
+}
+
+.runtime-v2-recommendation-timeline-prediction > span {
+  display: block;
+  color: #67e8f9;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.runtime-v2-recommendation-timeline-prediction strong {
+  display: block;
+  margin-top: 0.3rem;
+  color: #ecfeff;
+}
+
+.runtime-v2-recommendation-timeline-prediction p {
+  margin: 0.4rem 0;
+  color: #cffafe;
+  line-height: 1.5;
+}
+
+.runtime-v2-recommendation-timeline-change,
+.runtime-v2-recommendation-timeline-evolution {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.28);
+}
+
+.runtime-v2-recommendation-timeline-change strong,
+.runtime-v2-recommendation-timeline-evolution strong {
+  color: #f8fafc;
+}
+
+.runtime-v2-recommendation-timeline-change p,
+.runtime-v2-recommendation-timeline-evolution p {
+  margin: 0;
+  color: #cbd5e1;
+  line-height: 1.55;
+}

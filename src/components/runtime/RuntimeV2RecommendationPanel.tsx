@@ -1,14 +1,26 @@
 import type {
-    RuntimeV2RecommendationPresentation,
+  RuntimeV2RecommendationPresentation,
 } from "../../runtime-presentation/runtimeV2RecommendationPresentationTypes";
+
+import type {
+  RuntimeV2RecommendationTimelinePresentation,
+} from "../../runtime-presentation/runtimeV2RecommendationTimelinePresentationTypes";
+
+import {
+  RuntimeV2RecommendationTimeline,
+} from "./RuntimeV2RecommendationTimeline";
 
 type RuntimeV2RecommendationPanelProps = {
   presentation:
     RuntimeV2RecommendationPresentation;
+
+  timelinePresentation:
+    RuntimeV2RecommendationTimelinePresentation | null;
 };
 
 export function RuntimeV2RecommendationPanel({
   presentation,
+  timelinePresentation,
 }: RuntimeV2RecommendationPanelProps) {
   return (
     <section className="runtime-v2-recommendation-panel">
@@ -100,6 +112,20 @@ export function RuntimeV2RecommendationPanel({
             </p>
           ) : null}
         </div>
+      ) : null}
+
+      {timelinePresentation ? (
+        <details className="runtime-v2-recommendation-timeline-details">
+          <summary>
+            View Recommendation Timeline
+          </summary>
+
+          <RuntimeV2RecommendationTimeline
+            presentation={
+              timelinePresentation
+            }
+          />
+        </details>
       ) : null}
 
       {presentation.predictedDirectionLabel ? (
