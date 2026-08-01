@@ -308,34 +308,19 @@ export function App() {
       ?.predictiveIntelligenceResult ??
     null;
 
-  const runtimeV2PredictiveResult =
-    runtimeV2Response
-      ?.data
-      .recommendationIntegration
-      ?.predictiveIntelligenceResult ??
-    null;
-
-  /**
-   * Runtime V2 결과를 우선 사용합니다.
-   *
-   * Project Analyze와 Reflection + GitHub는 runtimeV2Response를
-   * 최신 결과로 갱신합니다.
-   *
-   * Runtime V2 결과에 Prediction이 없으면 Reflection Runtime의
-   * Prediction 결과를 fallback으로 사용합니다.
-   */
-  const predictiveIntelligenceResult =
-    runtimeV2PredictiveResult ??
-    reflectionPredictiveResult;
-
   const runtimePredictivePresentation =
     useMemo(
       () =>
         deriveRuntimePredictivePresentation(
-          predictiveIntelligenceResult
+          result
+            ?.recommendationIntegration
+            ?.predictiveIntelligenceResult ??
+          null
         ),
       [
-        predictiveIntelligenceResult,
+        result
+          ?.recommendationIntegration
+          ?.predictiveIntelligenceResult,
       ]
     );
 

@@ -3,6 +3,10 @@ import type {
 } from "../runtime-recommendation-integration/runtimeRecommendationIntegrationTypes";
 import type { GitHubSnapshot } from "./githubSnapshot";
 
+import type {
+  RuntimeV2RecommendationIntegrationResult,
+} from "./runtimeV2Recommendation";
+
 /**
  * Runtime Contract V2
  *
@@ -168,6 +172,17 @@ export type RuntimeContractV2Output = {
   knowledgeCompression?: RuntimeKnowledgeCompression;
   insightSynthesis?: RuntimeInsightSynthesis;
 
+  /**
+   * Private Runtime V2 Recommendation Intelligence.
+   */
+  recommendation?:
+    RuntimeV2RecommendationIntegrationResult;
+
+  /**
+   * Legacy Landing Recommendation Integration.
+   *
+   * Retained for the Reflection Runtime path.
+   */
   recommendationIntegration?:
     RuntimeRecommendationIntegrationResult | null;
 };
