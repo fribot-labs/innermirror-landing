@@ -1,4 +1,7 @@
 import { RUNTIME_TERMINOLOGY } from "../../constants/runtimeTerminology";
+import {
+  deriveRuntimeV2RecommendationPresentation,
+} from "../../runtime-presentation/deriveRuntimeV2RecommendationPresentation";
 import type {
   RuntimeCoaching,
   RuntimeContractV2Response,
@@ -9,6 +12,9 @@ import { DecisionLandscape } from "./DecisionLandscape";
 import { KnowledgeCompressionPanel } from "./KnowledgeCompressionPanel";
 import { ProjectIdentityPanel } from "./ProjectIdentityPanel";
 import { RuntimeInsightSynthesisPanel } from "./RuntimeInsightSynthesisPanel";
+import {
+  RuntimeV2RecommendationPanel,
+} from "./RuntimeV2RecommendationPanel";
 
 type RuntimeV2ResultPanelProps = {
   response: RuntimeContractV2Response;
@@ -20,6 +26,11 @@ export function RuntimeV2ResultPanel({
   const { meta, data } = response;
 
   const result = response.data;
+
+  const recommendationPresentation =
+    deriveRuntimeV2RecommendationPresentation(
+      data.recommendation
+    );
 
   return (
     <section className="runtime-v2-result-panel">
@@ -39,6 +50,14 @@ export function RuntimeV2ResultPanel({
 
       {data.insightSynthesis ? (
         <RuntimeInsightSynthesisPanel insight={data.insightSynthesis} />
+      ) : null}
+
+      {recommendationPresentation ? (
+        <RuntimeV2RecommendationPanel
+          presentation={
+            recommendationPresentation
+          }
+        />
       ) : null}
 
       {data.projectIdentity ||

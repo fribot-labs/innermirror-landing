@@ -1,188 +1,56 @@
-# Styles Architecture
+# Runtime Styles Architecture
 
-The `styles` directory contains the visual presentation layer for the InnerMirror Landing application.
+The `styles` directory contains the presentation layer for the InnerMirror Landing application.
 
-Each stylesheet owns a specific UI domain so that visual changes remain isolated and easy to maintain.
+Its purpose is to keep **visual presentation** completely independent from Runtime reasoning, Landing behavior, and project workflows.
+
+The stylesheet architecture follows the same architectural philosophy as the Runtime itself.
+
+```text
+Behavior
+
+↓
+
+Presentation
+
+↓
+
+Rendering
+```
+
+Runtime modules own reasoning.
+
+Landing components own behavior.
+
+Stylesheets own presentation.
 
 ---
 
-# Structure
+# Directory Structure
 
-```
+```text
 styles/
 
 ├── global.css
 ├── base.css
 ├── landing.css
 ├── runtime.css
+├── runtime-v2-recommendation.css
 ├── github.css
 ├── project.css
 ├── reflection.css
 └── responsive.css
 ```
 
----
+Each stylesheet owns one visual domain.
 
-# File Responsibilities
-
-## global.css
-
-Entry point for all styles.
-
-This file should only import the individual style modules.
-
-```
-global.css
-
-↓
-
-base.css
-landing.css
-runtime.css
-github.css
-project.css
-reflection.css
-responsive.css
-```
-
-No component-specific styling should be added here.
+This keeps Runtime UI scalable as Runtime Intelligence continues to expand.
 
 ---
 
-## base.css
+# Overall Architecture
 
-Application-wide styles.
-
-Includes:
-
-- CSS reset
-- Root variables
-- Typography
-- Default element styling
-- Global animations
-
----
-
-## landing.css
-
-Landing page presentation.
-
-Includes:
-
-- Hero section
-- Landing layout
-- Marketing sections
-- Boundary section
-
----
-
-## runtime.css
-
-Runtime V2 user interface.
-
-Includes:
-
-- Runtime Result Panel
-- Runtime Insight
-- Project Evolution
-- Decision Evolution
-- Decision Landscape
-- Project Identity
-- Knowledge Compression
-- Runtime Strategy
-- Runtime cards
-
-This is the largest Runtime UI stylesheet.
-
----
-
-## github.css
-
-GitHub integration UI.
-
-Includes:
-
-- GitHub learning entry
-- Repository selector
-- GitHub snapshot
-- Repository cards
-- GitHub connection status
-
----
-
-## project.css
-
-Project management UI.
-
-Includes:
-
-- Project start
-- Current project
-- Project summary
-- Project timeline
-- Project continuity
-- Project pattern
-
----
-
-## reflection.css
-
-Reflection and memory experience.
-
-Includes:
-
-- Reflection continuity
-- Returning theme
-- Long gap recovery
-- Identity drift
-- Runtime memory timeline
-- Reflection feedback
-
----
-
-## responsive.css
-
-Responsive layout rules.
-
-Includes:
-
-- Mobile layout
-- Tablet layout
-- Shared media queries
-
-No component-specific desktop styling should be added here.
-
----
-
-# Design Principles
-
-Each stylesheet should own a single UI domain.
-
-Avoid placing unrelated styles into another module.
-
-Example:
-
-Runtime Insight
-
-→ runtime.css
-
-Repository Selector
-
-→ github.css
-
-Project Timeline
-
-→ project.css
-
-Reflection Memory
-
-→ reflection.css
-
----
-
-# Architecture
-
-```
+```text
 Landing Components
 
 ↓
@@ -198,9 +66,260 @@ global.css
 Browser
 ```
 
-Component responsibility:
+Each component decides **what** to render.
 
+Each stylesheet decides **how** it is rendered.
+
+---
+
+# File Responsibilities
+
+## global.css
+
+Application stylesheet entry point.
+
+Responsibilities:
+
+- import stylesheet modules
+- define stylesheet load order
+
+`global.css` should not contain component-specific presentation.
+
+Recommended structure:
+
+```text
+global.css
+
+↓
+
+base.css
+
+landing.css
+
+runtime.css
+
+runtime-v2-recommendation.css
+
+github.css
+
+project.css
+
+reflection.css
+
+responsive.css
 ```
+
+---
+
+## base.css
+
+Application-wide presentation.
+
+Includes:
+
+- CSS reset
+- root variables
+- typography
+- spacing
+- shared animation
+- default HTML element styles
+
+Nothing Runtime-specific belongs here.
+
+---
+
+## landing.css
+
+Landing page presentation.
+
+Includes:
+
+- landing layout
+- hero section
+- marketing presentation
+- navigation
+- public landing experience
+
+No Runtime visualization belongs here.
+
+---
+
+## runtime.css
+
+Shared Runtime presentation.
+
+Includes:
+
+- Runtime Result Panel
+- Runtime Insight
+- Runtime Summary
+- Runtime Question
+- Runtime Coaching
+- Runtime Interpretation
+- Runtime Project Evolution
+- Runtime Decision Evolution
+- Decision Landscape
+- Project Identity
+- Knowledge Compression
+- Runtime Insight Synthesis
+- Runtime History
+- Runtime Next Action
+- Runtime Evidence
+- shared Runtime cards
+
+This stylesheet owns Runtime-wide presentation.
+
+Recommendation-specific presentation belongs elsewhere.
+
+---
+
+## runtime-v2-recommendation.css
+
+Runtime V2 Recommendation presentation.
+
+This stylesheet was introduced after Recommendation Intelligence became an independent Runtime subsystem.
+
+Includes:
+
+- Runtime Recommendation panel
+- Recommendation header
+- Recommendation direction
+- Recommendation priority
+- Recommendation confidence
+- Recommended action
+- Recommended implementation steps
+- Recommendation observation
+- Recommendation evolution
+- Recommendation prediction
+
+This stylesheet only presents Recommendation Intelligence generated by the private Runtime.
+
+It never generates Recommendation logic.
+
+---
+
+## github.css
+
+GitHub presentation.
+
+Includes:
+
+- GitHub connection
+- repository selector
+- repository cards
+- GitHub snapshot
+- synchronization status
+
+No Runtime reasoning belongs here.
+
+---
+
+## project.css
+
+Project workflow presentation.
+
+Includes:
+
+- Project start
+- Project overview
+- Project summary
+- Project timeline
+- Project continuity
+- Project pattern
+- Project flow
+- Guided project actions
+- Project action buttons
+
+Project workflow visualization belongs here.
+
+---
+
+## reflection.css
+
+Reflection presentation.
+
+Includes:
+
+- Reflection experience
+- Reflection continuity
+- Returning themes
+- Identity drift
+- Reflection feedback
+- Runtime memory timeline
+
+Reflection visualization belongs here.
+
+---
+
+## responsive.css
+
+Responsive presentation.
+
+Includes:
+
+- mobile layout
+- tablet layout
+- shared media queries
+
+Component-specific desktop presentation should not be added here.
+
+---
+
+# Architectural Principles
+
+Every stylesheet owns one presentation domain.
+
+Example:
+
+```text
+Runtime Insight
+
+↓
+
+runtime.css
+```
+
+```text
+Runtime Recommendation
+
+↓
+
+runtime-v2-recommendation.css
+```
+
+```text
+Project Workflow
+
+↓
+
+project.css
+```
+
+```text
+GitHub Repository
+
+↓
+
+github.css
+```
+
+```text
+Reflection Experience
+
+↓
+
+reflection.css
+```
+
+A feature should never be split across unrelated stylesheets.
+
+---
+
+# Separation of Responsibilities
+
+Components own behavior.
+
+```text
 Component
 
 ↓
@@ -208,9 +327,9 @@ Component
 Behavior
 ```
 
-Stylesheet responsibility:
+Stylesheets own presentation.
 
-```
+```text
 Stylesheet
 
 ↓
@@ -218,26 +337,253 @@ Stylesheet
 Presentation
 ```
 
-This separation keeps Runtime reasoning independent from UI styling.
+Runtime owns reasoning.
+
+```text
+Runtime
+
+↓
+
+Insight
+
+↓
+
+Recommendation
+
+↓
+
+Observation
+
+↓
+
+Evolution
+
+↓
+
+Prediction
+```
+
+Browser owns rendering.
+
+```text
+Presentation
+
+↓
+
+Rendering
+```
+
+This separation keeps Runtime Intelligence completely independent from UI implementation.
 
 ---
 
-# Future Direction
+# Runtime Recommendation Architecture
 
-As Runtime grows, new visual features should be added to the appropriate stylesheet instead of expanding `global.css`.
+Recommendation Intelligence is produced entirely inside the private Runtime.
+
+```text
+Private Runtime
+
+↓
+
+Recommendation Core
+
+↓
+
+Recommendation Intelligence
+
+↓
+
+Runtime Contract
+
+↓
+
+Landing
+
+↓
+
+Runtime Recommendation Presentation
+```
+
+Landing never recalculates:
+
+- Recommendation
+- Recommendation Comparison
+- Recommendation Observation
+- Recommendation Evolution
+- Recommendation Prediction
+
+Landing only presents Runtime output.
+
+This architectural boundary allows Recommendation Intelligence to evolve independently from the Landing UI.
+
+---
+
+# Runtime Presentation Layers
+
+Runtime presentation now consists of multiple independent visual layers.
+
+```text
+Runtime Understanding
+
+↓
+
+Runtime Recommendation
+
+↓
+
+Runtime Interpretation
+
+↓
+
+Project Flow
+```
+
+Future Runtime visual layers should become independent stylesheets rather than expanding existing ones.
+
+---
+
+# Import Order
+
+Recommended stylesheet order:
+
+```text
+base
+
+↓
+
+landing
+
+↓
+
+runtime
+
+↓
+
+runtime-v2-recommendation
+
+↓
+
+github
+
+↓
+
+project
+
+↓
+
+reflection
+
+↓
+
+responsive
+```
+
+Shared Runtime presentation is loaded before Recommendation-specific presentation.
+
+Responsive rules remain the final layer.
+
+---
+
+# Design Philosophy
+
+Presentation hierarchy should mirror Runtime hierarchy.
 
 Example:
 
-New Runtime panel
+```text
+Runtime Intelligence
 
-→ runtime.css
+↓
 
-New GitHub screen
+Recommendation Intelligence
 
-→ github.css
+↓
 
-New Reflection visualization
+Landing Presentation
 
-→ reflection.css
+↓
 
-This keeps the CSS architecture modular, maintainable, and scalable for long-term Runtime development.
+User Experience
+```
+
+Visual architecture should make Runtime structure understandable without exposing Runtime implementation.
+
+---
+
+# Future Growth
+
+As Runtime Intelligence expands, new visual domains should become independent stylesheets.
+
+Examples:
+
+```text
+Shared Runtime UI
+
+↓
+
+runtime.css
+```
+
+```text
+Runtime Recommendation
+
+↓
+
+runtime-v2-recommendation.css
+```
+
+```text
+Runtime Memory
+
+↓
+
+runtime-memory.css
+```
+
+```text
+Runtime Timeline
+
+↓
+
+runtime-timeline.css
+```
+
+```text
+Runtime Decision History
+
+↓
+
+runtime-decision.css
+```
+
+```text
+GitHub Collaboration
+
+↓
+
+github.css
+```
+
+```text
+Project Planning
+
+↓
+
+project.css
+```
+
+```text
+Reflection Visualization
+
+↓
+
+reflection.css
+```
+
+The goal is not to create large monolithic stylesheets.
+
+The goal is to allow each Runtime Intelligence layer to own its own visual presentation while remaining completely independent from Runtime reasoning.
+
+This architecture keeps the Landing presentation modular, maintainable, and scalable as Runtime Intelligence continues to evolve.
+```

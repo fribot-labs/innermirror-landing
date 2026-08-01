@@ -116,6 +116,14 @@
     justify-content: space-between;
     border-radius: 9px;
   }
+
+  .runtime-v2-recommendation-panel {
+    padding: 1rem;
+  }
+
+  .runtime-v2-recommendation-meta {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
