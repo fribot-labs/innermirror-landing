@@ -19,6 +19,15 @@ export type RuntimeV2RecommendationDirection =
   | "signal-collection"
   | "unknown";
 
+export type RuntimeV2RecommendationInsightPattern =
+  | "early-understanding"
+  | "stable-but-under-evidenced"
+  | "stable-and-aligned"
+  | "progressing"
+  | "strategic-transition"
+  | "direction-conflict"
+  | "uncertain";
+
 export type RuntimeV2RecommendationEvidence = {
   id: string;
   source: string;
@@ -150,4 +159,23 @@ export type RuntimeV2RecommendationIntegrationResult = {
   observation?: RuntimeV2RecommendationObservation;
   evolution?: RuntimeV2RecommendationEvolution;
   predictiveIntelligenceResult?: RuntimeV2RecommendationPrediction;
+  insight?: RuntimeV2RecommendationInsight;
+};
+
+export type RuntimeV2RecommendationInsight = {
+  projectId: string;
+  currentRecommendationId: string;
+  pattern:
+    RuntimeV2RecommendationInsightPattern;
+  headline: string;
+  summary: string;
+  keyInsight: string;
+  supportingReasons: string[];
+  currentDirection:
+    RuntimeV2RecommendationDirection;
+  confidence:
+    RuntimeV2RecommendationConfidence;
+  evidence:
+    RuntimeV2RecommendationEvidence[];
+  generatedAt: string;
 };
