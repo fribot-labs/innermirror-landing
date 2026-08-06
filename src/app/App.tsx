@@ -8,6 +8,9 @@ import {
 import { deriveRuntimePredictivePresentation } from "../components/deriveRuntimePredictivePresentation";
 import { deriveRuntimeRecommendationPresentation } from "../components/deriveRuntimeRecommendationPresentation";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
+import {
+  GitHubOrganizationVerification,
+} from "../components/github/GitHubOrganizationVerification";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
 import { ProjectReflectionPanel } from "../components/project/ProjectReflectionPanel";
@@ -124,6 +127,30 @@ export function App() {
   } = useGitHubRepositories({
     enabled: githubConnectionState === "connected",
   });
+
+  const [
+    verifiedOrganizationRepositories,
+    setVerifiedOrganizationRepositories,
+  ] = useState<GitHubRepositorySummary[]>([]);
+
+  const availableRepositories = useMemo(
+    () =>
+      mergeGitHubRepositories([
+        ...repositories,
+        ...verifiedOrganizationRepositories,
+      ]),
+    [
+      repositories,
+      verifiedOrganizationRepositories,
+    ]
+  );
+
+  const githubSessionId =
+    githubConnectionState === "connected"
+      ? window.localStorage.getItem(
+          "innermirror.githubSessionId"
+        )
+      : null;
 
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
@@ -420,6 +447,7 @@ export function App() {
       "The Runtime GitHub session expired. Please sign out and connect GitHub again."
     );
 
+    setVerifiedOrganizationRepositories([]);
     setSelectedRepository(null);
     setActiveProject(null);
     setLatestCapturedSnapshot(null);
@@ -551,6 +579,7 @@ export function App() {
 
       setAuthenticatedUser(null);
       setGithubConnectionState("disconnected");
+      setVerifiedOrganizationRepositories([]);
       setSelectedRepository(null);
       setActiveProject(null);
       setCurrentStep("");
@@ -610,6 +639,7 @@ export function App() {
 
       setAuthenticatedUser(null);
       setGithubConnectionState("disconnected");
+      setVerifiedOrganizationRepositories([]);
       setSelectedRepository(null);
       setActiveProject(null);
       setCurrentStep("");
@@ -636,6 +666,19 @@ export function App() {
           : "Unable to reset GitHub access."
       );
     }
+  };
+
+  const handleOrganizationVerified = (
+    _organizationLogin: string,
+    organizationRepositories: GitHubRepositorySummary[]
+  ) => {
+    setVerifiedOrganizationRepositories(
+      (currentRepositories) =>
+        mergeGitHubRepositories([
+          ...currentRepositories,
+          ...organizationRepositories,
+        ])
+    );
   };
 
   const handleSelectRepository = (
@@ -944,6 +987,7 @@ export function App() {
           "The Runtime GitHub session expired. Please sign out and connect GitHub again."
         );
 
+        setVerifiedOrganizationRepositories([]);
         setSelectedRepository(null);
         setActiveProject(null);
         resetSnapshot();
@@ -1183,10 +1227,42 @@ export function App() {
         onResetGitHubAccess={handleResetGitHubAccess}
       />
 
+      <GitHubOrganizationVerification
+        key={
+          githubSessionId ??
+          "no-github-session"
+        }
+        githubSessionId={githubSessionId}
+        disabled={
+          githubConnectionState !== "connected"
+        }
+        onVerified={
+          handleOrganizationVerified
+        }
+        onSessionExpired={() => {
+          window.localStorage.removeItem(
+            "innermirror.githubSessionId"
+          );
+
+          runtimeGitHubBridgeStateRef.current =
+            "idle";
+
+          setVerifiedOrganizationRepositories(
+            []
+          );
+
+          setGithubConnectionState("error");
+
+          setAuthMessage(
+            "The Runtime GitHub session expired. Please sign out and connect GitHub again."
+          );
+        }}
+      />
+
       <RepositorySelector
         repositories={
           githubConnectionState === "connected"
-            ? repositories
+            ? availableRepositories
             : []
         }
         selectedRepository={selectedRepository}
@@ -1428,6 +1504,62 @@ export function App() {
       ) : null}
     </main>
   );
+}
+
+function mergeGitHubRepositories(
+  repositories: GitHubRepositorySummary[]
+): GitHubRepositorySummary[] {
+  const repositoryMap =
+    new Map<
+      string,
+      GitHubRepositorySummary
+    >();
+
+  for (const repository of repositories) {
+    if (repository.private) {
+      continue;
+    }
+
+    const repositoryKey =
+      `${repository.owner}/${repository.name}`
+        .trim()
+        .toLowerCase();
+
+    if (repositoryKey === "/") {
+      continue;
+    }
+
+    repositoryMap.set(
+      repositoryKey,
+      repository
+    );
+  }
+
+  return Array.from(
+    repositoryMap.values()
+  ).sort(
+    (a, b) =>
+      getRepositoryUpdatedTimestamp(b) -
+      getRepositoryUpdatedTimestamp(a)
+  );
+}
+
+function getRepositoryUpdatedTimestamp(
+  repository: GitHubRepositorySummary
+): number {
+  if (
+    typeof repository.updatedAt !== "string" ||
+    repository.updatedAt.trim().length === 0
+  ) {
+    return 0;
+  }
+
+  const timestamp =
+    Date.parse(repository.updatedAt);
+
+  return Number.isNaN(timestamp)
+    ? 0
+    : timestamp;
 }
 
 export default App;
