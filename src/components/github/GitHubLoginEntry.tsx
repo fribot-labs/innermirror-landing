@@ -51,6 +51,7 @@ export function GitHubLoginEntry({
   const isConnecting = connectionState === "connecting";
   const isConnected = connectionState === "connected";
   const hasError = connectionState === "error";
+  const hasAuthenticatedUser = user !== null;
 
   const displayName = resolveGitHubDisplayName(user);
 
@@ -86,7 +87,7 @@ export function GitHubLoginEntry({
                     : "GitHub not connected"}
             </div>
 
-            {isConnected && displayName !== null ? (
+            {hasAuthenticatedUser && displayName !== null ? (
               <div className="github-learning-entry-user">
                 Signed in as {displayName}
               </div>
@@ -94,7 +95,7 @@ export function GitHubLoginEntry({
           </div>
         </div>
 
-        {isConnected ? (
+        {hasAuthenticatedUser ? (
           <button
             className="github-learning-entry-button"
             type="button"
