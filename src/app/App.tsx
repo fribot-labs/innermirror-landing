@@ -1,3 +1,4 @@
+import type { User } from "@supabase/supabase-js";
 import {
   useEffect,
   useMemo,
@@ -36,6 +37,7 @@ import { RuntimePredictionPanel } from "../components/RuntimePredictionPanel";
 import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResult";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
+import { supabaseClient } from "../lib/supabaseClient";
 import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
@@ -102,6 +104,12 @@ export function App() {
 
   const [githubConnectionState, setGithubConnectionState] =
     useState<GitHubConnectionState>("disconnected");
+
+  const [authenticatedUser, setAuthenticatedUser] =
+    useState<User | null>(null);
+
+  const [authMessage, setAuthMessage] =
+    useState<string | null>(null);
 
   const {
     repositories,
@@ -226,21 +234,72 @@ export function App() {
   });
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const githubSessionId = params.get("githubSessionId");
+    let isMounted = true;
 
-    if (githubSessionId === null) {
-      return;
-    }
+    const restoreSession = async () => {
+      const {
+        data: { session },
+        error,
+      } = await supabaseClient.auth.getSession();
 
-    window.localStorage.setItem(
-      "innermirror.githubSessionId",
-      githubSessionId
+      if (error) {
+        console.error(
+          "Unable to restore Supabase session.",
+          error
+        );
+
+        if (isMounted) {
+          setGithubConnectionState("error");
+          setAuthenticatedUser(null);
+          setAuthMessage(
+            "Unable to restore the GitHub session."
+          );
+        }
+
+        return;
+      }
+
+      if (!isMounted) {
+        return;
+      }
+
+      setAuthenticatedUser(session?.user ?? null);
+
+      setGithubConnectionState(
+        session !== null
+          ? "connected"
+          : "disconnected"
+      );
+
+      setAuthMessage(null);
+    };
+
+    void restoreSession();
+
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setAuthenticatedUser(session?.user ?? null);
+
+        setGithubConnectionState(
+          session !== null
+            ? "connected"
+            : "disconnected"
+        );
+
+        setAuthMessage(null);
+      }
     );
 
-    setGithubConnectionState("connected");
-
-    window.history.replaceState({}, "", "/");
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -324,9 +383,71 @@ export function App() {
       ]
     );
 
-  const handleConnectGitHub = () => {
-    window.location.href =
-      "http://localhost:4000/github/oauth/start";
+  const handleConnectGitHub = async () => {
+    setGithubConnectionState("connecting");
+    setAuthMessage(null);
+
+    try {
+      const { error } =
+        await supabaseClient.auth.signInWithOAuth({
+          provider: "github",
+          options: {
+            redirectTo: `${window.location.origin}/`,
+          },
+        });
+
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error(
+        "Unable to start GitHub authentication.",
+        error
+      );
+
+      setGithubConnectionState("error");
+
+      setAuthMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to connect GitHub. Please try again."
+      );
+    }
+  };
+
+  const handleSignOut = async () => {
+    setGithubConnectionState("connecting");
+    setAuthMessage(null);
+
+    try {
+      const { error } =
+        await supabaseClient.auth.signOut();
+
+      if (error) {
+        throw error;
+      }
+
+      setSelectedRepository(null);
+      setActiveProject(null);
+      setCurrentStep("");
+      setLatestCapturedSnapshot(null);
+      setRuntimeV2Response(null);
+      resetSnapshot();
+      resetMerge();
+    } catch (error) {
+      console.error(
+        "Unable to sign out from GitHub.",
+        error
+      );
+
+      setGithubConnectionState("error");
+
+      setAuthMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to sign out. Please try again."
+      );
+    }
   };
 
   const handleSelectRepository = (
@@ -857,7 +978,10 @@ export function App() {
     <main>
       <GitHubLoginEntry
         connectionState={githubConnectionState}
+        user={authenticatedUser}
+        authMessage={authMessage}
         onConnect={handleConnectGitHub}
+        onSignOut={handleSignOut}
       />
 
       <RepositorySelector
