@@ -508,6 +508,7 @@ export function App() {
           provider: "github",
           options: {
             redirectTo: `${window.location.origin}/`,
+            scopes: "read:org",
           },
         });
 
@@ -569,6 +570,70 @@ export function App() {
         error instanceof Error
           ? error.message
           : "Unable to sign out. Please try again."
+      );
+    }
+  };
+
+  const handleResetGitHubAccess = async () => {
+    const shouldReset = window.confirm(
+      [
+        "Reset the current GitHub connection?",
+        "",
+        "You will be signed out from InnerMirror and moved to GitHub.",
+        "On GitHub, revoke the InnerMirror Local MVP authorization.",
+        "Then return here and connect GitHub again.",
+      ].join("\n")
+    );
+
+    if (!shouldReset) {
+      return;
+    }
+
+    setGithubConnectionState("connecting");
+    setAuthMessage(null);
+
+    try {
+      const { error } =
+        await supabaseClient.auth.signOut({
+          scope: "local",
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      window.localStorage.removeItem(
+        "innermirror.githubSessionId"
+      );
+
+      runtimeGitHubBridgeStateRef.current = "idle";
+
+      setAuthenticatedUser(null);
+      setGithubConnectionState("disconnected");
+      setSelectedRepository(null);
+      setActiveProject(null);
+      setCurrentStep("");
+      setLatestCapturedSnapshot(null);
+      setRuntimeV2Response(null);
+
+      resetSnapshot();
+      resetMerge();
+
+      window.location.assign(
+        "https://github.com/settings/applications"
+      );
+    } catch (error) {
+      console.error(
+        "Unable to reset GitHub access.",
+        error
+      );
+
+      setGithubConnectionState("error");
+
+      setAuthMessage(
+        error instanceof Error
+          ? error.message
+          : "Unable to reset GitHub access."
       );
     }
   };
@@ -1115,6 +1180,7 @@ export function App() {
         authMessage={authMessage}
         onConnect={handleConnectGitHub}
         onSignOut={handleSignOut}
+        onResetGitHubAccess={handleResetGitHubAccess}
       />
 
       <RepositorySelector
