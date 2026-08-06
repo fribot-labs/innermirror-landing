@@ -46,8 +46,21 @@ import type {
 } from "../github/runtimeGitHubSessionTypes";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
+import {
+  createRuntimeProjectIdentity,
+} from "../project-identity/createRuntimeProjectIdentity";
+
+import {
+  clearRuntimeProjectIdentity,
+  loadRuntimeProjectIdentity,
+  saveRuntimeProjectIdentity,
+} from "../project-identity/runtimeProjectIdentityStore";
+
 import { supabaseClient } from "../lib/supabaseClient";
 import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
+import type {
+  RuntimeProjectIdentity,
+} from "../project-identity/runtimeProjectIdentityTypes";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -192,6 +205,15 @@ export function App() {
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
 
+  const [
+    runtimeProjectIdentity,
+    setRuntimeProjectIdentity,
+  ] = useState<
+    RuntimeProjectIdentity | null
+  >(() =>
+    loadRuntimeProjectIdentity()
+  );
+
   const [currentStep, setCurrentStep] = useState("");
 
   const [activeProject, setActiveProject] =
@@ -273,6 +295,37 @@ export function App() {
       health: runtimeBoundaryHealth,
       isChecking: isCheckingBoundary,
     });
+
+  useEffect(() => {
+    if (
+      runtimeProjectIdentity === null ||
+      selectedRepository !== null ||
+      availableRepositories.length === 0
+    ) {
+      return;
+    }
+
+    const restoredRepository =
+      availableRepositories.find(
+        (repository) =>
+          repository.owner.toLowerCase() ===
+            runtimeProjectIdentity.repository.owner.toLowerCase() &&
+          repository.name.toLowerCase() ===
+            runtimeProjectIdentity.repository.name.toLowerCase()
+      );
+
+    if (restoredRepository === undefined) {
+      return;
+    }
+
+    setSelectedRepository(
+      restoredRepository
+    );
+  }, [
+    runtimeProjectIdentity,
+    selectedRepository,
+    availableRepositories,
+  ]);
 
   useEffect(() => {
     const runtimeIsUnavailable =
@@ -812,6 +865,13 @@ export function App() {
       setGithubConnectionState("disconnected");
       setVerifiedOrganizationRepositories([]);
       setSelectedRepository(null);
+
+      clearRuntimeProjectIdentity();
+
+      setRuntimeProjectIdentity(
+        null
+      );
+
       setActiveProject(null);
       setCurrentStep("");
       setLatestCapturedSnapshot(null);
@@ -870,6 +930,13 @@ export function App() {
       setGithubConnectionState("disconnected");
       setVerifiedOrganizationRepositories([]);
       setSelectedRepository(null);
+
+      clearRuntimeProjectIdentity();
+
+      setRuntimeProjectIdentity(
+        null
+      );
+
       setActiveProject(null);
       setCurrentStep("");
       setLatestCapturedSnapshot(null);
@@ -914,14 +981,32 @@ export function App() {
     repository: GitHubRepositorySummary
   ) => {
     const isSameRepository =
-      selectedRepository?.owner === repository.owner &&
-      selectedRepository?.name === repository.name;
+      selectedRepository?.owner ===
+        repository.owner &&
+      selectedRepository?.name ===
+        repository.name;
 
     if (isSameRepository) {
       return;
     }
 
-    setSelectedRepository(repository);
+    const nextRuntimeProjectIdentity =
+      createRuntimeProjectIdentity({
+        repository,
+      });
+
+    setSelectedRepository(
+      repository
+    );
+
+    setRuntimeProjectIdentity(
+      nextRuntimeProjectIdentity
+    );
+
+    saveRuntimeProjectIdentity(
+      nextRuntimeProjectIdentity
+    );
+
     setActiveProject(null);
     setCurrentStep("");
     resetSnapshot();
@@ -1013,9 +1098,15 @@ export function App() {
             reflectionText: trimmedContent,
 
             project: {
-              projectId: activeProject.id,
-              name: activeProject.name,
-              currentStep: resolvedCurrentStep,
+              projectId:
+                runtimeProjectIdentity?.projectId ??
+                activeProject.id,
+
+              name:
+                activeProject.name,
+
+              currentStep:
+                resolvedCurrentStep,
             },
 
             repository: {
@@ -1119,9 +1210,15 @@ export function App() {
           trimmedContent.length > 0 ? trimmedContent : undefined,
 
         project: {
-          projectId: activeProject.id,
-          name: activeProject.name,
-          currentStep: resolvedCurrentStep,
+          projectId:
+            runtimeProjectIdentity?.projectId ??
+            activeProject.id,
+
+          name:
+            activeProject.name,
+
+          currentStep:
+            resolvedCurrentStep,
         },
 
         repository: {
