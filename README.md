@@ -354,3 +354,58 @@ Projects provide learning structure.
 Reflection provides learner thinking.
 
 Together they create one coherent Project-Based Learning experience.
+
+---
+
+## Production Deployment
+
+The InnerMirror Landing application is built with Vite.
+
+### Local Verification
+
+```bash
+npm install
+npm run dev
+npm run build
+npm run preview
+```
+
+### Build Configuration
+
+```text
+Build Command: npm run build
+Output Directory: dist
+```
+
+### Environment Variables
+
+The current Landing application uses:
+
+```text
+VITE_RUNTIME_API_URL
+VITE_RUNTIME_REQUEST_TIMEOUT_MS
+VITE_RUNTIME_RETRY_COUNT
+```
+
+Local values should be stored in:
+
+```text
+.env.local
+```
+
+Public variable names and example values are documented in:
+
+```text
+.env.example
+```
+
+Variables prefixed with `VITE_` are included in the client-side application
+bundle and must not contain private credentials or server-only secrets.
+
+### Deployment Target
+
+The current production deployment target is Vercel.
+
+GitHub OAuth, Supabase authentication, and authenticated Reflection
+persistence will be configured in separate Pull Requests after the public
+Landing URL has been established.
