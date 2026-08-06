@@ -7,6 +7,8 @@ type RepositorySelectorProps = {
   repositories: GitHubRepositorySummary[];
   selectedRepository: GitHubRepositorySummary | null;
   onSelectRepository: (repository: GitHubRepositorySummary) => void;
+  availabilityMessage:
+    string | null;
 };
 
 type RepositoryCardProps = {
@@ -19,6 +21,7 @@ export function RepositorySelector({
   repositories,
   selectedRepository,
   onSelectRepository,
+  availabilityMessage,
 }: RepositorySelectorProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -100,12 +103,15 @@ export function RepositorySelector({
 
       {repositories.length === 0 ? (
         <div className="repository-selector-empty">
-          <strong>No repositories available</strong>
+          <strong>
+            No repositories available
+          </strong>
 
-          <p>
-            Connect GitHub first. Repository selection will be available after
-            GitHub is connected.
-          </p>
+          {availabilityMessage !== null ? (
+            <p>
+              {availabilityMessage}
+            </p>
+          ) : null}
         </div>
       ) : filteredRepositories.length === 0 ? (
         <div className="repository-selector-empty-search">
