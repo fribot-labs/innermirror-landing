@@ -194,6 +194,51 @@ This keeps the learner in complete control of when project context is analyzed.
 
 ---
 
+## Repository Visibility Policy
+
+The MVP intentionally analyzes **public GitHub repositories only**.
+
+Private repositories are intentionally excluded from:
+
+- repository discovery
+- repository selection
+- GitHub Snapshot generation
+- Runtime project analysis
+
+Repository visibility policy:
+
+```text
+Public Repository
+
+↓
+
+Repository Selection
+
+↓
+
+GitHub Snapshot
+
+↓
+
+Runtime Analysis
+```
+
+Private repositories are never returned to the Landing.
+
+This policy:
+
+- protects private source code,
+- minimizes requested GitHub permissions,
+- reduces unnecessary repository access,
+- keeps the learning workflow transparent.
+
+Future versions may introduce optional private repository support.
+
+The MVP intentionally focuses on public software projects to provide
+transparent learning, minimal permissions, and clear repository ownership.
+
+---
+
 ## PBL Project Model
 
 The Landing organizes learning around Projects.
@@ -347,7 +392,7 @@ The Landing provides project-based learning experiences.
 
 The Runtime provides learning intelligence.
 
-GitHub provides development evidence.
+GitHub provides public development evidence.
 
 Projects provide learning structure.
 
@@ -410,6 +455,7 @@ GitHub OAuth, Supabase authentication, and authenticated Reflection
 persistence will be configured in separate Pull Requests after the public
 Landing URL has been established.
 
+```text
 Supabase Foundation
 
 ↓
@@ -423,3 +469,10 @@ Client
 ↓
 
 Authentication
+```
+
+The learner always decides **when** analysis starts.
+
+The platform defines **which repositories** are eligible for analysis.
+
+The Runtime determines **how** learning context is interpreted.

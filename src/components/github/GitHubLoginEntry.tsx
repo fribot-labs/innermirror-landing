@@ -12,6 +12,7 @@ type GitHubLoginEntryProps = {
   authMessage: string | null;
   onConnect: () => void;
   onSignOut: () => void;
+  onResetGitHubAccess: () => void;
 };
 
 function resolveGitHubDisplayName(user: User | null): string | null {
@@ -47,6 +48,7 @@ export function GitHubLoginEntry({
   authMessage,
   onConnect,
   onSignOut,
+  onResetGitHubAccess,
 }: GitHubLoginEntryProps) {
   const isConnecting = connectionState === "connecting";
   const isConnected = connectionState === "connected";
@@ -96,14 +98,25 @@ export function GitHubLoginEntry({
         </div>
 
         {hasAuthenticatedUser ? (
-          <button
-            className="github-learning-entry-button"
-            type="button"
-            onClick={onSignOut}
-            disabled={isConnecting}
-          >
-            {isConnecting ? "Signing out..." : "Sign out"}
-          </button>
+          <div className="github-learning-entry-actions">
+            <button
+              className="github-learning-entry-button"
+              type="button"
+              onClick={onSignOut}
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Signing out..." : "Sign out"}
+            </button>
+
+            <button
+              className="github-learning-entry-secondary-button"
+              type="button"
+              onClick={onResetGitHubAccess}
+              disabled={isConnecting}
+            >
+              GitHub 승인 다시 선택
+            </button>
+          </div>
         ) : (
           <button
             className="github-learning-entry-button"

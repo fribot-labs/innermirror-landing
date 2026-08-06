@@ -491,3 +491,24 @@
 .project-snapshot-more-section h4 {
   margin: 0 0 0.65rem;
 }
+
+.github-learning-entry-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.github-learning-entry-secondary-button {
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.github-learning-entry-secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
