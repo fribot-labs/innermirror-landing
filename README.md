@@ -409,3 +409,17 @@ The current production deployment target is Vercel.
 GitHub OAuth, Supabase authentication, and authenticated Reflection
 persistence will be configured in separate Pull Requests after the public
 Landing URL has been established.
+
+Supabase Foundation
+
+↓
+
+Environment
+
+↓
+
+Client
+
+↓
+
+Authentication
