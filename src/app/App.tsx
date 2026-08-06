@@ -41,6 +41,9 @@ import { RuntimeReflectionResultView } from "../components/RuntimeReflectionResu
 import {
   createRuntimeGitHubSession,
 } from "../github/createRuntimeGitHubSession";
+import type {
+  RuntimeGitHubSessionState,
+} from "../github/runtimeGitHubSessionTypes";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
 import { supabaseClient } from "../lib/supabaseClient";
@@ -120,12 +123,35 @@ export function App() {
   const [authMessage, setAuthMessage] =
     useState<string | null>(null);
 
+  const [
+    githubSessionId,
+    setGithubSessionId,
+  ] = useState<string | null>(() =>
+    window.localStorage.getItem(
+      "innermirror.githubSessionId"
+    )
+  );
+
+  const [
+    runtimeGitHubSessionState,
+    setRuntimeGitHubSessionState,
+  ] = useState<RuntimeGitHubSessionState>(
+    githubSessionId ? "ready" : "idle"
+  );
+
   const {
     repositories,
     isLoading: isLoadingRepositories,
     error: repositoryError,
   } = useGitHubRepositories({
-    enabled: githubConnectionState === "connected",
+    enabled:
+      githubConnectionState ===
+        "connected" &&
+      runtimeGitHubSessionState ===
+        "ready" &&
+      githubSessionId !== null,
+
+    githubSessionId,
   });
 
   const [
@@ -145,12 +171,23 @@ export function App() {
     ]
   );
 
-  const githubSessionId =
-    githubConnectionState === "connected"
-      ? window.localStorage.getItem(
-          "innermirror.githubSessionId"
-        )
-      : null;
+  const repositoryAvailabilityMessage =
+    githubConnectionState !==
+      "connected"
+      ? "Connect GitHub first. Repository selection will be available after GitHub is connected."
+      : runtimeGitHubSessionState ===
+          "unavailable"
+        ? "Start the private Runtime, then reconnect Runtime to load repositories."
+        : runtimeGitHubSessionState ===
+            "expired"
+          ? "Reconnect Runtime to load repositories."
+          : runtimeGitHubSessionState ===
+              "error"
+            ? "Restore Runtime authorization to load repositories."
+            : runtimeGitHubSessionState ===
+                "creating"
+              ? "Runtime repository access is being restored."
+              : "No eligible public repositories were found.";
 
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
@@ -227,13 +264,45 @@ export function App() {
   const {
     isChecking: isCheckingBoundary,
     health: runtimeBoundaryHealth,
+    error: runtimeBoundaryHealthError,
     checkHealth,
   } = useRuntimeBoundaryHealth();
 
-  const runtimeUxMode = resolveRuntimeUxMode({
-    health: runtimeBoundaryHealth,
-    isChecking: isCheckingBoundary,
-  });
+  const runtimeUxMode =
+    resolveRuntimeUxMode({
+      health: runtimeBoundaryHealth,
+      isChecking: isCheckingBoundary,
+    });
+
+  useEffect(() => {
+    const runtimeIsUnavailable =
+      runtimeBoundaryHealth?.status ===
+        "unavailable" ||
+      runtimeBoundaryHealthError !== null;
+
+    if (!runtimeIsUnavailable) {
+      return;
+    }
+
+    if (
+      githubConnectionState !==
+        "connected" ||
+      authenticatedUser === null
+    ) {
+      return;
+    }
+
+    setRuntimeGitHubSessionState(
+      "unavailable"
+    );
+
+    setAuthMessage(null);
+  }, [
+    runtimeBoundaryHealth,
+    runtimeBoundaryHealthError,
+    githubConnectionState,
+    authenticatedUser,
+  ]);
 
   const serverMemoryTimeline = useServerRuntimeMemoryTimeline({
     enabled: runtimeUxMode.canUseMemoryTimeline,
@@ -266,16 +335,94 @@ export function App() {
     onLocalSnapshotChanged: refreshLocalReflectionMemory,
   });
 
-  useEffect(() => {
-    let isMounted = true;
-
-  const clearRuntimeGitHubSession = () => {
+  const clearRuntimeGitHubSession = (
+    nextState: RuntimeGitHubSessionState =
+      "idle"
+  ) => {
     window.localStorage.removeItem(
       "innermirror.githubSessionId"
     );
 
-    runtimeGitHubBridgeStateRef.current = "idle";
+    runtimeGitHubBridgeStateRef.current =
+      "idle";
+
+    setGithubSessionId(null);
+
+    setRuntimeGitHubSessionState(
+      nextState
+    );
   };
+
+  const createOrRecoverRuntimeGitHubSession =
+    async (
+      providerToken: string
+    ): Promise<boolean> => {
+      const normalizedProviderToken =
+        providerToken.trim();
+
+      if (
+        normalizedProviderToken.length === 0
+      ) {
+        clearRuntimeGitHubSession(
+          "error"
+        );
+
+        return false;
+      }
+
+      if (
+        runtimeGitHubBridgeStateRef.current ===
+        "creating"
+      ) {
+        return false;
+      }
+
+      runtimeGitHubBridgeStateRef.current =
+        "creating";
+
+      setRuntimeGitHubSessionState(
+        "creating"
+      );
+
+      try {
+        const createdSessionId =
+          await createRuntimeGitHubSession(
+            normalizedProviderToken
+          );
+
+        window.localStorage.setItem(
+          "innermirror.githubSessionId",
+          createdSessionId
+        );
+
+        setGithubSessionId(
+          createdSessionId
+        );
+
+        runtimeGitHubBridgeStateRef.current =
+          "ready";
+
+        setRuntimeGitHubSessionState(
+          "ready"
+        );
+
+        return true;
+      } catch (error) {
+        clearRuntimeGitHubSession(
+          "error"
+        );
+
+        console.error(
+          "Unable to establish Runtime GitHub session.",
+          error
+        );
+
+        return false;
+      }
+    };
+
+  useEffect(() => {
+    let isMounted = true;
 
     const establishGitHubConnection = async (
       session: Awaited<
@@ -284,11 +431,13 @@ export function App() {
         >
       >["data"]["session"]
     ) => {
+
       if (!isMounted) {
         return;
       }
 
       if (session === null) {
+
         clearRuntimeGitHubSession();
         setAuthenticatedUser(null);
         setGithubConnectionState("disconnected");
@@ -308,9 +457,24 @@ export function App() {
         existingRuntimeSessionId !== null &&
         existingRuntimeSessionId.trim().length > 0
       ) {
-        runtimeGitHubBridgeStateRef.current = "ready";
+        const normalizedRuntimeSessionId =
+          existingRuntimeSessionId.trim();
 
-        setGithubConnectionState("connected");
+        runtimeGitHubBridgeStateRef.current =
+          "ready";
+
+        setGithubSessionId(
+          normalizedRuntimeSessionId
+        );
+
+        setRuntimeGitHubSessionState(
+          "ready"
+        );
+
+        setGithubConnectionState(
+          "connected"
+        );
+
         setAuthMessage(null);
 
         return;
@@ -323,65 +487,43 @@ export function App() {
         typeof providerToken !== "string" ||
         providerToken.trim().length === 0
       ) {
-        setGithubConnectionState("error");
+        clearRuntimeGitHubSession(
+          "error"
+        );
+
+        setGithubConnectionState(
+          "connected"
+        );
 
         setAuthMessage(
-          "GitHub authentication was restored, but the Runtime session could not be established. Please sign out and connect GitHub again."
+          "GitHub is connected, but Runtime authorization must be renewed."
         );
 
         return;
       }
 
-      if (
-        runtimeGitHubBridgeStateRef.current === "creating"
-      ) {
+      const runtimeSessionReady =
+        await createOrRecoverRuntimeGitHubSession(
+          providerToken
+        );
+
+      if (!isMounted) {
         return;
       }
 
-      runtimeGitHubBridgeStateRef.current = "creating";
+      setGithubConnectionState(
+        "connected"
+      );
 
-      setGithubConnectionState("connecting");
+      if (!runtimeSessionReady) {
+        setAuthMessage(
+          "Unable to establish the Runtime GitHub session."
+        );
+
+        return;
+      }
+
       setAuthMessage(null);
-
-      try {
-        const githubSessionId =
-          await createRuntimeGitHubSession(
-            providerToken
-          );
-
-        if (!isMounted) {
-          return;
-        }
-
-        window.localStorage.setItem(
-          "innermirror.githubSessionId",
-          githubSessionId
-        );
-
-        runtimeGitHubBridgeStateRef.current = "ready";
-
-        setGithubConnectionState("connected");
-        setAuthMessage(null);
-      } catch (error) {
-        if (!isMounted) {
-          return;
-        }
-
-        clearRuntimeGitHubSession();
-
-        console.error(
-          "Unable to establish Runtime GitHub session.",
-          error
-        );
-
-        setGithubConnectionState("error");
-
-        setAuthMessage(
-          error instanceof Error
-            ? error.message
-            : "Unable to establish the Runtime GitHub session."
-        );
-      }
     };
 
     const restoreSession = async () => {
@@ -413,13 +555,15 @@ export function App() {
 
     void restoreSession();
 
-  const {
-    data: { subscription },
-  } = supabaseClient.auth.onAuthStateChange(
-    (_event, session) => {
-      void establishGitHubConnection(session);
-    }
-  );
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange(
+      (_event, session) => {
+        void establishGitHubConnection(
+          session
+        );
+      }
+    );
 
     return () => {
       isMounted = false;
@@ -436,18 +580,18 @@ export function App() {
       return;
     }
 
-    window.localStorage.removeItem(
-      "innermirror.githubSessionId"
+    clearRuntimeGitHubSession(
+      "expired"
     );
 
-    runtimeGitHubBridgeStateRef.current = "idle";
+    setGithubConnectionState(
+      "connected"
+    );
 
-    setGithubConnectionState("error");
     setAuthMessage(
-      "The Runtime GitHub session expired. Please sign out and connect GitHub again."
+      "The Runtime GitHub session expired. Reconnect Runtime to continue."
     );
 
-    setVerifiedOrganizationRepositories([]);
     setSelectedRepository(null);
     setActiveProject(null);
     setLatestCapturedSnapshot(null);
@@ -521,13 +665,14 @@ export function App() {
     );
 
   const handleConnectGitHub = async () => {
-    window.localStorage.removeItem(
-      "innermirror.githubSessionId"
+    clearRuntimeGitHubSession(
+      "idle"
     );
 
-    runtimeGitHubBridgeStateRef.current = "idle";
+    setGithubConnectionState(
+      "connecting"
+    );
 
-    setGithubConnectionState("connecting");
     setAuthMessage(null);
 
     try {
@@ -559,6 +704,94 @@ export function App() {
     }
   };
 
+  const handleReconnectRuntime =
+    async () => {
+      setAuthMessage(null);
+
+      const {
+        data: { session },
+        error,
+      } =
+        await supabaseClient.auth.getSession();
+
+      if (error || session === null) {
+        setRuntimeGitHubSessionState(
+          "error"
+        );
+
+        setAuthMessage(
+          "The GitHub login session is unavailable. Connect GitHub again."
+        );
+
+        return;
+      }
+
+      const providerToken =
+        session.provider_token;
+
+      if (
+        typeof providerToken !== "string" ||
+        providerToken.trim().length === 0
+      ) {
+        setRuntimeGitHubSessionState(
+          "error"
+        );
+
+        setAuthMessage(
+          "GitHub authorization must be renewed before Runtime can reconnect."
+        );
+
+        return;
+      }
+
+      const restored =
+        await createOrRecoverRuntimeGitHubSession(
+          providerToken
+        );
+
+      if (!restored) {
+        setAuthMessage(
+          "Unable to reconnect the Runtime GitHub session."
+        );
+
+        return;
+      }
+
+      setAuthMessage(
+        "Runtime GitHub session reconnected."
+      );
+    };
+
+  const handleRenewGitHubAuthorization =
+    async () => {
+      clearRuntimeGitHubSession(
+        "creating"
+      );
+
+      setAuthMessage(null);
+
+      const { error } =
+        await supabaseClient.auth.signInWithOAuth({
+          provider: "github",
+          options: {
+            redirectTo:
+              `${window.location.origin}/`,
+            scopes:
+              "read:user user:email read:org",
+          },
+        });
+
+      if (error) {
+        setRuntimeGitHubSessionState(
+          "error"
+        );
+
+        setAuthMessage(
+          error.message
+        );
+      }
+    };
+
   const handleSignOut = async () => {
     setGithubConnectionState("connecting");
     setAuthMessage(null);
@@ -571,11 +804,9 @@ export function App() {
         throw error;
       }
 
-      window.localStorage.removeItem(
-        "innermirror.githubSessionId"
+      clearRuntimeGitHubSession(
+        "idle"
       );
-
-      runtimeGitHubBridgeStateRef.current = "idle";
 
       setAuthenticatedUser(null);
       setGithubConnectionState("disconnected");
@@ -631,11 +862,9 @@ export function App() {
         throw error;
       }
 
-      window.localStorage.removeItem(
-        "innermirror.githubSessionId"
+      clearRuntimeGitHubSession(
+        "idle"
       );
-
-      runtimeGitHubBridgeStateRef.current = "idle";
 
       setAuthenticatedUser(null);
       setGithubConnectionState("disconnected");
@@ -976,15 +1205,16 @@ export function App() {
           : "GitHub Analyze request failed.";
 
       if (message.includes("GitHub session expired")) {
-        window.localStorage.removeItem(
-          "innermirror.githubSessionId"
+        clearRuntimeGitHubSession(
+          "expired"
         );
 
-        runtimeGitHubBridgeStateRef.current = "idle";
+        setGithubConnectionState(
+          "connected"
+        );
 
-        setGithubConnectionState("error");
         setAuthMessage(
-          "The Runtime GitHub session expired. Please sign out and connect GitHub again."
+          "The Runtime GitHub session expired. Reconnect Runtime to continue."
         );
 
         setVerifiedOrganizationRepositories([]);
@@ -1219,12 +1449,41 @@ export function App() {
   return (
     <main>
       <GitHubLoginEntry
-        connectionState={githubConnectionState}
-        user={authenticatedUser}
-        authMessage={authMessage}
-        onConnect={handleConnectGitHub}
-        onSignOut={handleSignOut}
-        onResetGitHubAccess={handleResetGitHubAccess}
+        connectionState={
+          githubConnectionState
+        }
+        runtimeSessionState={
+          runtimeGitHubSessionState
+        }
+        user={
+          authenticatedUser
+        }
+        authMessage={
+          authMessage
+        }
+        onConnect={
+          handleConnectGitHub
+        }
+        onReconnectRuntime={
+          handleReconnectRuntime
+        }
+        onSignOut={
+          handleSignOut
+        }
+        onResetGitHubAccess={
+          handleRenewGitHubAuthorization
+        }
+        isRuntimeReconnectAvailable={
+          authenticatedUser !== null &&
+          (
+            runtimeGitHubSessionState ===
+              "unavailable" ||
+            runtimeGitHubSessionState ===
+              "expired" ||
+            runtimeGitHubSessionState ===
+              "error"
+          )
+        }
       />
 
       <GitHubOrganizationVerification
@@ -1234,40 +1493,67 @@ export function App() {
         }
         githubSessionId={githubSessionId}
         disabled={
-          githubConnectionState !== "connected"
+          githubConnectionState !==
+            "connected" ||
+          runtimeGitHubSessionState !==
+            "ready" ||
+          githubSessionId === null
         }
         onVerified={
           handleOrganizationVerified
         }
         onSessionExpired={() => {
-          window.localStorage.removeItem(
-            "innermirror.githubSessionId"
+          clearRuntimeGitHubSession(
+            "expired"
           );
-
-          runtimeGitHubBridgeStateRef.current =
-            "idle";
 
           setVerifiedOrganizationRepositories(
             []
           );
 
-          setGithubConnectionState("error");
+          setSelectedRepository(null);
+          setActiveProject(null);
+          setLatestCapturedSnapshot(null);
+          resetSnapshot();
+
+          setGithubConnectionState(
+            "connected"
+          );
 
           setAuthMessage(
-            "The Runtime GitHub session expired. Please sign out and connect GitHub again."
+            "The Runtime GitHub session expired. Reconnect Runtime to continue."
           );
         }}
       />
 
       <RepositorySelector
         repositories={
-          githubConnectionState === "connected"
+          githubConnectionState ===
+            "connected" &&
+          runtimeGitHubSessionState ===
+            "ready" &&
+          githubSessionId !== null
             ? availableRepositories
             : []
         }
-        selectedRepository={selectedRepository}
-        onSelectRepository={handleSelectRepository}
+        selectedRepository={
+          selectedRepository
+        }
+        onSelectRepository={
+          handleSelectRepository
+        }
+        availabilityMessage={
+          repositoryAvailabilityMessage
+        }
       />
+
+      {runtimeGitHubSessionState ===
+      "expired" ? (
+        <div className="github-repository-status github-repository-status-warning">
+          Runtime session expired. Reconnect
+          Runtime to load repositories.
+        </div>
+      ) : null}
 
       {isLoadingRepositories ? (
         <div className="github-repository-status">

@@ -512,3 +512,30 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.github-connection-status-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.github-connection-status-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.github-runtime-status-ready {
+  color: var(--success-color);
+}
+
+.github-runtime-status-expired {
+  color: var(--warning-color);
+}
+
+.github-runtime-status-error {
+  color: var(--error-color);
+}
+
+.github-runtime-reconnect-button {
+  white-space: nowrap;
+}

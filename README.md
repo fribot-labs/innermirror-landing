@@ -239,6 +239,26 @@ transparent learning, minimal permissions, and clear repository ownership.
 
 ---
 
+## Runtime GitHub Session Recovery
+
+GitHub authentication and Runtime authorization are separate states.
+
+A learner may remain signed in to GitHub while the temporary Runtime
+GitHub session has expired.
+
+When this occurs:
+
+- GitHub identity remains connected,
+- repository access is suspended,
+- verified organization repositories are cleared,
+- the learner may reconnect the Runtime session without immediately
+  revoking the entire GitHub authorization.
+
+If the GitHub provider token is no longer available, the learner must
+renew GitHub authorization.
+
+---
+
 ## PBL Project Model
 
 The Landing organizes learning around Projects.
