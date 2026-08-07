@@ -1,0 +1,57 @@
+.project-intelligence-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0 24px;
+}
+
+.project-intelligence-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.project-intelligence-eyebrow {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.project-intelligence-header h2 {
+  margin: 4px 0 0;
+}
+
+.project-intelligence-readiness {
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.project-intelligence-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.project-intelligence-item,
+.project-intelligence-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.project-intelligence-summary {
+  margin-top: 18px;
+}
+
+.project-intelligence-item span,
+.project-intelligence-summary span {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.project-intelligence-summary p {
+  margin: 0;
+}
