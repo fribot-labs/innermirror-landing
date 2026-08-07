@@ -81,12 +81,14 @@ import {
 import {
   createRuntimeProjectIntelligence,
 } from "../project-intelligence/createRuntimeProjectIntelligence";
-
 import {
   clearRuntimeProjectMetadata,
   loadRuntimeProjectMetadata,
   saveRuntimeProjectMetadata,
 } from "../project-metadata/runtimeProjectMetadataStore";
+import {
+  createRuntimeProjectIntelligenceAdapter,
+} from "../runtime-project-intelligence/createRuntimeProjectIntelligenceAdapter";
 
 import {
   ProjectIntelligencePanel,
@@ -296,6 +298,26 @@ export function App() {
         runtimeProjectMetadata,
         runtimeProjectContext,
         currentStep,
+      ]
+    );
+
+  const runtimeProjectRecommendationInput =
+    useMemo(
+      () => {
+        if (
+          runtimeProjectIntelligence ===
+          null
+        ) {
+          return null;
+        }
+
+        return createRuntimeProjectIntelligenceAdapter({
+          intelligence:
+            runtimeProjectIntelligence,
+        });
+      },
+      [
+        runtimeProjectIntelligence,
       ]
     );
 
