@@ -313,7 +313,7 @@ export function GitHubLoginEntry({
                 isRuntimeCreating
               }
             >
-              GitHub 다시 연결
+              GitHub 계정 다시 연결
             </button>
           </div>
         ) : (
