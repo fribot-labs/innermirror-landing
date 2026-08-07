@@ -78,6 +78,9 @@ import {
   createRepositoryDerivedMetadata,
 } from "../project-metadata/createRepositoryDerivedMetadata";
 
+import {
+  createRuntimeProjectIntelligence,
+} from "../project-intelligence/createRuntimeProjectIntelligence";
 
 import {
   clearRuntimeProjectMetadata,
@@ -255,6 +258,43 @@ export function App() {
   );
 
   const [currentStep, setCurrentStep] = useState("");
+
+  const runtimeProjectIntelligence =
+    useMemo(
+      () => {
+        if (
+          runtimeProjectMetadata ===
+            null ||
+          runtimeProjectContext ===
+            null
+        ) {
+          return null;
+        }
+
+        if (
+          runtimeProjectMetadata.projectId !==
+          runtimeProjectContext.projectId
+        ) {
+          return null;
+        }
+
+        return createRuntimeProjectIntelligence({
+          metadata:
+            runtimeProjectMetadata,
+
+          context:
+            runtimeProjectContext,
+
+          currentFocus:
+            currentStep,
+        });
+      },
+      [
+        runtimeProjectMetadata,
+        runtimeProjectContext,
+        currentStep,
+      ]
+    );
 
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
