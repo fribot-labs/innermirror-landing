@@ -8,9 +8,6 @@ import {
 import { deriveRuntimePredictivePresentation } from "../components/deriveRuntimePredictivePresentation";
 import { deriveRuntimeRecommendationPresentation } from "../components/deriveRuntimeRecommendationPresentation";
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
-import {
-  GitHubOrganizationVerification,
-} from "../components/github/GitHubOrganizationVerification";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
 import { ProjectReflectionPanel } from "../components/project/ProjectReflectionPanel";
@@ -167,21 +164,12 @@ export function App() {
     githubSessionId,
   });
 
-  const [
-    verifiedOrganizationRepositories,
-    setVerifiedOrganizationRepositories,
-  ] = useState<GitHubRepositorySummary[]>([]);
-
   const availableRepositories = useMemo(
     () =>
-      mergeGitHubRepositories([
-        ...repositories,
-        ...verifiedOrganizationRepositories,
-      ]),
-    [
-      repositories,
-      verifiedOrganizationRepositories,
-    ]
+      mergeGitHubRepositories(
+        repositories
+      ),
+    [repositories]
   );
 
   const repositoryAvailabilityMessage =
@@ -829,8 +817,14 @@ export function App() {
           options: {
             redirectTo:
               `${window.location.origin}/`,
+
             scopes:
               "read:user user:email read:org",
+
+            queryParams: {
+              prompt:
+                "select_account",
+            },
           },
         });
 
@@ -863,7 +857,6 @@ export function App() {
 
       setAuthenticatedUser(null);
       setGithubConnectionState("disconnected");
-      setVerifiedOrganizationRepositories([]);
       setSelectedRepository(null);
 
       clearRuntimeProjectIdentity();
@@ -892,89 +885,6 @@ export function App() {
           : "Unable to sign out. Please try again."
       );
     }
-  };
-
-  const handleResetGitHubAccess = async () => {
-    const shouldReset = window.confirm(
-      [
-        "Reset the current GitHub connection?",
-        "",
-        "You will be signed out from InnerMirror and moved to GitHub.",
-        "On GitHub, revoke the InnerMirror Local MVP authorization.",
-        "Then return here and connect GitHub again.",
-      ].join("\n")
-    );
-
-    if (!shouldReset) {
-      return;
-    }
-
-    setGithubConnectionState("connecting");
-    setAuthMessage(null);
-
-    try {
-      const { error } =
-        await supabaseClient.auth.signOut({
-          scope: "local",
-        });
-
-      if (error) {
-        throw error;
-      }
-
-      clearRuntimeGitHubSession(
-        "idle"
-      );
-
-      setAuthenticatedUser(null);
-      setGithubConnectionState("disconnected");
-      setVerifiedOrganizationRepositories([]);
-      setSelectedRepository(null);
-
-      clearRuntimeProjectIdentity();
-
-      setRuntimeProjectIdentity(
-        null
-      );
-
-      setActiveProject(null);
-      setCurrentStep("");
-      setLatestCapturedSnapshot(null);
-      setRuntimeV2Response(null);
-
-      resetSnapshot();
-      resetMerge();
-
-      window.location.assign(
-        "https://github.com/settings/applications"
-      );
-    } catch (error) {
-      console.error(
-        "Unable to reset GitHub access.",
-        error
-      );
-
-      setGithubConnectionState("error");
-
-      setAuthMessage(
-        error instanceof Error
-          ? error.message
-          : "Unable to reset GitHub access."
-      );
-    }
-  };
-
-  const handleOrganizationVerified = (
-    _organizationLogin: string,
-    organizationRepositories: GitHubRepositorySummary[]
-  ) => {
-    setVerifiedOrganizationRepositories(
-      (currentRepositories) =>
-        mergeGitHubRepositories([
-          ...currentRepositories,
-          ...organizationRepositories,
-        ])
-    );
   };
 
   const handleSelectRepository = (
@@ -1314,7 +1224,6 @@ export function App() {
           "The Runtime GitHub session expired. Reconnect Runtime to continue."
         );
 
-        setVerifiedOrganizationRepositories([]);
         setSelectedRepository(null);
         setActiveProject(null);
         resetSnapshot();
@@ -1581,46 +1490,6 @@ export function App() {
               "error"
           )
         }
-      />
-
-      <GitHubOrganizationVerification
-        key={
-          githubSessionId ??
-          "no-github-session"
-        }
-        githubSessionId={githubSessionId}
-        disabled={
-          githubConnectionState !==
-            "connected" ||
-          runtimeGitHubSessionState !==
-            "ready" ||
-          githubSessionId === null
-        }
-        onVerified={
-          handleOrganizationVerified
-        }
-        onSessionExpired={() => {
-          clearRuntimeGitHubSession(
-            "expired"
-          );
-
-          setVerifiedOrganizationRepositories(
-            []
-          );
-
-          setSelectedRepository(null);
-          setActiveProject(null);
-          setLatestCapturedSnapshot(null);
-          resetSnapshot();
-
-          setGithubConnectionState(
-            "connected"
-          );
-
-          setAuthMessage(
-            "The Runtime GitHub session expired. Reconnect Runtime to continue."
-          );
-        }}
       />
 
       <RepositorySelector
