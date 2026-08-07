@@ -89,6 +89,9 @@ import {
 } from "../project-metadata/runtimeProjectMetadataStore";
 
 import {
+  ProjectIntelligencePanel,
+} from "../components/project/ProjectIntelligencePanel";
+import {
   RepositoryMetadataPanel,
 } from "../components/project/RepositoryMetadataPanel";
 import type {
@@ -1708,6 +1711,12 @@ export function App() {
       <RepositoryMetadataPanel
         metadata={
           runtimeProjectMetadata
+        }
+      />
+
+      <ProjectIntelligencePanel
+        intelligence={
+          runtimeProjectIntelligence
         }
       />
 
