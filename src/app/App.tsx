@@ -72,14 +72,25 @@ import type {
 
 import {
   loadRepositoryMetadata,
+  RepositoryMetadataLoadError,
 } from "../project-metadata-loader/loadRepositoryMetadata";
 import {
   createRepositoryDerivedMetadata,
 } from "../project-metadata/createRepositoryDerivedMetadata";
+
+
 import {
   clearRuntimeProjectMetadata,
+  loadRuntimeProjectMetadata,
   saveRuntimeProjectMetadata,
 } from "../project-metadata/runtimeProjectMetadataStore";
+
+import {
+  RepositoryMetadataPanel,
+} from "../components/project/RepositoryMetadataPanel";
+import type {
+  RuntimeProjectMetadata,
+} from "../project-metadata/runtimeProjectMetadataTypes";
 
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
@@ -223,6 +234,15 @@ export function App() {
     RuntimeProjectIdentity | null
   >(() =>
     loadRuntimeProjectIdentity()
+  );
+
+  const [
+    runtimeProjectMetadata,
+    setRuntimeProjectMetadata,
+  ] = useState<
+    RuntimeProjectMetadata | null
+  >(() =>
+    loadRuntimeProjectMetadata()
   );
 
   const [
@@ -897,6 +917,12 @@ export function App() {
         null
       );
 
+      clearRuntimeProjectMetadata();
+
+      setRuntimeProjectMetadata(
+        null
+      );
+
       clearRuntimeProjectContext();
 
       setRuntimeProjectContext(
@@ -992,12 +1018,24 @@ export function App() {
       } catch (
         error
       ) {
-        console.warn(
-          "[Repository Metadata] Manifest discovery was unavailable. Repository-derived metadata will be used.",
-          error
-        );
+        if (
+          error instanceof
+          RepositoryMetadataLoadError
+        ) {
+          console.warn(
+            `[Repository Metadata] ${error.message} Repository-derived metadata will be used.`
+          );
+        } else {
+          console.warn(
+            "[Repository Metadata] Unexpected manifest discovery failure. Repository-derived metadata will be used."
+          );
+        }
       }
     }
+
+    setRuntimeProjectMetadata(
+      nextRuntimeProjectMetadata
+    );
 
     saveRuntimeProjectMetadata(
       nextRuntimeProjectMetadata
@@ -1626,6 +1664,12 @@ export function App() {
           {repositoryError}
         </div>
       ) : null}
+
+      <RepositoryMetadataPanel
+        metadata={
+          runtimeProjectMetadata
+        }
+      />
 
       <div ref={projectFocusSectionRef}>
         <ProjectStartPanel
