@@ -69,6 +69,18 @@ import type {
 import type {
   RuntimeProjectIdentity,
 } from "../project-identity/runtimeProjectIdentityTypes";
+
+import {
+  loadRepositoryMetadata,
+} from "../project-metadata-loader/loadRepositoryMetadata";
+import {
+  createRepositoryDerivedMetadata,
+} from "../project-metadata/createRepositoryDerivedMetadata";
+import {
+  clearRuntimeProjectMetadata,
+  saveRuntimeProjectMetadata,
+} from "../project-metadata/runtimeProjectMetadataStore";
+
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -913,7 +925,7 @@ export function App() {
     }
   };
 
-  const handleSelectRepository = (
+  const handleSelectRepository = async (
     repository: GitHubRepositorySummary
   ) => {
     const isSameRepository =
@@ -947,6 +959,48 @@ export function App() {
 
     saveRuntimeProjectIdentity(
       nextRuntimeProjectIdentity
+    );
+
+    clearRuntimeProjectMetadata();
+
+    let nextRuntimeProjectMetadata =
+      createRepositoryDerivedMetadata({
+        projectIdentity:
+          nextRuntimeProjectIdentity,
+      });
+
+    if (
+      githubSessionId !==
+      null
+    ) {
+      try {
+        const discoveredMetadata =
+          await loadRepositoryMetadata({
+            githubSessionId,
+
+            projectIdentity:
+              nextRuntimeProjectIdentity,
+          });
+
+        if (
+          discoveredMetadata !==
+          null
+        ) {
+          nextRuntimeProjectMetadata =
+            discoveredMetadata;
+        }
+      } catch (
+        error
+      ) {
+        console.warn(
+          "[Repository Metadata] Manifest discovery was unavailable. Repository-derived metadata will be used.",
+          error
+        );
+      }
+    }
+
+    saveRuntimeProjectMetadata(
+      nextRuntimeProjectMetadata
     );
 
     setRuntimeProjectContext(
