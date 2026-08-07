@@ -1182,3 +1182,61 @@
   opacity: 0.72;
   transform: none;
 }
+
+.repository-metadata-panel {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 16px 0 24px;
+}
+
+.repository-metadata-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.repository-metadata-eyebrow {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.repository-metadata-header h2 {
+  margin: 4px 0 0;
+}
+
+.repository-metadata-source {
+  font-size: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+}
+
+.repository-metadata-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.repository-metadata-item,
+.repository-metadata-goal {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.repository-metadata-goal {
+  margin-top: 18px;
+}
+
+.repository-metadata-item span,
+.repository-metadata-goal span {
+  font-size: 12px;
+  opacity: 0.65;
+}
+
+.repository-metadata-goal p {
+  margin: 0;
+}
