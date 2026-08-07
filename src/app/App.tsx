@@ -55,6 +55,17 @@ import {
 
 import { supabaseClient } from "../lib/supabaseClient";
 import { resolveProjectActionGuidance } from "../project-actions/resolveProjectActionGuidance";
+import {
+  createRuntimeProjectContext,
+} from "../project-context/createRuntimeProjectContext";
+import {
+  clearRuntimeProjectContext,
+  loadRuntimeProjectContext,
+  saveRuntimeProjectContext,
+} from "../project-context/runtimeProjectContextStore";
+import type {
+  RuntimeProjectContext,
+} from "../project-context/runtimeProjectContextTypes";
 import type {
   RuntimeProjectIdentity,
 } from "../project-identity/runtimeProjectIdentityTypes";
@@ -200,6 +211,15 @@ export function App() {
     RuntimeProjectIdentity | null
   >(() =>
     loadRuntimeProjectIdentity()
+  );
+
+  const [
+    runtimeProjectContext,
+    setRuntimeProjectContext,
+  ] = useState<
+    RuntimeProjectContext | null
+  >(() =>
+    loadRuntimeProjectContext()
   );
 
   const [currentStep, setCurrentStep] = useState("");
@@ -865,6 +885,12 @@ export function App() {
         null
       );
 
+      clearRuntimeProjectContext();
+
+      setRuntimeProjectContext(
+        null
+      );
+
       setActiveProject(null);
       setCurrentStep("");
       setLatestCapturedSnapshot(null);
@@ -905,6 +931,12 @@ export function App() {
         repository,
       });
 
+    const nextRuntimeProjectContext =
+      createRuntimeProjectContext({
+        projectIdentity:
+          nextRuntimeProjectIdentity,
+      });
+
     setSelectedRepository(
       repository
     );
@@ -915,6 +947,14 @@ export function App() {
 
     saveRuntimeProjectIdentity(
       nextRuntimeProjectIdentity
+    );
+
+    setRuntimeProjectContext(
+      nextRuntimeProjectContext
+    );
+
+    saveRuntimeProjectContext(
+      nextRuntimeProjectContext
     );
 
     setActiveProject(null);
