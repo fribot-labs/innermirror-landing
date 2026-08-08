@@ -1,11 +1,11 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import {
-    parseRepositoryMetadataManifest,
+  parseRepositoryMetadataManifest,
 } from "../parseRepositoryMetadataManifest";
 
 describe(
@@ -687,6 +687,114 @@ describe(
         ).toThrow(
           "PBL manifest estimatedWeeks is invalid."
         );
+      }
+    );
+
+    it(
+      "parses the Class Concept Robot PBL manifest",
+      () => {
+        const result =
+          parseRepositoryMetadataManifest({
+            schemaVersion:
+              "v1",
+
+            templateId:
+              "fribot-learning-template-v1",
+
+            courseId:
+              "class-concept-robot",
+
+            title:
+              "Class Concept Robot",
+
+            difficulty:
+              "beginner",
+
+            estimatedWeeks:
+              4,
+
+            learningGoal:
+              "Understand why related state and behavior can be organized together through a class in robot programming.",
+          });
+
+        expect(
+          result
+        ).toEqual({
+          schemaVersion:
+            "v1",
+
+          templateId:
+            "fribot-learning-template-v1",
+
+          courseId:
+            "class-concept-robot",
+
+          title:
+            "Class Concept Robot",
+
+          difficulty:
+            "beginner",
+
+          estimatedWeeks:
+            4,
+
+          learningGoal:
+            "Understand why related state and behavior can be organized together through a class in robot programming.",
+        });
+      }
+    );
+
+    it(
+      "parses the Tandem Dual MCU PBL manifest",
+      () => {
+        const result =
+          parseRepositoryMetadataManifest({
+            schemaVersion:
+              "v1",
+
+            templateId:
+              "fribot-learning-template-v1",
+
+            courseId:
+              "tandem-dual-mcu",
+
+            title:
+              "Tandem Dual MCU",
+
+            difficulty:
+              "beginner",
+
+            estimatedWeeks:
+              6,
+
+            learningGoal:
+              "Understand how two microcontrollers divide responsibilities, communicate, and coordinate robot behavior.",
+          });
+
+        expect(
+          result
+        ).toEqual({
+          schemaVersion:
+            "v1",
+
+          templateId:
+            "fribot-learning-template-v1",
+
+          courseId:
+            "tandem-dual-mcu",
+
+          title:
+            "Tandem Dual MCU",
+
+          difficulty:
+            "beginner",
+
+          estimatedWeeks:
+            6,
+
+          learningGoal:
+            "Understand how two microcontrollers divide responsibilities, communicate, and coordinate robot behavior.",
+        });
       }
     );
   }

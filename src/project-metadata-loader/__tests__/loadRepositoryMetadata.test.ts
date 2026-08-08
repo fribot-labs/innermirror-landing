@@ -1,18 +1,18 @@
 import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 import {
-    loadRepositoryMetadata,
-    RepositoryMetadataLoadError,
+  loadRepositoryMetadata,
+  RepositoryMetadataLoadError,
 } from "../loadRepositoryMetadata";
 
 import type {
-    RuntimeProjectIdentity,
+  RuntimeProjectIdentity,
 } from "../../project-identity/runtimeProjectIdentityTypes";
 
 function createProjectIdentity(): RuntimeProjectIdentity {
@@ -1303,6 +1303,95 @@ describe(
             );
           }
         }
+      }
+    );
+
+    it(
+      "loads and normalizes the Class Concept Robot PBL manifest contract",
+      async () => {
+        const manifest =
+          JSON.stringify({
+            schemaVersion:
+              "v1",
+
+            templateId:
+              "fribot-learning-template-v1",
+
+            courseId:
+              "class-concept-robot",
+
+            title:
+              "Class Concept Robot",
+
+            difficulty:
+              "beginner",
+
+            estimatedWeeks:
+              4,
+
+            learningGoal:
+              "Understand why related state and behavior can be organized together through a class in robot programming.",
+          });
+
+        vi.spyOn(
+          globalThis,
+          "fetch"
+        ).mockResolvedValue(
+          createJsonResponse(
+            createSuccessfulRuntimeResponse(
+              manifest
+            )
+          )
+        );
+
+        const result =
+          await loadRepositoryMetadata({
+            githubSessionId:
+              "session-123",
+
+            projectIdentity:
+              createProjectIdentity(),
+
+            discoveredAt:
+              "2026-08-08T07:30:00.000Z",
+          });
+
+        expect(
+          result
+        ).toEqual({
+          metadataVersion:
+            "v1",
+
+          projectId:
+            "github:fribot-labs:fribot-learning",
+
+          templateId:
+            "fribot-learning-template-v1",
+
+          courseId:
+            "class-concept-robot",
+
+          title:
+            "Class Concept Robot",
+
+          difficulty:
+            "beginner",
+
+          estimatedWeeks:
+            4,
+
+          learningGoal:
+            "Understand why related state and behavior can be organized together through a class in robot programming.",
+
+          source:
+            "pbl-manifest",
+
+          discoveredAt:
+            "2026-08-08T07:30:00.000Z",
+
+          updatedAt:
+            "2026-08-08T07:30:00.000Z",
+        });
       }
     );
   }
