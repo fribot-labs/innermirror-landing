@@ -7,6 +7,10 @@ import type {
   RuntimeV2RecommendationIntegrationResult,
 } from "./runtimeV2Recommendation";
 
+import type {
+  RuntimeProjectRecommendationInput,
+} from "../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
+
 /**
  * Runtime Contract V2
  *
@@ -78,11 +82,17 @@ export type RuntimeContractV2Input = {
 
   githubSnapshot?: GitHubSnapshot;
 
-  learningContext: RuntimeLearningContext;
+  projectRecommendationInput?:
+    RuntimeProjectRecommendationInput;
 
-  projectHistory?: RuntimeProjectHistory;
+  learningContext:
+    RuntimeLearningContext;
 
-  trigger?: RuntimeExecutionTrigger;
+  projectHistory?:
+    RuntimeProjectHistory;
+
+  trigger?:
+    RuntimeExecutionTrigger;
 };
 
 /* ------------------------------------------------------------------ */
