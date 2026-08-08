@@ -1202,7 +1202,8 @@ export function App() {
       try {
         if (activeProject !== null) {
           const payload = createRuntimeContractV2Payload({
-            reflectionText: trimmedContent,
+            reflectionText:
+              trimmedContent,
 
             project: {
               projectId:
@@ -1217,18 +1218,30 @@ export function App() {
             },
 
             repository: {
-              owner: activeProject.repository.owner,
-              name: activeProject.repository.name,
+              owner:
+                activeProject.repository.owner,
+
+              name:
+                activeProject.repository.name,
+
               defaultBranch:
                 activeProject.repository.defaultBranch,
             },
 
+            projectRecommendationInput:
+              runtimeProjectRecommendationInput ??
+              undefined,
+
             learningContext: {
-              currentStep: resolvedCurrentStep,
-              learnerLevel: "junior",
+              currentStep:
+                resolvedCurrentStep,
+
+              learnerLevel:
+                "junior",
             },
 
-            trigger: "reflection",
+            trigger:
+              "reflection",
           });
 
           const runtimeResponse =
@@ -1314,7 +1327,9 @@ export function App() {
 
       const payload = createRuntimeContractV2Payload({
         reflectionText:
-          trimmedContent.length > 0 ? trimmedContent : undefined,
+          trimmedContent.length > 0
+            ? trimmedContent
+            : undefined,
 
         project: {
           projectId:
@@ -1329,29 +1344,60 @@ export function App() {
         },
 
         repository: {
-          owner: activeProject.repository.owner,
-          name: activeProject.repository.name,
-          defaultBranch: activeProject.repository.defaultBranch,
+          owner:
+            activeProject.repository.owner,
+
+          name:
+            activeProject.repository.name,
+
+          defaultBranch:
+            activeProject.repository.defaultBranch,
         },
 
-        githubSnapshot: capturedSnapshot,
+        githubSnapshot:
+          capturedSnapshot,
+
+        projectRecommendationInput:
+          runtimeProjectRecommendationInput ??
+          undefined,
 
         learningContext: {
-          currentStep: resolvedCurrentStep,
-          learnerLevel: "junior",
+          currentStep:
+            resolvedCurrentStep,
+
+          learnerLevel:
+            "junior",
         },
 
         projectHistory: {
-          events: projectAnalysisMemory.events.slice(0, 5).map((event) => ({
-            source: event.source,
-            title: event.title,
-            summary: event.summary,
-            repositoryName: event.repositoryName,
-            commitCount: event.commitCount,
-            pullRequestCount: event.pullRequestCount,
-            tags: event.tags,
-            createdAt: event.createdAt,
-          })),
+          events:
+            projectAnalysisMemory.events
+              .slice(0, 5)
+              .map((event) => ({
+                source:
+                  event.source,
+
+                title:
+                  event.title,
+
+                summary:
+                  event.summary,
+
+                repositoryName:
+                  event.repositoryName,
+
+                commitCount:
+                  event.commitCount,
+
+                pullRequestCount:
+                  event.pullRequestCount,
+
+                tags:
+                  event.tags,
+
+                createdAt:
+                  event.createdAt,
+              })),
         },
 
         trigger:

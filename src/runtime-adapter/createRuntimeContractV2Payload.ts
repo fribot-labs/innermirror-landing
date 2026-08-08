@@ -9,6 +9,10 @@ import type {
   RuntimeRepositoryContext,
 } from "../types/runtimeContractV2";
 
+import type {
+  RuntimeProjectRecommendationInput,
+} from "../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
+
 /**
  * Runtime Contract V2 Payload Builder
  *
@@ -21,21 +25,32 @@ import type {
  */
 
 export type CreateRuntimeContractV2PayloadOptions = {
-  reflectionText?: string;
+  reflectionText?:
+    string;
 
-  reflectionCreatedAt?: string;
+  reflectionCreatedAt?:
+    string;
 
-  project: RuntimeProjectContext;
+  project:
+    RuntimeProjectContext;
 
-  repository: RuntimeRepositoryContext;
+  repository:
+    RuntimeRepositoryContext;
 
-  githubSnapshot?: GitHubSnapshot;
+  githubSnapshot?:
+    GitHubSnapshot;
 
-  learningContext?: RuntimeLearningContext;
+  projectRecommendationInput?:
+    RuntimeProjectRecommendationInput;
 
-  projectHistory?: RuntimeProjectHistory;
+  learningContext?:
+    RuntimeLearningContext;
 
-  trigger?: RuntimeExecutionTrigger;
+  projectHistory?:
+    RuntimeProjectHistory;
+
+  trigger?:
+    RuntimeExecutionTrigger;
 };
 
 export function createRuntimeContractV2Payload(
@@ -55,14 +70,30 @@ export function createRuntimeContractV2Payload(
       : undefined;
 
   const payload: RuntimeContractV2Input = {
-    ...(reflection ? { reflection } : {}),
+    ...(reflection
+      ? {
+          reflection,
+        }
+      : {}),
 
-    project: options.project,
+    project:
+      options.project,
 
-    repository: options.repository,
+    repository:
+      options.repository,
 
     ...(options.githubSnapshot
-      ? { githubSnapshot: options.githubSnapshot }
+      ? {
+          githubSnapshot:
+            options.githubSnapshot,
+        }
+      : {}),
+
+    ...(options.projectRecommendationInput
+      ? {
+          projectRecommendationInput:
+            options.projectRecommendationInput,
+        }
       : {}),
 
     learningContext: {
