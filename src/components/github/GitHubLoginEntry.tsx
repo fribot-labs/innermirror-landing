@@ -202,17 +202,17 @@ export function GitHubLoginEntry({
     <section className="github-learning-entry">
       <div className="github-learning-entry-header">
         <span className="github-learning-entry-eyebrow">
-          GitHub Learning Entry
+          GITHUB CONNECTION
         </span>
 
         <h2>
-          Start learning from your GitHub repository
+          Connect your GitHub repository
         </h2>
 
         <p>
-          Connect GitHub, choose a repository, and
-          begin a project-based learning flow powered
-          by Reflection and Runtime analysis.
+          Connect GitHub.
+          Choose a repository.
+          Start understanding your project.
         </p>
       </div>
 

@@ -64,14 +64,13 @@ export function RepositorySelector({
     <section className="repository-selector">
       <div className="repository-selector-header">
         <span className="repository-selector-eyebrow">
-          Repository Selection
+          REPOSITORY SELECTION
         </span>
 
-        <h2>Choose a repository for learning</h2>
+        <h2>Choose Your Project Repository</h2>
 
         <p>
-          Select the GitHub repository that will become the learning record for
-          this PBL project.
+          Select the GitHub repository you want InnerMirror to understand.
         </p>
       </div>
 
