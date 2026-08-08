@@ -1,23 +1,23 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import {
-    createRuntimeContractV2Payload,
+  createRuntimeContractV2Payload,
 } from "../createRuntimeContractV2Payload";
 
 import type {
-    RuntimeProjectRecommendationInput,
+  RuntimeProjectRecommendationInput,
 } from "../../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
 
 import type {
-    GitHubSnapshot,
+  GitHubSnapshot,
 } from "../../types/githubSnapshot";
 
 import type {
-    RuntimeProjectHistory,
+  RuntimeProjectHistory,
 } from "../../types/runtimeContractV2";
 
 function createProject() {
@@ -530,6 +530,157 @@ describe(
     );
 
     it(
+      "preserves PBL metadata in the Runtime V2 project recommendation input",
+      () => {
+
+        const recommendation:
+          RuntimeProjectRecommendationInput = {
+
+          adapterVersion:
+            "v1",
+
+          projectId:
+            "github:fribot-labs:class-concept-robot",
+
+          projectTitle:
+            "Class Concept Robot",
+
+          projectKind:
+            "pbl",
+
+          metadataSource:
+            "pbl-manifest",
+
+          readiness:
+            "ready",
+
+          currentFocus:
+            "Class responsibility",
+
+          projectSummary:
+            "Class Concept Robot is currently focused on understanding class responsibility.",
+
+          difficulty:
+            "beginner",
+
+          estimatedWeeks:
+            4,
+
+          learningGoal:
+            "Understand why related state and behavior can be organized together through a class in robot programming.",
+        };
+
+        const payload =
+          createRuntimeContractV2Payload({
+
+            project: {
+              projectId:
+                "github:fribot-labs:class-concept-robot",
+
+              name:
+                "Class Concept Robot",
+
+              currentStep:
+                "Understand",
+            },
+
+            repository: {
+              owner:
+                "fribot-labs",
+
+              name:
+                "class-concept-robot",
+
+              defaultBranch:
+                "main",
+            },
+
+            projectRecommendationInput:
+              recommendation,
+
+            learningContext: {
+              currentStep:
+                "Understand",
+
+              learnerLevel:
+                "beginner",
+            },
+
+            trigger:
+              "github-snapshot",
+          });
+
+        expect(
+          payload.projectRecommendationInput
+        ).toEqual({
+          adapterVersion:
+            "v1",
+
+          projectId:
+            "github:fribot-labs:class-concept-robot",
+
+          projectTitle:
+            "Class Concept Robot",
+
+          projectKind:
+            "pbl",
+
+          metadataSource:
+            "pbl-manifest",
+
+          readiness:
+            "ready",
+
+          currentFocus:
+            "Class responsibility",
+
+          projectSummary:
+            "Class Concept Robot is currently focused on understanding class responsibility.",
+
+          difficulty:
+            "beginner",
+
+          estimatedWeeks:
+            4,
+
+          learningGoal:
+            "Understand why related state and behavior can be organized together through a class in robot programming.",
+        });
+
+        expect(
+          payload.project.projectId
+        ).toBe(
+          "github:fribot-labs:class-concept-robot"
+        );
+
+        expect(
+          payload.repository.name
+        ).toBe(
+          "class-concept-robot"
+        );
+
+        expect(
+          payload.learningContext.currentStep
+        ).toBe(
+          "Understand"
+        );
+
+        expect(
+          payload.learningContext.learnerLevel
+        ).toBe(
+          "beginner"
+        );
+
+        expect(
+          payload.trigger
+        ).toBe(
+          "github-snapshot"
+        );
+
+      }
+    );
+
+    it(
       "creates a new payload object",
       () => {
 
@@ -551,6 +702,5 @@ describe(
 
       }
     );
-
   }
 );
