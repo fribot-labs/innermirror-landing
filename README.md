@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/logo/fribot-logo.png" width="96" />
+  <img src="assets/logo/IM_LOGO.png" width="96" />
 </p>
 
 <h1 align="center">InnerMirror Landing</h1>
@@ -27,6 +27,153 @@ The Landing provides the learner experience by:
 The Landing presents learning.
 
 The Runtime interprets learning.
+
+---
+
+# Choose Your Starting Point
+
+InnerMirror supports two project entry paths.
+
+The learner may begin with a structured Fribot Learning project or connect an
+existing GitHub repository directly.
+
+## Option 1 — Start a New Learning Project
+
+Choose a project from Fribot Learning.
+
+```text
+Fribot Learning
+
+↓
+
+Choose a Project
+
+↓
+
+Export Repository
+
+↓
+
+Your GitHub Repository
+
+↓
+
+InnerMirror
+
+↓
+
+Project Analyze
+
+Reflect
+
+Reflect + GitHub
+```
+
+Fribot Learning provides a structured starting point.
+
+Each learning project is exported into an independent learner-owned GitHub
+repository.
+
+For the MVP:
+
+```text
+One Fribot Learning Project
+
+=
+
+One Exported Repository
+
+=
+
+One GitHub Project
+```
+
+The template is used only once when the project begins.
+
+After export, the learner owns the repository completely.
+
+The learner may freely continue development using commits, branches,
+pull requests, documentation, experiments, and new ideas.
+
+InnerMirror interprets how the project evolves rather than requiring the
+template to remain unchanged.
+
+---
+
+## Option 2 — Analyze an Existing Project
+
+Fribot Learning is optional.
+
+A learner who already has a GitHub repository may connect it directly to
+InnerMirror.
+
+```text
+Existing GitHub Repository
+
+↓
+
+InnerMirror
+
+↓
+
+Project Analyze
+
+Reflect
+
+Reflect + GitHub
+```
+
+Existing repositories receive Runtime analysis using the available GitHub
+context.
+
+Repositories originating from Fribot Learning additionally provide explicit
+PBL metadata, allowing richer initial project understanding.
+
+---
+
+## Relationship Between Fribot Learning and InnerMirror
+
+The two services have different responsibilities.
+
+```text
+Fribot Learning
+
+↓
+
+Defines where a project begins.
+
+────────────────────────────
+
+InnerMirror
+
+↓
+
+Understands where the project chooses to go.
+```
+
+Fribot Learning introduces the learner to a structured project.
+
+InnerMirror follows the learner's own project evolution.
+
+The learner is free to extend the exported repository beyond the original
+template.
+
+Reflection, Git history, pull requests, and project direction are interpreted
+together as one continuous learning journey.
+
+---
+
+## Project Philosophy
+
+The exported repository belongs to the learner.
+
+Templates provide the initial project context.
+
+They do not constrain future development.
+
+GitHub records how the project changes.
+
+InnerMirror interprets how the learner grows.
 
 ---
 

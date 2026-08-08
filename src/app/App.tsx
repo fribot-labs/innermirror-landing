@@ -100,6 +100,12 @@ import type {
   RuntimeProjectMetadata,
 } from "../project-metadata/runtimeProjectMetadataTypes";
 
+import {
+  InnerMirrorBrand,
+} from "../components/branding/InnerMirrorBrand";
+import {
+  ServiceEntryNavigation,
+} from "../components/service-entry/ServiceEntryNavigation";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -151,6 +157,11 @@ type ProjectActionState =
 export function App() {
   const projectFocusSectionRef =
     useRef<HTMLDivElement | null>(null);
+
+  const githubEntrySectionRef =
+    useRef<HTMLDivElement | null>(
+      null
+    );
 
   const reflectionSectionRef =
     useRef<HTMLDivElement | null>(null);
@@ -380,6 +391,18 @@ export function App() {
       isActionRunning:
         isAnyProjectActionRunning,
     });
+
+  const handleExistingProjectSelect =
+    () => {
+      githubEntrySectionRef.current
+        ?.scrollIntoView({
+          behavior:
+            "smooth",
+
+          block:
+            "start",
+        });
+    };
 
   const {
     isMerging,
@@ -1697,318 +1720,358 @@ export function App() {
 
   return (
     <main>
-      <GitHubLoginEntry
-        connectionState={
-          githubConnectionState
+      <InnerMirrorBrand />
+
+      <ServiceEntryNavigation
+        fribotLearningUrl={
+          "https://github.com/fribot-labs/fribot-learning"
         }
-        runtimeSessionState={
-          runtimeGitHubSessionState
+        onExistingProjectSelect={
+          handleExistingProjectSelect
         }
-        user={
-          authenticatedUser
-        }
-        authMessage={
-          authMessage
-        }
-        onConnect={
-          handleConnectGitHub
-        }
-        onReconnectRuntime={
-          handleReconnectRuntime
-        }
-        onSignOut={
-          handleSignOut
-        }
-        onResetGitHubAccess={
-          handleRenewGitHubAuthorization
-        }
-        isRuntimeReconnectAvailable={
-          authenticatedUser !== null &&
-          (
+      />
+
+      {/* --------------------------------------------------
+          Project Entry Experience
+
+            Service Entry
+
+            ↓
+
+            GitHub Connection
+
+            ↓
+
+            Repository Selection
+
+            ↓
+
+            Project Context
+
+            ↓
+
+            Project Start
+
+      --------------------------------------------------- */}
+      <div ref={githubEntrySectionRef}>
+        <GitHubLoginEntry
+          connectionState={
+            githubConnectionState 
+          }
+          runtimeSessionState={
+            runtimeGitHubSessionState
+          }
+          user={
+            authenticatedUser
+          }
+          authMessage={
+            authMessage
+          }
+          onConnect={
+            handleConnectGitHub
+          }
+          onReconnectRuntime={
+            handleReconnectRuntime
+          }
+          onSignOut={
+            handleSignOut
+          }
+          onResetGitHubAccess={
+            handleRenewGitHubAuthorization
+          }
+          isRuntimeReconnectAvailable={
+            authenticatedUser !== null &&
+            (
+              runtimeGitHubSessionState ===
+                "unavailable" ||
+              runtimeGitHubSessionState ===
+                "expired" ||
+              runtimeGitHubSessionState ===
+                "error"
+            )
+          }
+        />
+
+        <RepositorySelector
+          repositories={
+            githubConnectionState ===
+              "connected" &&
             runtimeGitHubSessionState ===
-              "unavailable" ||
-            runtimeGitHubSessionState ===
-              "expired" ||
-            runtimeGitHubSessionState ===
-              "error"
-          )
-        }
-      />
-
-      <RepositorySelector
-        repositories={
-          githubConnectionState ===
-            "connected" &&
-          runtimeGitHubSessionState ===
-            "ready" &&
-          githubSessionId !== null
-            ? availableRepositories
-            : []
-        }
-        selectedRepository={
-          selectedRepository
-        }
-        onSelectRepository={
-          handleSelectRepository
-        }
-        availabilityMessage={
-          repositoryAvailabilityMessage
-        }
-      />
-
-      {runtimeGitHubSessionState ===
-      "expired" ? (
-        <div className="github-repository-status github-repository-status-warning">
-          Runtime session expired. Reconnect
-          Runtime to load repositories.
-        </div>
-      ) : null}
-
-      {isLoadingRepositories ? (
-        <div className="github-repository-status">
-          Loading GitHub repositories...
-        </div>
-      ) : null}
-
-      {repositoryError !== null ? (
-        <div className="github-repository-status github-repository-status-error">
-          {repositoryError}
-        </div>
-      ) : null}
-
-      <RepositoryMetadataPanel
-        metadata={
-          runtimeProjectMetadata
-        }
-      />
-
-      <ProjectIntelligencePanel
-        intelligence={
-          runtimeProjectIntelligence
-        }
-      />
-
-      <div ref={projectFocusSectionRef}>
-        <ProjectStartPanel
-          selectedRepository={selectedRepository}
-          project={activeProject}
-          currentStep={currentStep}
-          onChangeCurrentStep={setCurrentStep}
-          onApplyProjectFocus={handleApplyProjectFocus}
-          onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
-          isGitHubAnalyzing={isGitHubAnalyzing}
-          isActionLocked={
-            isSavingThought || isCombinedAnalyzing
+              "ready" &&
+            githubSessionId !== null
+              ? availableRepositories
+              : []
           }
-          startAction={
-            activeProject === null
-              ? projectActionGuidance.startProject
-              : projectActionGuidance.updateProjectFocus
+          selectedRepository={
+            selectedRepository
           }
-          analyzeAction={
-            projectActionGuidance.analyzeGitHubProject
+          onSelectRepository={
+            handleSelectRepository
+          }
+          availabilityMessage={
+            repositoryAvailabilityMessage
           }
         />
-      </div>
 
-      <div ref={reflectionSectionRef}>
-        <ProjectReflectionPanel
-          project={activeProject}
-          selectedRepository={selectedRepository}
-          content={content}
-          onChangeContent={setContent}
-          onSaveThought={handleReflect}
-          onThoughtAndProjectAnalyze={
-            handleThoughtAndProjectAnalyze
-          }
-          isSavingThought={isSavingThought || isLoading}
-          isCombinedAnalyzing={isCombinedAnalyzing}
-          isActionLocked={isGitHubAnalyzing}
-          saveAction={
-            projectActionGuidance.saveThought
-          }
-          combinedAction={
-            projectActionGuidance.thoughtProjectAnalyze
-          }
-        />
-      </div>
+        {runtimeGitHubSessionState ===
+        "expired" ? (
+          <div className="github-repository-status github-repository-status-warning">
+            Runtime session expired. Reconnect
+            Runtime to load repositories.
+          </div>
+        ) : null}
 
-      <ProjectSummaryPanel project={activeProject} />
+        {isLoadingRepositories ? (
+          <div className="github-repository-status">
+            Loading GitHub repositories...
+          </div>
+        ) : null}
 
-      {activeProject !== null ? (
-        <GitHubSnapshotPanel snapshotState={snapshotState} />
-      ) : null}
+        {repositoryError !== null ? (
+          <div className="github-repository-status github-repository-status-error">
+            {repositoryError}
+          </div>
+        ) : null}
 
-      <RuntimeBoundaryStatusBanner
-        health={runtimeBoundaryHealth}
-        isChecking={isCheckingBoundary}
-        onRefresh={checkHealth}
-      />
-
-      <RuntimeFallbackModeNotice uxMode={runtimeUxMode} />
-
-      <LocalReflectionPersistenceNotice
-        snapshot={localReflectionSnapshot}
-        isLocalOnlyMode={isLocalOnlyMode}
-      />
-
-      <OfflineSyncRecoveryPanel
-        snapshot={localReflectionSnapshot}
-        syncState={offlineSyncRecovery}
-        canSync={runtimeUxMode.mode === "full-runtime"}
-        onSync={offlineSyncRecovery.syncPendingReflections}
-      />
-
-      <RuntimeFailureRecoveryNotice
-        recovery={runtimeFailureRecovery}
-        visible={runtimeFailureRecoveryDismiss.visible}
-        isRecoveryComplete={runtimeFailureRecoveryDismiss.isRecoveryComplete}
-        displayTitle={runtimeFailureRecoveryDismiss.title}
-        displayMessage={runtimeFailureRecoveryDismiss.message}
-        onRetryRuntime={checkHealth}
-        onRetryTimeline={serverMemoryTimeline.refresh}
-        onSyncLocal={offlineSyncRecovery.syncPendingReflections}
-        onDismiss={runtimeFailureRecoveryDismiss.dismiss}
-      />
-
-      <ImmediateReflectionFeedback data={immediateFeedback} />
-
-      {runtimeUxMode.canUseStreamingMerge ? (
-        <RuntimeStreamingMergeSurface
-          events={streamingMergeEvents}
-          isMerging={isMerging}
-        />
-      ) : null}
-
-      {isLoading ? <RuntimeLoadingState /> : null}
-
-      {error !== null && runtimeUxMode.mode !== "local-only" ? (
-        <RuntimeErrorState error={error} onRetry={handleReflect} />
-      ) : null}
-
-      {runtimeNextAction ? (
-        <RuntimeNextActionPanel
-          action={runtimeNextAction}
-          recommendationPresentation={
-            recommendationPresentation
-          }
-          onNavigate={
-            handleNextActionNavigation
+        <RepositoryMetadataPanel
+          metadata={
+            runtimeProjectMetadata
           }
         />
-      ) : null}
 
-      {activeProject !== null ? (
-        <RuntimeActionHistoryPanel
-          entries={
-            runtimeActionHistoryEntries
-          }
-          transitions={
-            runtimeActionHistoryTransitions
-          }
-          activeEntryId={
-            activeRuntimeActionHistoryEntry
-              ?.id ??
-            null
-          }
-          currentRecommendationPresentation={
-            recommendationPresentation
-          }
-          onClear={
-            handleClearProjectHistory
+        <ProjectIntelligencePanel
+          intelligence={
+            runtimeProjectIntelligence
           }
         />
-      ) : null}
 
-      {runtimePredictivePresentation !== null ? (
-        <div className="runtime-prediction-region">
-          <RuntimePredictionPanel
-            presentation={
-              runtimePredictivePresentation
+        <div ref={projectFocusSectionRef}>
+          <ProjectStartPanel
+            selectedRepository={selectedRepository}
+            project={activeProject}
+            currentStep={currentStep}
+            onChangeCurrentStep={setCurrentStep}
+            onApplyProjectFocus={handleApplyProjectFocus}
+            onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
+            isGitHubAnalyzing={isGitHubAnalyzing}
+            isActionLocked={
+              isSavingThought || isCombinedAnalyzing
+            }
+            startAction={
+              activeProject === null
+                ? projectActionGuidance.startProject
+                : projectActionGuidance.updateProjectFocus
+            }
+            analyzeAction={
+              projectActionGuidance.analyzeGitHubProject
             }
           />
         </div>
-      ) : null}
+      </div>
 
-      {runtimeV2Response !== null ? (
-        <div ref={runtimeDetailsSectionRef}>
-          <RuntimeV2ResultPanel
-            response={runtimeV2Response}
+      {/* --------------------------------------------------
+          Reflection & Runtime Experience
+      --------------------------------------------------- */}
+
+        <div ref={reflectionSectionRef}>
+          <ProjectReflectionPanel
+            project={activeProject}
+            selectedRepository={selectedRepository}
+            content={content}
+            onChangeContent={setContent}
+            onSaveThought={handleReflect}
+            onThoughtAndProjectAnalyze={
+              handleThoughtAndProjectAnalyze
+            }
+            isSavingThought={isSavingThought || isLoading}
+            isCombinedAnalyzing={isCombinedAnalyzing}
+            isActionLocked={isGitHubAnalyzing}
+            saveAction={
+              projectActionGuidance.saveThought
+            }
+            combinedAction={
+              projectActionGuidance.thoughtProjectAnalyze
+            }
           />
         </div>
-      ) : null}
 
-      {result !== null ? (
-        <>
-          {isOptimistic ? (
-            <div className="optimistic-result-note">
-              임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로
-              갱신됩니다.
-            </div>
-          ) : null}
+        <ProjectSummaryPanel project={activeProject} />
 
-          <RuntimeReflectionResultView result={result} />
+        {activeProject !== null ? (
+          <GitHubSnapshotPanel snapshotState={snapshotState} />
+        ) : null}
 
-          {runtimeUxMode.canUseContinuitySurfaces ? (
-            <>
-              <ReflectionContinuitySurface data={continuitySurfaceData} />
-
-              <ReturningThemeSurface data={returningThemeSurfaceData} />
-
-              <LongGapRecoverySurface data={longGapRecoverySurfaceData} />
-
-              <IdentityDriftSurface data={identityDriftSurfaceData} />
-            </>
-          ) : null}
-        </>
-      ) : null}
-
-      {activeProject !== null &&
-      (projectContinuityInsight ||
-        projectPatternInsight) ? (
-        <ProjectFlowSummaryPanel
-          continuity={projectContinuityInsight ?? undefined}
-          pattern={projectPatternInsight ?? undefined}
+        <RuntimeBoundaryStatusBanner
+          health={runtimeBoundaryHealth}
+          isChecking={isCheckingBoundary}
+          onRefresh={checkHealth}
         />
-      ) : null}
 
-      {activeProject !== null &&
-      projectAnalysisMemory.events.length > 0 ? (
-        <div ref={projectTimelineSectionRef}>
-          <ProjectAnalysisMemoryTimeline
-            events={projectAnalysisMemory.events}
-            onClear={projectAnalysisMemory.clearEvents}
-          />
-        </div>
-      ) : null}
+        <RuntimeFallbackModeNotice uxMode={runtimeUxMode} />
 
-      {activeProject !== null &&
-      runtimeUxMode.canUseMemoryTimeline ? (
-        <>
-          {serverMemoryTimeline.isLoading ? (
-            <div className="runtime-memory-source-note">
-              Loading Runtime memory timeline...
-            </div>
-          ) : null}
-
-          {serverMemoryTimeline.error !== null ? (
-            <div className="runtime-memory-source-note runtime-memory-source-note-error">
-              Unable to load Runtime memory timeline.
-            </div>
-          ) : null}
-
-          <RuntimeMemoryTimeline
-            data={runtimeMemoryTimelineData}
-          />
-        </>
-      ) : null}
-
-      {localReflectionSnapshot.totalCount > 0 ? (
-        <LocalReflectionList
+        <LocalReflectionPersistenceNotice
           snapshot={localReflectionSnapshot}
-          onClear={clearLocalReflectionMemory}
+          isLocalOnlyMode={isLocalOnlyMode}
         />
-      ) : null}
+
+        <OfflineSyncRecoveryPanel
+          snapshot={localReflectionSnapshot}
+          syncState={offlineSyncRecovery}
+          canSync={runtimeUxMode.mode === "full-runtime"}
+          onSync={offlineSyncRecovery.syncPendingReflections}
+        />
+
+        <RuntimeFailureRecoveryNotice
+          recovery={runtimeFailureRecovery}
+          visible={runtimeFailureRecoveryDismiss.visible}
+          isRecoveryComplete={runtimeFailureRecoveryDismiss.isRecoveryComplete}
+          displayTitle={runtimeFailureRecoveryDismiss.title}
+          displayMessage={runtimeFailureRecoveryDismiss.message}
+          onRetryRuntime={checkHealth}
+          onRetryTimeline={serverMemoryTimeline.refresh}
+          onSyncLocal={offlineSyncRecovery.syncPendingReflections}
+          onDismiss={runtimeFailureRecoveryDismiss.dismiss}
+        />
+
+        <ImmediateReflectionFeedback data={immediateFeedback} />
+
+        {runtimeUxMode.canUseStreamingMerge ? (
+          <RuntimeStreamingMergeSurface
+            events={streamingMergeEvents}
+            isMerging={isMerging}
+          />
+        ) : null}
+
+        {isLoading ? <RuntimeLoadingState /> : null}
+
+        {error !== null && runtimeUxMode.mode !== "local-only" ? (
+          <RuntimeErrorState error={error} onRetry={handleReflect} />
+        ) : null}
+
+        {runtimeNextAction ? (
+          <RuntimeNextActionPanel
+            action={runtimeNextAction}
+            recommendationPresentation={
+              recommendationPresentation
+            }
+            onNavigate={
+              handleNextActionNavigation
+            }
+          />
+        ) : null}
+
+        {activeProject !== null ? (
+          <RuntimeActionHistoryPanel
+            entries={
+              runtimeActionHistoryEntries
+            }
+            transitions={
+              runtimeActionHistoryTransitions
+            }
+            activeEntryId={
+              activeRuntimeActionHistoryEntry
+                ?.id ??
+              null
+            }
+            currentRecommendationPresentation={
+              recommendationPresentation
+            }
+            onClear={
+              handleClearProjectHistory
+            }
+          />
+        ) : null}
+
+        {runtimePredictivePresentation !== null ? (
+          <div className="runtime-prediction-region">
+            <RuntimePredictionPanel
+              presentation={
+                runtimePredictivePresentation
+              }
+            />
+          </div>
+        ) : null}
+
+        {runtimeV2Response !== null ? (
+          <div ref={runtimeDetailsSectionRef}>
+            <RuntimeV2ResultPanel
+              response={runtimeV2Response}
+            />
+          </div>
+        ) : null}
+
+        {result !== null ? (
+          <>
+            {isOptimistic ? (
+              <div className="optimistic-result-note">
+                임시 분석 결과입니다. 깊은 runtime 결과가 도착하면 자동으로
+                갱신됩니다.
+              </div>
+            ) : null}
+
+            <RuntimeReflectionResultView result={result} />
+
+            {runtimeUxMode.canUseContinuitySurfaces ? (
+              <>
+                <ReflectionContinuitySurface data={continuitySurfaceData} />
+
+                <ReturningThemeSurface data={returningThemeSurfaceData} />
+
+                <LongGapRecoverySurface data={longGapRecoverySurfaceData} />
+
+                <IdentityDriftSurface data={identityDriftSurfaceData} />
+              </>
+            ) : null}
+          </>
+        ) : null}
+
+        {activeProject !== null &&
+        (projectContinuityInsight ||
+          projectPatternInsight) ? (
+          <ProjectFlowSummaryPanel
+            continuity={projectContinuityInsight ?? undefined}
+            pattern={projectPatternInsight ?? undefined}
+          />
+        ) : null}
+
+        {activeProject !== null &&
+        projectAnalysisMemory.events.length > 0 ? (
+          <div ref={projectTimelineSectionRef}>
+            <ProjectAnalysisMemoryTimeline
+              events={projectAnalysisMemory.events}
+              onClear={projectAnalysisMemory.clearEvents}
+            />
+          </div>
+        ) : null}
+
+        {activeProject !== null &&
+        runtimeUxMode.canUseMemoryTimeline ? (
+          <>
+            {serverMemoryTimeline.isLoading ? (
+              <div className="runtime-memory-source-note">
+                Loading Runtime memory timeline...
+              </div>
+            ) : null}
+
+            {serverMemoryTimeline.error !== null ? (
+              <div className="runtime-memory-source-note runtime-memory-source-note-error">
+                Unable to load Runtime memory timeline.
+              </div>
+            ) : null}
+
+            <RuntimeMemoryTimeline
+              data={runtimeMemoryTimelineData}
+            />
+          </>
+        ) : null}
+
+        {localReflectionSnapshot.totalCount > 0 ? (
+          <LocalReflectionList
+            snapshot={localReflectionSnapshot}
+            onClear={clearLocalReflectionMemory}
+          />
+        ) : null}
+
     </main>
   );
 }

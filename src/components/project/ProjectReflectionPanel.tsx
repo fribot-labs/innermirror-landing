@@ -78,10 +78,10 @@ export function ProjectReflectionPanel({
           Project Reflection
         </span>
 
-        <h2>Add a thought about this project</h2>
+        <h2>Capture your thinking</h2>
 
         <p>
-          Record a thought, decision, question, or concern.
+          Record your decisions, discoveries, questions, or uncertainty.
         </p>
       </div>
 

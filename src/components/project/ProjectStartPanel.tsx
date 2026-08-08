@@ -66,14 +66,14 @@ export function ProjectStartPanel({
     >
       <div className="project-start-panel-header">
         <span className="project-start-panel-eyebrow">
-          Project Setup
+          PROJECT FOCUS
         </span>
 
-        <h2>Start a PBL coding project</h2>
+        <h2>What are you working on today?</h2>
 
         <p>
-          Define the current focus, then choose how to continue
-          with recent GitHub activity.
+          Tell InnerMirror what you are currently
+          trying to understand, change, or build.
         </p>
       </div>
 
