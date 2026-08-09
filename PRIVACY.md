@@ -1,263 +1,94 @@
-# Privacy & Data Ownership
+# PRIVACY.md
 
-> **Trust comes before intelligence.**
+# InnerMirror Privacy Policy
 
----
+Effective for the current InnerMirror MVP.
 
-> ## Our Commitment
->
-> **Your GitHub repositories remain under your ownership.**
->
-> **InnerMirror never deletes or takes ownership of your GitHub projects.**
->
-> **InnerMirror analyzes only the information you explicitly choose to submit.**
-
----
-
-# Why This Document Exists
-
-InnerMirror is designed to help people understand the long-term evolution of their projects, learning, and thinking.
-
-Because the service records personal project history over time, transparency must come before intelligence.
-
-This document explains:
-
-- what InnerMirror stores,
-- what InnerMirror never stores,
-- who owns your data,
-- and how your information can be permanently removed.
-
----
-
-# Core Principles
-
-InnerMirror follows five fundamental principles.
-
----
-
-## 1. Your GitHub repositories always remain yours.
-
-GitHub repositories remain under your ownership at all times.
-
-InnerMirror never becomes the owner of your repositories.
-
-InnerMirror never modifies your repositories.
-
-InnerMirror never deletes repositories stored on GitHub.
-
-Your GitHub account remains completely independent from InnerMirror.
-
----
-
-## 2. InnerMirror stores only the information required to provide its own service.
-
-InnerMirror stores only the information necessary to provide services such as:
-
-- long-term Reflection
-- project continuity
-- learning journey analysis
-- project history
-- Runtime interpretation
-
-InnerMirror is **not** a Git hosting platform.
-
-GitHub remains the source of software development.
-
-InnerMirror remains the source of learning continuity.
-
----
-
-## 3. analyzes only information you explicitly choose to submit.
-
-InnerMirror does not continuously monitor your projects.
-
-Analysis begins only when the learner explicitly performs actions such as:
-
-- Analyze GitHub Project
-- Reflect
-- Reflect + GitHub
-
-The learner always decides:
-
-- when analysis begins,
-- what project is analyzed,
-- and when Reflection is submitted.
-
-Innermirror never analyzes repositories automatically.
-
----
-
-## 4. The learner always remains in control.
-
-The learner decides:
-
-- when GitHub is connected,
-- which repository is selected,
-- when Reflection is created,
-- when Runtime analysis begins,
-- and when all stored records are permanently deleted.
-
-InnerMirror exists to support the learner.
-
-It never replaces the learner's ownership.
-
----
-
-## 5. Complete deletion is always available.
-
-If the learner requests deletion of their InnerMirror account,
-
-InnerMirror permanently removes all learner-owned records stored by InnerMirror.
-
-Deletion includes:
-
-- Reflection
-- Project records
-- Learning Journey
-- Runtime-derived analysis
-- GitHub connection information
-- Internal learning history
-
-Deletion does **not** remove:
-
-- GitHub repositories
-- GitHub commits
-- GitHub pull requests
-- GitHub account information
-- GitHub organization memberships
-
-GitHub repositories remain exactly as they were before deletion.
-
----
-
-# Data Ownership
-
-Ownership of information is intentionally separated.
+InnerMirror is operated by:
 
 ```text
-GitHub
+Fribot Co., Ltd.
+주식회사 프라이봇
+```
 
-↓
+Privacy Officer:
 
-Source Code
+```text
+Wookjin Chung
+정욱진
+```
 
-Commits
+Contact:
 
-Branches
+```text
+mail@fribot.com
+```
 
-Pull Requests
+Business Address:
 
-↓
-
-Owned by the learner
-
-────────────────────────
-
-InnerMirror
-
-↓
-
-Reflection
-
-Project Journey
-
-Learning History
-
-Current Focus
-
-↓
-
-Stored by InnerMirror
-
-────────────────────────
-
-Runtime
-
-↓
-
-Summary
-
-Recommendation
-
-Pattern Detection
-
-Continuity Analysis
-
-↓
-
-Generated from learner-provided information
+```text
+대한민국
+경상북도 경주시 강동면 동해대로 166-11, 7층
 ```
 
 ---
 
-# What InnerMirror Stores
+# 1. Our Privacy Principle
 
-InnerMirror may store information such as:
+InnerMirror is an online Reflection and Project Continuity service.
 
-## Account
+The service is designed around the following principles:
 
-- Internal User ID
-- GitHub Account ID
-- GitHub Email Address
-- GitHub Username
+```text
+Your projects remain yours.
 
----
+Analysis begins only when you choose.
 
-## Project
+InnerMirror stores only the information
+required to provide its own service.
+```
 
-- Connected Repository
-- Project Identity
-- Project Metadata
-- Template Origin
-- Learning Context
+InnerMirror does not become the owner of your GitHub repositories.
+
+InnerMirror does not modify or delete GitHub repositories as part of the current MVP workflow.
 
 ---
 
-## Reflection
+# 2. Current MVP Service Boundary
 
-- Reflection entries
-- Current Focus
-- Project events
-- Learning Journey
-- User-generated notes
+The current MVP provides the following workflow:
 
----
+```text
+GitHub Authentication
 
-## Runtime
+↓
 
-InnerMirror may store Runtime-generated information necessary to improve long-term continuity, including:
+Repository Selection
 
-- summaries
-- recommendations
-- learning continuity
-- project evolution
+↓
 
-Only information required to provide the service is stored.
+Project Context
 
----
+↓
 
-# What InnerMirror Does Not Store
+Reflection or Explicit Analysis Request
 
-InnerMirror does **not** permanently store:
+↓
 
-- complete GitHub repositories
-- Git source ownership
-- GitHub passwords
-- GitHub authentication credentials
-- private GitHub tokens
-- unrelated GitHub activity
+InnerMirror Runtime
 
-InnerMirror is not intended to duplicate GitHub.
+↓
 
-GitHub remains the authoritative source for software development history.
+Result Presentation
+```
 
----
+The current MVP:
 
-# Service Transparency
+- does not continuously monitor GitHub activity,
+- does not perform automatic background analysis,
+- does not connect learner information to an external LLM analysis service.
 
-The current MVP does not continuously analyze learner activity.
-
-InnerMirror performs analysis only when the learner explicitly requests it.
+Analysis begins only when the learner explicitly requests it.
 
 Examples include:
 
@@ -265,164 +96,487 @@ Examples include:
 - Reflect
 - Reflect + GitHub
 
-No background analysis is performed.
+---
 
-No continuous observation is performed.
+# 3. Personal Information We Process
 
-No automatic monitoring is performed.
+InnerMirror processes only information necessary to provide the current service.
+
+## 3.1 Authentication Information
+
+The current MVP may process:
+
+- Supabase authenticated user identifier
+- GitHub provider identifier
+- GitHub username
+
+GitHub email addresses are not intended to be stored as persistent InnerMirror user identifiers in the current MVP.
+
+InnerMirror does not require a separate InnerMirror password.
 
 ---
 
-# Current MVP
+## 3.2 GitHub Project Information
 
-The current MVP does not connect learner information to external LLM services.
+When the learner explicitly connects GitHub and requests project analysis,
+InnerMirror may process information including:
 
-Runtime analyzes only the information required to provide the current MVP experience.
+- repository owner
+- repository name
+- repository identifier
+- repository default branch
+- repository metadata
+- recent commit information
+- recent pull request information
 
-Future versions may introduce optional AI-assisted interpretation.
+The specific scope may be adjusted to the minimum information required for the service.
 
-Any future AI features will continue to follow the same transparency and ownership principles described in this document.
-
----
-
-# Learner Control
-
-The learner always decides:
-
-- when GitHub is connected,
-- which repository is selected,
-- when Reflection is recorded,
-- when analysis begins,
-- and when all InnerMirror records are permanently removed.
-
-Analysis never begins automatically.
+InnerMirror does not permanently copy complete GitHub repositories as part of the current MVP design.
 
 ---
 
-# Relationship with GitHub
+## 3.3 Learner-Created Information
 
-GitHub repositories remain under the learner's ownership.
+The learner may voluntarily provide:
 
-InnerMirror never modifies repositories stored on GitHub.
+- Reflection
+- project focus
+- questions
+- decisions
+- project-related thoughts
+- learning journey information
+- project events
 
-InnerMirror never deletes GitHub repositories.
-
-GitHub continues to operate independently from InnerMirror.
-
----
-
-# Runtime
-
-Runtime exists to interpret learner-provided information.
-
-Runtime does not continuously collect learner information.
-
-Runtime analyzes only information explicitly submitted by the learner.
+These records may be used to provide project continuity and Reflection services.
 
 ---
 
-# Future AI Policy
+## 3.4 Fribot Learning Information
 
-If future versions introduce AI-assisted interpretation,
+For projects originating from Fribot Learning templates,
+InnerMirror may process template-related context including:
 
-InnerMirror will continue to follow these principles:
+- template identifier
+- course identifier
+- learning goal
+- difficulty
+- estimated duration
+- project metadata
 
-- learner ownership
-- explicit user action
-- transparent analysis
-- complete account deletion
-- GitHub independence
-
-The learner will always remain in control.
-
----
-
-# Data Deletion Policy
-
-InnerMirror treats each learner's history as one continuous learning journey.
-
-For this reason,
-
-partial deletion by:
-
-- project,
-- date,
-- repository,
-- Reflection,
-
-is intentionally **not supported**.
-
-Deletion removes the learner's entire InnerMirror history.
-
-This design preserves both:
-
-- learner ownership,
-- and the integrity of long-term learning analysis.
+This information is used to understand the starting context of the learner's project.
 
 ---
 
-# Relationship with GitHub
+# 4. Purpose of Processing
 
-GitHub and InnerMirror have different responsibilities.
+InnerMirror processes personal information for the following purposes:
+
+- user authentication,
+- identification of the learner's InnerMirror record,
+- connection of GitHub project context,
+- Reflection recording,
+- project continuity,
+- learning journey continuity,
+- learner-requested analysis,
+- service security,
+- account deletion and privacy-right handling.
+
+Personal information is not used beyond the purposes reasonably necessary to provide the service unless a separate lawful basis exists.
+
+---
+
+# 5. User Identity and Continuity
+
+InnerMirror does not attempt to infer that different authenticated identities belong to the same person.
+
+The authenticated identity presented by the learner defines the InnerMirror user boundary.
+
+If a learner signs in using a different supported authentication identity,
+InnerMirror treats that identity as a different user.
+
+InnerMirror does not automatically merge identities based on:
+
+- name,
+- email similarity,
+- repository similarity,
+- project similarity,
+- or inferred personal characteristics.
+
+A learner who wishes to maintain long-term continuity should continue using the same supported authentication identity.
+
+---
+
+# 6. Minimum Age
+
+InnerMirror is intended only for users who are:
 
 ```text
-GitHub
-
-↓
-
-Software Development
-
-↓
-
-Repository Ownership
-
-────────────────────────
-
-InnerMirror
-
-↓
-
-Reflection
-
-Learning Continuity
-
-Long-term Understanding
+14 years of age or older
 ```
 
-Deleting an InnerMirror account never deletes GitHub repositories.
+The current MVP is not intended for children under the age of 14.
 
-Disconnecting GitHub never removes repositories stored on GitHub.
-
-GitHub remains completely independent.
+InnerMirror does not intentionally provide the current service to children under 14.
 
 ---
 
-# Transparency
+# 7. Retention Period
 
-InnerMirror believes every learner should always understand:
+InnerMirror retains information only for as long as necessary to provide the service.
 
-- what is stored,
-- why it is stored,
-- when it is analyzed,
-- who owns it,
-- and how it can be permanently removed.
+## Active Users
 
-Transparency comes before intelligence.
+Records required for Reflection and Project Continuity may remain available while the learner actively uses the service.
 
-Ownership comes before analysis.
+## Inactive Users
 
-Trust comes before AI.
+If an InnerMirror account remains inactive for:
+
+```text
+3 years
+```
+
+the associated InnerMirror user records are scheduled for deletion under the service retention policy, unless retention is required by applicable law.
+
+The three-year period is an InnerMirror service policy and is not represented as a statutory retention period.
 
 ---
 
-# Foundation Statement
+# 8. User-Requested Deletion
 
-InnerMirror does not own your projects.
+A learner may request complete deletion of their InnerMirror data.
 
-InnerMirror does not own your repositories.
+The current MVP policy treats the learner's InnerMirror history as one continuous ownership domain.
 
-InnerMirror does not own your ideas.
+A complete deletion request is intended to remove InnerMirror-held records including:
 
-You do.
+- learner identity records maintained by InnerMirror,
+- Reflection,
+- Project records,
+- Learning Journey,
+- Project History,
+- GitHub connection metadata retained by InnerMirror,
+- Runtime-derived learner records that are retained by InnerMirror.
 
-InnerMirror exists to help you understand your own long-term journey.
+The current MVP does not intend to provide selective deletion by:
+
+- individual Reflection,
+- project,
+- repository,
+- date range,
+- or analysis type.
+
+Where deletion is required, InnerMirror will use deletion procedures designed so that information is not ordinarily recoverable or reproducible through the service.
+
+---
+
+# 9. GitHub Data Is Not Deleted
+
+Deleting InnerMirror data does not delete information stored independently by GitHub.
+
+InnerMirror deletion does not delete:
+
+- GitHub repositories
+- GitHub commits
+- GitHub pull requests
+- GitHub branches
+- GitHub organizations
+- GitHub accounts
+
+Your GitHub repositories remain under your ownership.
+
+GitHub remains independent from InnerMirror.
+
+---
+
+# 10. GitHub Connection
+
+Connecting GitHub authorizes the technical connection required for the selected service workflow.
+
+GitHub authorization does not transfer ownership of GitHub information to InnerMirror.
+
+GitHub OAuth authorization and InnerMirror personal-information processing are separate concepts.
+
+InnerMirror processes GitHub-derived information only within the scope required for the service and the permissions available through the connected account.
+
+---
+
+# 11. Third-Party Provision
+
+The current MVP does not intentionally sell learner personal information.
+
+The current MVP does not intentionally provide learner records to unrelated third parties for their own independent marketing purposes.
+
+Where personal information is provided to a third party in the future,
+InnerMirror will review and disclose the applicable legal basis and required information before such processing begins.
+
+---
+
+# 12. Processing by Service Providers
+
+InnerMirror currently uses or plans to use technical service providers necessary to operate the service.
+
+These may include:
+
+- GitHub
+- Supabase
+- web hosting and deployment infrastructure
+- infrastructure used to operate the private InnerMirror Runtime
+
+The exact production infrastructure, processing location, contractual role,
+and international-transfer status must be finalized before long-term production persistence is enabled.
+
+InnerMirror will update this Privacy Policy to reflect the actual production architecture.
+
+---
+
+# 13. International Data Transfers
+
+The final international-transfer configuration has not yet been completed.
+
+Current status:
+
+```text
+UNDER REVIEW
+```
+
+Before production storage of long-term learner records is enabled,
+InnerMirror will review:
+
+- Supabase production region,
+- hosting region,
+- Runtime hosting location,
+- GitHub-related processing,
+- other infrastructure providers,
+- and whether personal information is transferred, stored, or processed outside the Republic of Korea.
+
+Where required, the Privacy Policy and user notices will be updated before such processing is activated.
+
+---
+
+# 14. Current Supabase Status
+
+The current MVP uses Supabase for authentication.
+
+Long-term application database persistence is not yet considered production-ready.
+
+Current status:
+
+```text
+Supabase Auth
+IMPLEMENTED
+
+Long-Term Learner Database
+NOT YET PRODUCTION READY
+
+Production RLS
+NOT YET VERIFIED
+
+Production Retention Automation
+NOT YET IMPLEMENTED
+
+Production Account Deletion
+NOT YET IMPLEMENTED
+```
+
+Legacy or experimental Supabase data created before the InnerMirror production service is treated as test data and may be deleted during production initialization.
+
+---
+
+# 15. Sensitive Information
+
+Reflection is free-form text.
+
+A learner may voluntarily enter information that could be highly personal or potentially sensitive.
+
+InnerMirror does not require learners to submit sensitive information in order to use the current MVP.
+
+Learners should avoid submitting sensitive information that is not necessary for the project or Reflection purpose.
+
+Before long-term production persistence of Reflection is enabled,
+InnerMirror will review the treatment of sensitive information separately.
+
+---
+
+# 16. Security
+
+InnerMirror will implement reasonable technical and organizational safeguards appropriate to the information being processed.
+
+Before production persistence of learner records is enabled, the service will review at least:
+
+- authentication boundaries,
+- database access controls,
+- Row Level Security,
+- user-level data isolation,
+- encrypted transport,
+- credentials and secret management,
+- logging,
+- deletion procedures,
+- backup behavior,
+- administrative access,
+- and incident-response procedures.
+
+Production storage must not be considered ready until these safeguards are verified.
+
+---
+
+# 17. Rights of Learners
+
+Subject to applicable law, learners may request actions concerning their personal information.
+
+These may include requests relating to:
+
+- access,
+- correction,
+- deletion,
+- suspension of processing,
+- and withdrawal of consent where applicable.
+
+Requests may be sent to:
+
+```text
+mail@fribot.com
+```
+
+InnerMirror will process valid requests in accordance with applicable law.
+
+---
+
+# 18. Privacy Officer
+
+Privacy Officer:
+
+```text
+Wookjin Chung
+정욱진
+```
+
+Operator:
+
+```text
+Fribot Co., Ltd.
+주식회사 프라이봇
+```
+
+Email:
+
+```text
+mail@fribot.com
+```
+
+Address:
+
+```text
+경상북도 경주시 강동면 동해대로 166-11, 7층
+대한민국
+```
+
+---
+
+# 19. Service Transparency
+
+The current MVP follows these public service principles:
+
+```text
+YOUR OWNERSHIP
+
+✓ GitHub repositories remain under your ownership.
+
+✓ InnerMirror never modifies GitHub repositories.
+
+
+SERVICE TRANSPARENCY
+
+✓ Analysis begins only when you explicitly request it.
+
+✓ Analysis never starts automatically.
+
+
+CURRENT MVP
+
+✓ No continuous monitoring
+
+✓ No automatic background analysis
+
+✓ No external LLM analysis
+```
+
+The public Landing may present these principles in a shortened Trust Layer.
+
+---
+
+# 20. Future AI or LLM Processing
+
+The current MVP does not send learner information to an external LLM for analysis.
+
+If future versions introduce external AI or LLM processing,
+InnerMirror will review before activation:
+
+- the processing purpose,
+- information transmitted,
+- service provider,
+- processing location,
+- retention,
+- international transfer,
+- user disclosure,
+- consent or other lawful basis,
+- AI-related legal requirements,
+- and changes required to this Privacy Policy.
+
+Future AI functionality must not be silently introduced under the current MVP disclosure.
+
+---
+
+# 21. Changes to This Privacy Policy
+
+This Privacy Policy may be updated as InnerMirror develops.
+
+Material changes affecting the processing of personal information will be disclosed before or when they become effective as required by applicable law.
+
+The effective date and revision history should be maintained when the production service begins.
+
+---
+
+# 22. Relationship to Other InnerMirror Documents
+
+This Privacy Policy is based on:
+
+```text
+LEGAL_FOUNDATION.md
+
+↓
+
+PRIVACY.md
+```
+
+Related documents include:
+
+```text
+DATA_OWNERSHIP.md
+
+LEGAL_READINESS.md
+
+Future TERMS.md
+
+Future ACCOUNT_DELETION.md
+
+Future SECURITY_POLICY.md
+```
+
+These documents should remain consistent with the actual behavior of the service.
+
+---
+
+# Privacy Foundation
+
+Your projects remain yours.
+
+Analysis begins only when you choose.
+
+InnerMirror processes only the information necessary to provide the service.
+
+The learner remains in control of their InnerMirror history.
+
+Deleting InnerMirror data never deletes the learner's GitHub repositories.
+
+Trust comes before intelligence.
