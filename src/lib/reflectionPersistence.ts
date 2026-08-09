@@ -1,7 +1,7 @@
 import { supabaseClient } from "./supabaseClient";
 
 export type CreateReflectionInput = {
-  projectId: string;
+  projectId?: string | null;
   content: string;
   source?: string | null;
 };
@@ -9,7 +9,7 @@ export type CreateReflectionInput = {
 export type ReflectionRecord = {
   id: string;
   userId: string;
-  projectId: string;
+  projectId: string | null;
   content: string;
   source: string | null;
   createdAt: string;
@@ -19,7 +19,7 @@ export type ReflectionRecord = {
 type ReflectionRow = {
   id: string;
   user_id: string;
-  project_id: string;
+  project_id: string | null;
   content: string;
   source: string | null;
   created_at: string;
@@ -58,7 +58,7 @@ export async function createReflection(
     .from("reflections")
     .insert({
       user_id: authData.user.id,
-      project_id: input.projectId,
+      project_id: input.projectId ?? null,
       content: input.content,
       source: input.source ?? null,
     })
