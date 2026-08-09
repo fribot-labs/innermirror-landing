@@ -1,7 +1,14 @@
 node_modules/
 dist/
 .vercel/
+
 # Environment files
+
 .env
 .env.local
 .env.*.local
+
+# Supabase local development files
+supabase/.temp/
+supabase/.branches/
+supabase/snippets/
