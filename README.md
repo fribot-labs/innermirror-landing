@@ -30,6 +30,54 @@ The Runtime interprets learning.
 
 ---
 
+## Data Ownership
+
+> GitHub repositories always remain
+> under the learner's ownership.
+
+> InnerMirror stores only the information
+> required to provide its own service.
+
+> Deleting an InnerMirror account
+> never deletes GitHub repositories.
+
+---
+
+# Service Transparency
+
+The current MVP is intentionally simple.
+
+The current MVP does not continuously monitor learner activity.
+
+The current MVP does not perform background analysis.
+
+The current MVP does not connect learner information to external LLM services.
+
+Analysis begins only when the learner explicitly requests one of the following actions:
+
+- Analyze GitHub Project
+- Reflect
+- Reflect + GitHub
+
+The learner always decides:
+
+- when GitHub is connected,
+- when Reflection is recorded,
+- when Runtime is executed,
+- and when analysis begins.
+
+Future versions may introduce optional AI-assisted interpretation.
+
+Any future AI capabilities will continue to follow the same principles:
+
+- learner ownership
+- explicit user action
+- transparent analysis
+- complete account deletion
+- GitHub independence
+
+---
+
 # Choose Your Starting Point
 
 InnerMirror supports two project entry paths.
@@ -258,7 +306,6 @@ The Landing does **not** own:
 - Continuity Intelligence
 - Runtime Memory
 - Runtime Orchestration
-- Proprietary AI reasoning
 
 Runtime intelligence belongs exclusively to:
 
