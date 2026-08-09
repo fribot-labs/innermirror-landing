@@ -78,6 +78,58 @@ Any future AI capabilities will continue to follow the same principles:
 
 ---
 
+# Service Trust Documents
+
+InnerMirror places legal transparency before implementation.
+
+The following public documents explain how the service operates and how learner
+rights are protected.
+
+```text
+PRIVACY.md
+```
+
+Defines:
+
+- personal information processing
+- learner rights
+- retention
+- deletion
+- service transparency
+
+```text
+docs/legal/LEGAL_FOUNDATION.md
+```
+
+Defines:
+
+- legal identity of the service
+- service classification
+- MVP legal boundary
+
+```text
+docs/legal/DATA_OWNERSHIP.md
+```
+
+Defines:
+
+- ownership
+- GitHub independence
+- learner continuity
+- deletion boundary
+
+```text
+docs/legal/PERSONAL_DATA_INVENTORY.md
+```
+
+Defines:
+
+- every category of learner information
+- persistence classification
+- minimum necessary collection
+
+---
+
 # Choose Your Starting Point
 
 InnerMirror supports two project entry paths.
@@ -533,20 +585,56 @@ docs/architecture/
 
 README.md
 
-REPOSITORY_BOUNDARY.md
-
-LANDING_RESPONSIBILITY_AUDIT.md
-
-LANDING_RESPONSIBILITY_MATRIX.md
+ARCHITECTURE_GOVERNANCE.md
 
 PBL_PROJECT_DOMAIN_MODEL.md
 
 GITHUB_SNAPSHOT_INTEGRATION.md
 
-ARCHITECTURE_GOVERNANCE.md
+LANDING_RESPONSIBILITY_AUDIT.md
+
+LANDING_RESPONSIBILITY_MATRIX.md
+
+PERSISTENCE_DOMAIN_MODEL.md
+
+DATABASE_SCHEMA.md
+
+RLS_SECURITY_MODEL.md
+
+SUPABASE_MIGRATION_PLAN.md
 ```
 
 Developers should review these documents before introducing new Landing functionality.
+
+---
+
+## Legal Documentation
+
+Legal architecture is maintained separately from implementation.
+
+```text
+docs/legal/
+
+README.md
+
+LEGAL_FOUNDATION.md
+
+LEGAL_READINESS.md
+
+DATA_OWNERSHIP.md
+
+PERSONAL_DATA_INVENTORY.md
+```
+
+The legal documents define:
+
+- service classification
+- ownership
+- privacy
+- compliance
+- learner rights
+
+Implementation must remain consistent with these documents.
 
 ---
 
@@ -685,8 +773,26 @@ Client
 Authentication
 ```
 
-The learner always decides **when** analysis starts.
+---
 
-The platform defines **which repositories** are eligible for analysis.
+# Foundation Statement
 
-The Runtime determines **how** learning context is interpreted.
+InnerMirror is an online Reflection and Project Continuity service.
+
+The learner owns the project.
+
+The learner controls when analysis begins.
+
+GitHub remains independent.
+
+InnerMirror stores only the information required to provide its own service.
+
+Legal architecture defines the service.
+
+Technical architecture implements the service.
+
+Trust comes before intelligence.
+
+Ownership comes before analysis.
+
+Compliance comes before implementation.
