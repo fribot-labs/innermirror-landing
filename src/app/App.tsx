@@ -106,6 +106,9 @@ import {
 import {
   ServiceEntryNavigation,
 } from "../components/service-entry/ServiceEntryNavigation";
+import {
+  TrustLayer,
+} from "../components/trust/TrustLayer";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -1721,6 +1724,8 @@ export function App() {
   return (
     <main>
       <InnerMirrorBrand />
+
+      <TrustLayer />
 
       <ServiceEntryNavigation
         fribotLearningUrl={

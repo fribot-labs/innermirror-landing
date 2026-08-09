@@ -1,5 +1,5 @@
 import {
-    ServiceEntryCard,
+  ServiceEntryCard,
 } from "./ServiceEntryCard";
 
 import "./ServiceEntryNavigation.css";
