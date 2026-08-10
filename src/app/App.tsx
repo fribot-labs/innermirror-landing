@@ -10,9 +10,12 @@ import { deriveRuntimeRecommendationPresentation } from "../components/deriveRun
 import { GitHubLoginEntry } from "../components/github/GitHubLoginEntry";
 import { GitHubSnapshotPanel } from "../components/github/GitHubSnapshotPanel";
 import { RepositorySelector } from "../components/github/RepositorySelector";
+
 import { ProjectReflectionPanel } from "../components/project/ProjectReflectionPanel";
 import { ProjectStartPanel } from "../components/project/ProjectStartPanel";
 import { ProjectSummaryPanel } from "../components/project/ProjectSummaryPanel";
+import { ReflectionHistoryPanel } from "../components/project/ReflectionHistoryPanel";
+
 import { RuntimeNextActionPanel } from "../components/runtime-next-action/RuntimeNextActionPanel";
 import { IdentityDriftSurface } from "../components/runtime/IdentityDriftSurface";
 import { ImmediateReflectionFeedback } from "../components/runtime/ImmediateReflectionFeedback";
@@ -111,6 +114,8 @@ import {
 } from "../components/trust/TrustLayer";
 import {
   createReflection,
+  listReflectionsForCurrentUser,
+  type ReflectionRecord,
 } from "../lib/reflectionPersistence";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
@@ -187,6 +192,21 @@ export function App() {
     reflectionPersistenceError,
     setReflectionPersistenceError,
   ] = useState<string | null>(null);
+
+  const [
+    persistedReflections,
+    setPersistedReflections,
+  ] = useState<ReflectionRecord[]>([]);
+
+  const [
+    reflectionHistoryError,
+    setReflectionHistoryError,
+  ] = useState<string | null>(null);
+
+  const [
+    isLoadingReflectionHistory,
+    setIsLoadingReflectionHistory,
+  ] = useState(false);
 
   const [githubConnectionState, setGithubConnectionState] =
     useState<GitHubConnectionState>("disconnected");
@@ -764,6 +784,17 @@ export function App() {
   }, []);
 
   useEffect(() => {
+    if (authenticatedUser === null) {
+      setPersistedReflections([]);
+      setReflectionHistoryError(null);
+
+      return;
+    }
+
+    void refreshPersistedReflections();
+  }, [authenticatedUser]);
+
+  useEffect(() => {
     if (repositoryError === null) {
       return;
     }
@@ -1010,6 +1041,10 @@ export function App() {
       setGithubConnectionState("disconnected");
       setSelectedRepository(null);
 
+      setPersistedReflections([]);
+      setReflectionHistoryError(null);
+      setIsLoadingReflectionHistory(false);
+
       clearRuntimeProjectIdentity();
 
       setRuntimeProjectIdentity(
@@ -1227,6 +1262,32 @@ export function App() {
       }
     };
 
+  const refreshPersistedReflections =
+    async (): Promise<void> => {
+      setReflectionHistoryError(null);
+      setIsLoadingReflectionHistory(true);
+
+      try {
+        const reflections =
+          await listReflectionsForCurrentUser(10);
+
+        setPersistedReflections(
+          reflections
+        );
+      } catch (error) {
+        console.error(
+          "Unable to load persisted Reflections.",
+          error
+        );
+
+        setReflectionHistoryError(
+          "Unable to load saved Reflections."
+        );
+      } finally {
+        setIsLoadingReflectionHistory(false);
+      }
+    };
+
   const handleReflect = async () => {
     const trimmedContent = content.trim();
 
@@ -1268,6 +1329,8 @@ export function App() {
       if (!persisted) {
         return;
       }
+
+      void refreshPersistedReflections();
 
       if (activeProject !== null) {
         setActiveProject(
@@ -1402,6 +1465,8 @@ export function App() {
         if (!persisted) {
           return;
         }
+
+        void refreshPersistedReflections();
       }
 
       capturedSnapshot =
@@ -2025,6 +2090,41 @@ export function App() {
             }
           />
         </div>
+
+        <div ref={reflectionSectionRef}>
+          <ProjectReflectionPanel
+            project={activeProject}
+            selectedRepository={selectedRepository}
+            content={content}
+            onChangeContent={setContent}
+            onSaveThought={handleReflect}
+            onThoughtAndProjectAnalyze={
+              handleThoughtAndProjectAnalyze
+            }
+            reflectionPersistenceError={
+              reflectionPersistenceError
+            }
+            isSavingThought={isSavingThought || isLoading}
+            isCombinedAnalyzing={isCombinedAnalyzing}
+            isActionLocked={isGitHubAnalyzing}
+            saveAction={
+              projectActionGuidance.saveThought
+            }
+            combinedAction={
+              projectActionGuidance.thoughtProjectAnalyze
+            }
+          />
+        </div>
+
+        {authenticatedUser !== null ? (
+          <ReflectionHistoryPanel
+            reflections={persistedReflections}
+            isLoading={isLoadingReflectionHistory}
+            error={reflectionHistoryError}
+          />
+        ) : null}
+
+        <ProjectSummaryPanel project={activeProject} />
 
         <ProjectSummaryPanel project={activeProject} />
 
