@@ -123,7 +123,7 @@ export function RepositorySelector({
           <div className="repository-selector-list">
             {visibleRepositories.map((repository) => (
               <RepositoryCard
-                key={`${repository.owner}/${repository.name}`}
+                key={repository.repositoryId}
                 repository={repository}
                 isSelected={isSameRepository(
                   selectedRepository,
@@ -143,7 +143,7 @@ export function RepositorySelector({
               <div className="repository-selector-list">
                 {hiddenRepositories.map((repository) => (
                   <RepositoryCard
-                    key={`${repository.owner}/${repository.name}`}
+                    key={repository.repositoryId}
                     repository={repository}
                     isSelected={isSameRepository(
                       selectedRepository,
@@ -215,8 +215,8 @@ function isSameRepository(
   repository: GitHubRepositorySummary
 ): boolean {
   return (
-    selectedRepository?.owner === repository.owner &&
-    selectedRepository?.name === repository.name
+    selectedRepository?.repositoryId ===
+    repository.repositoryId
   );
 }
 

@@ -1,15 +1,15 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import {
-    createRuntimeProjectContext,
+  createRuntimeProjectContext,
 } from "../createRuntimeProjectContext";
 
 import type {
-    RuntimeProjectIdentity,
+  RuntimeProjectIdentity,
 } from "../../project-identity/runtimeProjectIdentityTypes";
 
 function createProjectIdentity(
@@ -26,6 +26,9 @@ function createProjectIdentity(
       "general",
 
     repository: {
+      repositoryId:
+          "1001",
+
       owner:
         "wookjin-chung",
 
@@ -132,6 +135,9 @@ describe(
               "github:fribot-labs:fribot-learning",
 
             repository: {
+              repositoryId:
+                "1002",
+
               owner:
                 "fribot-labs",
 
@@ -205,6 +211,9 @@ describe(
               "github:fribot-labs:innermirror-landing",
 
             repository: {
+              repositoryId:
+                "1003",
+
               owner:
                 "FRIBOT-LABS",
 

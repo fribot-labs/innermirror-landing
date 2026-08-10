@@ -17,12 +17,23 @@ type UseGitHubRepositoriesOptions = {
   githubSessionId: string | null;
 };
 
+type RuntimeGitHubRepository = {
+  id: number;
+  owner: string;
+  name: string;
+  fullName: string;
+  defaultBranch: string;
+  private: boolean;
+  htmlUrl: string;
+  updatedAt: string;
+};
+
 type GitHubRepositoriesResponse = {
   ok: boolean;
 
   data?: {
     repositories:
-      GitHubRepositorySummary[];
+      RuntimeGitHubRepository[];
   };
 
   error?: {
@@ -120,9 +131,14 @@ export function useGitHubRepositories({
           );
         }
 
+        const normalizedRepositories =
+          result.data.repositories.map(
+            toGitHubRepositorySummary
+          );
+
         const sortedRepositories =
           [
-            ...result.data.repositories,
+            ...normalizedRepositories,
           ].sort(
             (a, b) =>
               getRepositoryUpdatedTimestamp(
@@ -204,4 +220,58 @@ function getRepositoryUpdatedTimestamp(
   )
     ? 0
     : timestamp;
+}
+
+function toGitHubRepositorySummary(
+  repository:
+    RuntimeGitHubRepository
+): GitHubRepositorySummary {
+  if (
+    !Number.isSafeInteger(
+      repository.id
+    ) ||
+    repository.id <= 0
+  ) {
+    throw new Error(
+      "GitHub repository response is missing a stable repository identity."
+    );
+  }
+
+  const owner =
+    repository.owner.trim();
+
+  const name =
+    repository.name.trim();
+
+  if (
+    owner.length === 0 ||
+    name.length === 0
+  ) {
+    throw new Error(
+      "GitHub repository response included invalid repository metadata."
+    );
+  }
+
+  return {
+    repositoryId:
+      String(repository.id),
+
+    owner,
+    name,
+
+    fullName:
+      repository.fullName,
+
+    defaultBranch:
+      repository.defaultBranch,
+
+    private:
+      repository.private,
+
+    htmlUrl:
+      repository.htmlUrl,
+
+    updatedAt:
+      repository.updatedAt,
+  };
 }

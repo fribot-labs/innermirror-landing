@@ -1,8 +1,8 @@
 import type {
-    RuntimeProjectIdentity,
-    RuntimeProjectKind,
-    RuntimeProjectRepositoryIdentity,
-    RuntimeProjectSource,
+  RuntimeProjectIdentity,
+  RuntimeProjectKind,
+  RuntimeProjectRepositoryIdentity,
+  RuntimeProjectSource,
 } from "./runtimeProjectIdentityTypes";
 
 const RUNTIME_PROJECT_IDENTITY_STORAGE_KEY =
@@ -152,6 +152,11 @@ function normalizeRuntimeProjectRepositoryIdentity(
     );
   }
 
+  const repositoryId =
+    normalizeRepositoryId(
+      value.repositoryId
+    );
+
   const owner =
     requireNonEmptyString(
       value.owner,
@@ -194,6 +199,7 @@ function normalizeRuntimeProjectRepositoryIdentity(
   }
 
   return {
+    repositoryId,
     owner,
     name,
     fullName:
@@ -355,4 +361,40 @@ function canUseLocalStorage(): boolean {
     typeof window.localStorage !==
       "undefined"
   );
+}
+
+function normalizeRepositoryId(
+  value: unknown
+): string {
+  const repositoryId =
+    requireNonEmptyString(
+      value,
+      "repository.repositoryId"
+    );
+
+  if (
+    !/^\d+$/.test(
+      repositoryId
+    )
+  ) {
+    throw new Error(
+      "Stored Runtime Project Identity repository.repositoryId must be a valid GitHub repository ID."
+    );
+  }
+
+  const numericRepositoryId =
+    Number(repositoryId);
+
+  if (
+    !Number.isSafeInteger(
+      numericRepositoryId
+    ) ||
+    numericRepositoryId <= 0
+  ) {
+    throw new Error(
+      "Stored Runtime Project Identity repository.repositoryId must be a positive safe integer."
+    );
+  }
+
+  return repositoryId;
 }
