@@ -122,3 +122,46 @@ export async function listReflectionsByProject(
 
   return (data as ReflectionRow[]).map(toReflectionRecord);
 }
+
+export async function listReflectionsForCurrentUser(
+  limit = 10
+): Promise<ReflectionRecord[]> {
+  const { data: authData, error: authError } =
+    await supabaseClient.auth.getUser();
+
+  if (authError) {
+    throw authError;
+  }
+
+  if (!authData.user) {
+    throw new Error(
+      "An authenticated user is required to read reflections.",
+    );
+  }
+
+  const { data, error } = await supabaseClient
+    .from("reflections")
+    .select(
+      `
+        id,
+        user_id,
+        project_id,
+        content,
+        source,
+        created_at,
+        updated_at
+      `
+    )
+    .order("created_at", {
+      ascending: false,
+    })
+    .limit(limit);
+
+  if (error) {
+    throw error;
+  }
+
+  return (data as ReflectionRow[]).map(
+    toReflectionRecord
+  );
+}
