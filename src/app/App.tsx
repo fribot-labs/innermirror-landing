@@ -2091,31 +2091,6 @@ export function App() {
           />
         </div>
 
-        <div ref={reflectionSectionRef}>
-          <ProjectReflectionPanel
-            project={activeProject}
-            selectedRepository={selectedRepository}
-            content={content}
-            onChangeContent={setContent}
-            onSaveThought={handleReflect}
-            onThoughtAndProjectAnalyze={
-              handleThoughtAndProjectAnalyze
-            }
-            reflectionPersistenceError={
-              reflectionPersistenceError
-            }
-            isSavingThought={isSavingThought || isLoading}
-            isCombinedAnalyzing={isCombinedAnalyzing}
-            isActionLocked={isGitHubAnalyzing}
-            saveAction={
-              projectActionGuidance.saveThought
-            }
-            combinedAction={
-              projectActionGuidance.thoughtProjectAnalyze
-            }
-          />
-        </div>
-
         {authenticatedUser !== null ? (
           <ReflectionHistoryPanel
             reflections={persistedReflections}
@@ -2123,8 +2098,6 @@ export function App() {
             error={reflectionHistoryError}
           />
         ) : null}
-
-        <ProjectSummaryPanel project={activeProject} />
 
         <ProjectSummaryPanel project={activeProject} />
 
