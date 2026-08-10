@@ -6,6 +6,7 @@ export type RuntimeProjectKind =
   | "pbl";
 
 export type RuntimeProjectRepositoryIdentity = {
+  repositoryId: string;
   owner: string;
   name: string;
   fullName: string;

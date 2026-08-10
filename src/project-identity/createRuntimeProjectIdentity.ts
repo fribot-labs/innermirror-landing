@@ -1,10 +1,10 @@
 import type {
-    GitHubRepositorySummary,
+  GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
 
 import type {
-    RuntimeProjectIdentity,
-    RuntimeProjectKind,
+  RuntimeProjectIdentity,
+  RuntimeProjectKind,
 } from "./runtimeProjectIdentityTypes";
 
 export type CreateRuntimeProjectIdentityInput = {
@@ -24,6 +24,9 @@ export function createRuntimeProjectIdentity({
   createdAt =
     new Date().toISOString(),
 }: CreateRuntimeProjectIdentityInput): RuntimeProjectIdentity {
+  const repositoryId =
+    repository.repositoryId.trim();
+
   const owner =
     repository.owner.trim();
 
@@ -31,11 +34,12 @@ export function createRuntimeProjectIdentity({
     repository.name.trim();
 
   if (
+    repositoryId.length === 0 ||
     owner.length === 0 ||
     name.length === 0
   ) {
     throw new Error(
-        "A valid GitHub repository is required to create a Runtime Project Identity."
+      "A stable GitHub repository identity is required to create a Runtime Project Identity."
     );
   }
 
@@ -59,15 +63,6 @@ export function createRuntimeProjectIdentity({
       htmlUrl:
         repository.htmlUrl,
     });
-
-  if (
-    owner.length === 0 ||
-    name.length === 0
-  ) {
-    throw new Error(
-      "A valid GitHub repository is required to create a Runtime Project Identity."
-    );
-  }
 
   const normalizedCreatedAt =
     new Date(createdAt);
@@ -95,6 +90,7 @@ export function createRuntimeProjectIdentity({
     kind,
 
     repository: {
+      repositoryId,
       owner,
       name,
       fullName,

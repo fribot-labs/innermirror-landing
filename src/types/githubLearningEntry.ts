@@ -23,6 +23,8 @@ export type GitHubConnectionState =
  * used by the Landing UI.
  */
 export type GitHubRepositorySummary = {
+  repositoryId: string;
+
   owner: string;
   name: string;
   defaultBranch?: string;
