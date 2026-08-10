@@ -21,6 +21,8 @@ type ProjectReflectionPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
   content: string;
 
+  reflectionPersistenceError?: string | null;
+
   onChangeContent: (value: string) => void;
   onSaveThought: () => void;
   onThoughtAndProjectAnalyze: () => void;
@@ -37,6 +39,7 @@ export function ProjectReflectionPanel({
   project,
   selectedRepository,
   content,
+  reflectionPersistenceError = null,
   onChangeContent,
   onSaveThought,
   onThoughtAndProjectAnalyze,
@@ -214,7 +217,11 @@ export function ProjectReflectionPanel({
         </div>
       </div>
 
-      {!hasActiveProject ? (
+      {reflectionPersistenceError !== null ? (
+        <small className="project-reflection-panel-status">
+          {reflectionPersistenceError}
+        </small>
+      ) : !hasActiveProject ? (
         <small className="project-reflection-panel-status">
           Start the project before analyzing a Reflection.
         </small>

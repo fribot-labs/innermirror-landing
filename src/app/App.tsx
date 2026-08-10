@@ -109,6 +109,9 @@ import {
 import {
   TrustLayer,
 } from "../components/trust/TrustLayer";
+import {
+  createReflection,
+} from "../lib/reflectionPersistence";
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -179,6 +182,11 @@ export function App() {
     useRef<"idle" | "creating" | "ready">("idle");
 
   const [content, setContent] = useState("");
+
+  const [
+    reflectionPersistenceError,
+    setReflectionPersistenceError,
+  ] = useState<string | null>(null);
 
   const [githubConnectionState, setGithubConnectionState] =
     useState<GitHubConnectionState>("disconnected");
@@ -1192,6 +1200,33 @@ export function App() {
     setActiveProject(updatedProject);
   };
 
+  const persistReflectionBeforeRuntime =
+    async (
+      reflectionContent: string
+    ): Promise<boolean> => {
+      setReflectionPersistenceError(null);
+
+      try {
+        await createReflection({
+          content: reflectionContent,
+          source: "landing",
+        });
+
+        return true;
+      } catch (error) {
+        console.error(
+          "Unable to persist Reflection before Runtime analysis.",
+          error
+        );
+
+        setReflectionPersistenceError(
+          "Unable to save the Reflection. Analysis was not started."
+        );
+
+        return false;
+      }
+    };
+
   const handleReflect = async () => {
     const trimmedContent = content.trim();
 
@@ -1202,9 +1237,38 @@ export function App() {
       return;
     }
 
+    setReflectionPersistenceError(null);
     setProjectActionState("saving-thought");
 
     try {
+      resetMerge();
+
+      if (isLocalOnlyMode) {
+        saveLocalReflection(trimmedContent);
+
+        if (activeProject !== null) {
+          setActiveProject(
+            addPblReflection({
+              project: activeProject,
+              content: trimmedContent,
+            })
+          );
+        }
+
+        setContent("");
+
+        return;
+      }
+
+      const persisted =
+        await persistReflectionBeforeRuntime(
+          trimmedContent
+        );
+
+      if (!persisted) {
+        return;
+      }
+
       if (activeProject !== null) {
         setActiveProject(
           addPblReflection({
@@ -1214,66 +1278,62 @@ export function App() {
         );
       }
 
-      resetMerge();
-
-      if (isLocalOnlyMode) {
-        saveLocalReflection(trimmedContent);
-        setContent("");
-
-        return;
-      }
-
       setRuntimeV2Response(null);
 
       try {
         if (activeProject !== null) {
-          const payload = createRuntimeContractV2Payload({
-            reflectionText:
-              trimmedContent,
+          const payload =
+            createRuntimeContractV2Payload({
+              reflectionText:
+                trimmedContent,
 
-            project: {
-              projectId:
-                runtimeProjectIdentity?.projectId ??
-                activeProject.id,
+              project: {
+                projectId:
+                  runtimeProjectIdentity?.projectId ??
+                  activeProject.id,
 
-              name:
-                activeProject.name,
+                name:
+                  activeProject.name,
 
-              currentStep:
-                resolvedCurrentStep,
-            },
+                currentStep:
+                  resolvedCurrentStep,
+              },
 
-            repository: {
-              owner:
-                activeProject.repository.owner,
+              repository: {
+                owner:
+                  activeProject.repository.owner,
 
-              name:
-                activeProject.repository.name,
+                name:
+                  activeProject.repository.name,
 
-              defaultBranch:
-                activeProject.repository.defaultBranch,
-            },
+                defaultBranch:
+                  activeProject.repository.defaultBranch,
+              },
 
-            projectRecommendationInput:
-              runtimeProjectRecommendationInput ??
-              undefined,
+              projectRecommendationInput:
+                runtimeProjectRecommendationInput ??
+                undefined,
 
-            learningContext: {
-              currentStep:
-                resolvedCurrentStep,
+              learningContext: {
+                currentStep:
+                  resolvedCurrentStep,
 
-              learnerLevel:
-                "junior",
-            },
+                learnerLevel:
+                  "junior",
+              },
 
-            trigger:
-              "reflection",
-          });
+              trigger:
+                "reflection",
+            });
 
           const runtimeResponse =
-            await analyzeRuntimeV2(payload);
+            await analyzeRuntimeV2(
+              payload
+            );
 
-          setRuntimeV2Response(runtimeResponse);
+          setRuntimeV2Response(
+            runtimeResponse
+          );
         }
       } catch (error) {
         console.error(
@@ -1282,7 +1342,9 @@ export function App() {
         );
       }
 
-      await submitReflection(trimmedContent);
+      await submitReflection(
+        trimmedContent
+      );
 
       setContent("");
 
@@ -1290,9 +1352,12 @@ export function App() {
         void serverMemoryTimeline.refresh();
       }, 800);
 
-      if (runtimeUxMode.canUseStreamingMerge) {
+      if (
+        runtimeUxMode.canUseStreamingMerge
+      ) {
         void startMerge({
-          content: trimmedContent,
+          content:
+            trimmedContent,
         });
       }
     } finally {
@@ -1326,50 +1391,21 @@ export function App() {
     let capturedSnapshot = null;
 
     try {
-      capturedSnapshot = await captureSnapshot({
-        owner: activeProject.repository.owner,
-        name: activeProject.repository.name,
-        defaultBranch: activeProject.repository.defaultBranch,
-      });
-
-      if (capturedSnapshot === null) {
-        return;
-      }
-
-      setLatestCapturedSnapshot(capturedSnapshot);
-
       if (includeThought) {
-        setActiveProject((currentProject) => {
-          if (currentProject === null) {
-            return currentProject;
-          }
+        setReflectionPersistenceError(null);
 
-          return addPblReflection({
-            project: currentProject,
-            content: trimmedContent,
-          });
-        });
+        const persisted =
+          await persistReflectionBeforeRuntime(
+            trimmedContent
+          );
+
+        if (!persisted) {
+          return;
+        }
       }
 
-      const payload = createRuntimeContractV2Payload({
-        reflectionText:
-          trimmedContent.length > 0
-            ? trimmedContent
-            : undefined,
-
-        project: {
-          projectId:
-            runtimeProjectIdentity?.projectId ??
-            activeProject.id,
-
-          name:
-            activeProject.name,
-
-          currentStep:
-            resolvedCurrentStep,
-        },
-
-        repository: {
+      capturedSnapshot =
+        await captureSnapshot({
           owner:
             activeProject.repository.owner,
 
@@ -1378,66 +1414,132 @@ export function App() {
 
           defaultBranch:
             activeProject.repository.defaultBranch,
-        },
+        });
 
-        githubSnapshot:
-          capturedSnapshot,
+      if (capturedSnapshot === null) {
+        return;
+      }
 
-        projectRecommendationInput:
-          runtimeProjectRecommendationInput ??
-          undefined,
+      setLatestCapturedSnapshot(
+        capturedSnapshot
+      );
 
-        learningContext: {
-          currentStep:
-            resolvedCurrentStep,
+      if (includeThought) {
+        setActiveProject(
+          (currentProject) => {
+            if (
+              currentProject === null
+            ) {
+              return currentProject;
+            }
 
-          learnerLevel:
-            "junior",
-        },
+            return addPblReflection({
+              project:
+                currentProject,
 
-        projectHistory: {
-          events:
-            projectAnalysisMemory.events
-              .slice(0, 5)
-              .map((event) => ({
-                source:
-                  event.source,
+              content:
+                trimmedContent,
+            });
+          }
+        );
+      }
 
-                title:
-                  event.title,
+      const payload =
+        createRuntimeContractV2Payload({
+          reflectionText:
+            trimmedContent.length > 0
+              ? trimmedContent
+              : undefined,
 
-                summary:
-                  event.summary,
+          project: {
+            projectId:
+              runtimeProjectIdentity
+                ?.projectId ??
+              activeProject.id,
 
-                repositoryName:
-                  event.repositoryName,
+            name:
+              activeProject.name,
 
-                commitCount:
-                  event.commitCount,
+            currentStep:
+              resolvedCurrentStep,
+          },
 
-                pullRequestCount:
-                  event.pullRequestCount,
+          repository: {
+            owner:
+              activeProject.repository.owner,
 
-                tags:
-                  event.tags,
+            name:
+              activeProject.repository.name,
 
-                createdAt:
-                  event.createdAt,
-              })),
-        },
+            defaultBranch:
+              activeProject.repository
+                .defaultBranch,
+          },
 
-        trigger:
-          trimmedContent.length > 0
-            ? "combined"
-            : "github-snapshot",
-      });
+          githubSnapshot:
+            capturedSnapshot,
 
-      const runtimeResponse = await analyzeRuntimeV2(payload);
+          projectRecommendationInput:
+            runtimeProjectRecommendationInput ??
+            undefined,
 
-      setRuntimeV2Response(runtimeResponse);
+          learningContext: {
+            currentStep:
+              resolvedCurrentStep,
+
+            learnerLevel:
+              "junior",
+          },
+
+          projectHistory: {
+            events:
+              projectAnalysisMemory.events
+                .slice(0, 5)
+                .map((event) => ({
+                  source:
+                    event.source,
+
+                  title:
+                    event.title,
+
+                  summary:
+                    event.summary,
+
+                  repositoryName:
+                    event.repositoryName,
+
+                  commitCount:
+                    event.commitCount,
+
+                  pullRequestCount:
+                    event.pullRequestCount,
+
+                  tags:
+                    event.tags,
+
+                  createdAt:
+                    event.createdAt,
+                })),
+          },
+
+          trigger:
+            trimmedContent.length > 0
+              ? "combined"
+              : "github-snapshot",
+        });
+
+      const runtimeResponse =
+        await analyzeRuntimeV2(
+          payload
+        );
+
+      setRuntimeV2Response(
+        runtimeResponse
+      );
 
       projectAnalysisMemory.saveEvent({
-        id: crypto.randomUUID(),
+        id:
+          crypto.randomUUID(),
 
         source:
           trimmedContent.length > 0
@@ -1449,38 +1551,55 @@ export function App() {
             ? "Thought and project analyzed"
             : "Project analyzed",
 
-        summary: runtimeResponse.data.summary.text,
+        summary:
+          runtimeResponse.data.summary.text,
 
-        projectName: activeProject.name,
+        projectName:
+          activeProject.name,
 
         repositoryName:
           `${activeProject.repository.owner}/${activeProject.repository.name}`,
 
         commitCount:
-          capturedSnapshot.recentCommits.length,
+          capturedSnapshot.recentCommits
+            .length,
 
         pullRequestCount:
-          capturedSnapshot.recentPullRequests.length,
+          capturedSnapshot.recentPullRequests
+            .length,
 
-        createdAt: new Date().toISOString(),
+        createdAt:
+          new Date().toISOString(),
 
         tags:
           trimmedContent.length > 0
-            ? ["thought", "project", "github"]
-            : ["project", "github"],
+            ? [
+                "thought",
+                "project",
+                "github",
+              ]
+            : [
+                "project",
+                "github",
+              ],
       });
 
-      if (trimmedContent.length > 0) {
+      if (
+        trimmedContent.length > 0
+      ) {
         setContent("");
       }
-      
     } catch (error) {
       const message =
         error instanceof Error
           ? error.message
           : "GitHub Analyze request failed.";
 
-      if (message.includes("GitHub session expired")) {
+      if (
+        message.includes(
+          "GitHub session expired"
+        )
+      ) {
         clearRuntimeGitHubSession(
           "expired"
         );
@@ -1496,7 +1615,9 @@ export function App() {
         setSelectedRepository(null);
         setActiveProject(null);
         resetSnapshot();
-        setLatestCapturedSnapshot(null);
+        setLatestCapturedSnapshot(
+          null
+        );
       }
 
       console.error(
@@ -1504,7 +1625,9 @@ export function App() {
         error
       );
     } finally {
-      setProjectActionState("idle");
+      setProjectActionState(
+        "idle"
+      );
     }
   };
 
@@ -1887,6 +2010,9 @@ export function App() {
             onSaveThought={handleReflect}
             onThoughtAndProjectAnalyze={
               handleThoughtAndProjectAnalyze
+            }
+            reflectionPersistenceError={
+              reflectionPersistenceError
             }
             isSavingThought={isSavingThought || isLoading}
             isCombinedAnalyzing={isCombinedAnalyzing}
