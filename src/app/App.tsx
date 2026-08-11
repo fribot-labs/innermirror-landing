@@ -113,10 +113,14 @@ import {
   TrustLayer,
 } from "../components/trust/TrustLayer";
 import {
+  ensureProjectForRepository,
+} from "../lib/projectPersistence";
+import {
   createReflection,
   listReflectionsForCurrentUser,
   type ReflectionRecord,
 } from "../lib/reflectionPersistence";
+
 import { useRuntimeActionHistory } from "../runtime-action-history/useRuntimeActionHistory";
 import { analyzeRuntimeV2 } from "../runtime-adapter/analyzeRuntimeV2";
 import { createRuntimeContractV2Payload } from "../runtime-adapter/createRuntimeContractV2Payload";
@@ -276,6 +280,13 @@ export function App() {
 
   const [selectedRepository, setSelectedRepository] =
     useState<GitHubRepositorySummary | null>(null);
+
+  const [
+    projectPersistenceError,
+    setProjectPersistenceError,
+  ] = useState<string | null>(
+    null
+  );
 
   const [
     runtimeProjectIdentity,
@@ -467,10 +478,10 @@ export function App() {
     const restoredRepository =
       availableRepositories.find(
         (repository) =>
-          repository.owner.toLowerCase() ===
-            runtimeProjectIdentity.repository.owner.toLowerCase() &&
-          repository.name.toLowerCase() ===
-            runtimeProjectIdentity.repository.name.toLowerCase()
+          repository.repositoryId ===
+          runtimeProjectIdentity
+            .repository
+            .repositoryId
       );
 
     if (restoredRepository === undefined) {
@@ -816,6 +827,7 @@ export function App() {
     );
 
     setSelectedRepository(null);
+    setProjectPersistenceError(null);
     setActiveProject(null);
     setLatestCapturedSnapshot(null);
     resetSnapshot();
@@ -1041,6 +1053,8 @@ export function App() {
       setGithubConnectionState("disconnected");
       setSelectedRepository(null);
 
+      setProjectPersistenceError(null);
+
       setPersistedReflections([]);
       setReflectionHistoryError(null);
       setIsLoadingReflectionHistory(false);
@@ -1089,15 +1103,33 @@ export function App() {
     repository: GitHubRepositorySummary
   ) => {
     const isSameRepository =
-      selectedRepository?.owner ===
-        repository.owner &&
-      selectedRepository?.name ===
-        repository.name;
+      selectedRepository?.repositoryId ===
+      repository.repositoryId;
 
     if (isSameRepository) {
       return;
     }
 
+    setProjectPersistenceError(
+      null
+    );
+
+    try {
+      await ensureProjectForRepository(
+        repository
+      );
+    } catch (error) {
+      console.error(
+        "Unable to persist canonical project.",
+        error
+      );
+
+      setProjectPersistenceError(
+        "Unable to establish the InnerMirror project record."
+      );
+
+      return;
+    }
     const nextRuntimeProjectIdentity =
       createRuntimeProjectIdentity({
         repository,
@@ -1678,6 +1710,7 @@ export function App() {
         );
 
         setSelectedRepository(null);
+        setProjectPersistenceError(null);
         setActiveProject(null);
         resetSnapshot();
         setLatestCapturedSnapshot(
@@ -2026,6 +2059,12 @@ export function App() {
           </div>
         ) : null}
 
+        {projectPersistenceError !== null ? (
+          <div className="github-repository-status github-repository-status-error">
+            {projectPersistenceError}
+          </div>
+        ) : null}
+
         <RepositoryMetadataPanel
           metadata={
             runtimeProjectMetadata
@@ -2295,11 +2334,11 @@ function mergeGitHubRepositories(
     }
 
     const repositoryKey =
-      `${repository.owner}/${repository.name}`
-        .trim()
-        .toLowerCase();
+      repository.repositoryId.trim();
 
-    if (repositoryKey === "/") {
+    if (
+      repositoryKey.length === 0
+    ) {
       continue;
     }
 
