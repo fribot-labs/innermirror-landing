@@ -85,6 +85,17 @@ export async function createReflection(
 export async function listReflectionsByProject(
   projectId: string,
 ): Promise<ReflectionRecord[]> {
+  const normalizedProjectId =
+    projectId.trim();
+
+  if (
+    normalizedProjectId.length === 0
+  ) {
+    throw new Error(
+      "A canonical project identity is required to read project Reflections."
+    );
+  }
+
   const { data: authData, error: authError } =
     await supabaseClient.auth.getUser();
 
@@ -111,7 +122,10 @@ export async function listReflectionsByProject(
         updated_at
       `,
     )
-    .eq("project_id", projectId)
+    .eq(
+      "project_id",
+      normalizedProjectId
+    )
     .order("created_at", {
       ascending: false,
     });

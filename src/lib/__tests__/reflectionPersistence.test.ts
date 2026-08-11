@@ -1,17 +1,18 @@
 import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 import {
-    createReflection,
+  createReflection,
+  listReflectionsByProject,
 } from "../reflectionPersistence";
 
 import {
-    supabaseClient,
+  supabaseClient,
 } from "../supabaseClient";
 
 
@@ -519,6 +520,257 @@ describe(
           })
         ).rejects.toBe(
           insertError
+        );
+      }
+    );
+
+    it(
+      "reads Reflections scoped to the canonical project identity",
+      async () => {
+        mockAuthenticatedUser();
+
+        const order =
+          vi.fn().mockResolvedValue({
+            data: [
+              createReflectionRow(),
+            ],
+            error:
+              null,
+          });
+
+        const eq =
+          vi.fn().mockReturnValue({
+            order,
+          });
+
+        const select =
+          vi.fn().mockReturnValue({
+            eq,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          select,
+        } as never);
+
+        const result =
+          await listReflectionsByProject(
+            PROJECT_ID
+          );
+
+        expect(
+          eq
+        ).toHaveBeenCalledWith(
+          "project_id",
+          PROJECT_ID
+        );
+
+        expect(
+          result
+        ).toHaveLength(
+          1
+        );
+
+        expect(
+          result[0]?.projectId
+        ).toBe(
+          PROJECT_ID
+        );
+      }
+    );
+
+    it(
+      "trims the canonical project identity before querying",
+      async () => {
+        mockAuthenticatedUser();
+
+        const order =
+          vi.fn().mockResolvedValue({
+            data: [],
+            error:
+              null,
+          });
+
+        const eq =
+          vi.fn().mockReturnValue({
+            order,
+          });
+
+        const select =
+          vi.fn().mockReturnValue({
+            eq,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          select,
+        } as never);
+
+        await listReflectionsByProject(
+          `  ${PROJECT_ID}  `
+        );
+
+        expect(
+          eq
+        ).toHaveBeenCalledWith(
+          "project_id",
+          PROJECT_ID
+        );
+      }
+    );
+
+    it(
+      "requests project Reflections in descending creation order",
+      async () => {
+        mockAuthenticatedUser();
+
+        const order =
+          vi.fn().mockResolvedValue({
+            data: [],
+            error:
+              null,
+          });
+
+        const eq =
+          vi.fn().mockReturnValue({
+            order,
+          });
+
+        const select =
+          vi.fn().mockReturnValue({
+            eq,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          select,
+        } as never);
+
+        await listReflectionsByProject(
+          PROJECT_ID
+        );
+
+        expect(
+          order
+        ).toHaveBeenCalledWith(
+          "created_at",
+          {
+            ascending:
+              false,
+          }
+        );
+      }
+    );
+
+    it(
+      "rejects an empty canonical project identity before querying Supabase",
+      async () => {
+        const getUserSpy =
+          vi.spyOn(
+            supabaseClient.auth,
+            "getUser"
+          );
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          listReflectionsByProject(
+            "   "
+          )
+        ).rejects.toThrow(
+          "A canonical project identity is required to read project Reflections."
+        );
+
+        expect(
+          getUserSpy
+        ).not.toHaveBeenCalled();
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects unauthenticated project Reflection reads",
+      async () => {
+        vi.spyOn(
+          supabaseClient.auth,
+          "getUser"
+        ).mockImplementation(
+          async () => ({
+            data: {
+              user:
+                null,
+            },
+
+            error:
+              null,
+          } as never)
+        );
+
+        await expect(
+          listReflectionsByProject(
+            PROJECT_ID
+          )
+        ).rejects.toThrow(
+          "An authenticated user is required to read reflections."
+        );
+      }
+    );
+
+    it(
+      "propagates project Reflection query errors",
+      async () => {
+        mockAuthenticatedUser();
+
+        const queryError =
+          new Error(
+            "Project Reflection query failed."
+          );
+
+        const order =
+          vi.fn().mockResolvedValue({
+            data:
+              null,
+
+            error:
+              queryError,
+          });
+
+        const eq =
+          vi.fn().mockReturnValue({
+            order,
+          });
+
+        const select =
+          vi.fn().mockReturnValue({
+            eq,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          select,
+        } as never);
+
+        await expect(
+          listReflectionsByProject(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          queryError
         );
       }
     );
