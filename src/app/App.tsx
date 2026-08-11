@@ -1274,7 +1274,25 @@ export function App() {
       setReflectionPersistenceError(null);
 
       try {
+        let projectId:
+          string | null =
+          null;
+
+        if (
+          selectedRepository !==
+          null
+        ) {
+          const canonicalProject =
+            await ensureProjectForRepository(
+              selectedRepository
+            );
+
+          projectId =
+            canonicalProject.id;
+        }
+
         await createReflection({
+          projectId,
           content: reflectionContent,
           source: "landing",
         });
