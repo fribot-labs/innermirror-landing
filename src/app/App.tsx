@@ -117,6 +117,7 @@ import {
 } from "../lib/projectPersistence";
 import {
   createReflection,
+  listReflectionsByProject,
   listReflectionsForCurrentUser,
   type ReflectionRecord,
 } from "../lib/reflectionPersistence";
@@ -795,15 +796,11 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (authenticatedUser === null) {
-      setPersistedReflections([]);
-      setReflectionHistoryError(null);
-
-      return;
-    }
-
     void refreshPersistedReflections();
-  }, [authenticatedUser]);
+  }, [
+    authenticatedUser,
+    selectedRepository,
+  ]);
 
   useEffect(() => {
     if (repositoryError === null) {
@@ -1110,6 +1107,8 @@ export function App() {
       return;
     }
 
+    setPersistedReflections([]);
+
     setProjectPersistenceError(
       null
     );
@@ -1314,12 +1313,59 @@ export function App() {
 
   const refreshPersistedReflections =
     async (): Promise<void> => {
-      setReflectionHistoryError(null);
-      setIsLoadingReflectionHistory(true);
+      if (
+        authenticatedUser ===
+        null
+      ) {
+        setPersistedReflections(
+          []
+        );
+
+        setReflectionHistoryError(
+          null
+        );
+
+        setIsLoadingReflectionHistory(
+          false
+        );
+
+        return;
+      }
+
+      setReflectionHistoryError(
+        null
+      );
+
+      setIsLoadingReflectionHistory(
+        true
+      );
 
       try {
+        if (
+          selectedRepository !==
+          null
+        ) {
+          const canonicalProject =
+            await ensureProjectForRepository(
+              selectedRepository
+            );
+
+          const reflections =
+            await listReflectionsByProject(
+              canonicalProject.id
+            );
+
+          setPersistedReflections(
+            reflections
+          );
+
+          return;
+        }
+
         const reflections =
-          await listReflectionsForCurrentUser(10);
+          await listReflectionsForCurrentUser(
+            10
+          );
 
         setPersistedReflections(
           reflections
@@ -1330,11 +1376,15 @@ export function App() {
           error
         );
 
+        setPersistedReflections([]);
+
         setReflectionHistoryError(
           "Unable to load saved Reflections."
         );
       } finally {
-        setIsLoadingReflectionHistory(false);
+        setIsLoadingReflectionHistory(
+          false
+        );
       }
     };
 
