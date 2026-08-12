@@ -46,9 +46,13 @@ import type {
 } from "../github/runtimeGitHubSessionTypes";
 import { useGitHubRepositories } from "../github/useGitHubRepositories";
 import { useGitHubSnapshot } from "../github/useGitHubSnapshot";
+
 import {
   createRuntimeProjectIdentity,
 } from "../project-identity/createRuntimeProjectIdentity";
+import {
+  createCanonicalProjectState,
+} from "../project-state/createCanonicalProjectState";
 
 import {
   clearRuntimeProjectIdentity,
@@ -128,6 +132,7 @@ import {
   ensureProjectForRepository,
   markProjectStarted,
   updateProjectCurrentFocus,
+  type ProjectRecord,
 } from "../lib/projectPersistence";
 
 import {
@@ -472,6 +477,25 @@ export function App() {
         isAnyProjectActionRunning,
     });
 
+  const applyCanonicalProjectState =
+    (
+      project:
+        ProjectRecord
+    ): void => {
+      const canonicalState =
+        createCanonicalProjectState(
+          project
+        );
+
+      setIsCanonicalProjectStarted(
+        canonicalState.isStarted
+      );
+
+      setCurrentStep(
+        canonicalState.currentFocus
+      );
+    };
+
   const loadCanonicalProjectLifecycleHistory =
     async (
       projectId: string
@@ -571,9 +595,8 @@ export function App() {
             return;
           }
 
-          setIsCanonicalProjectStarted(
-            canonicalProject.startedAt !==
-              null
+          applyCanonicalProjectState(
+            canonicalProject
           );
 
           await loadCanonicalProjectLifecycleHistory(
@@ -1246,9 +1269,8 @@ export function App() {
           repository
         );
 
-      setIsCanonicalProjectStarted(
-        canonicalProject.startedAt !==
-          null
+      applyCanonicalProjectState(
+        canonicalProject
       );
 
       await loadCanonicalProjectLifecycleHistory(
@@ -1353,7 +1375,6 @@ export function App() {
     );
 
     setActiveProject(null);
-    setCurrentStep("");
     resetSnapshot();
     setLatestCapturedSnapshot(null);
     setRuntimeV2Response(null);
@@ -1490,8 +1511,8 @@ export function App() {
         return;
       }
 
-      setIsCanonicalProjectStarted(
-        true
+      applyCanonicalProjectState(
+        focusedProject
       );
 
       if (wasLocalProjectMissing) {
@@ -1598,6 +1619,10 @@ export function App() {
 
       return;
     }
+
+    applyCanonicalProjectState(
+      focusedProject
+    );
 
     const updatedProject =
       updatePblProjectFocus({
