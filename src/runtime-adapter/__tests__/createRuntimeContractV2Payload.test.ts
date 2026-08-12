@@ -13,12 +13,17 @@ import type {
 } from "../../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
 
 import type {
+  RuntimeProjectHistoryInputV1,
+} from "../../project-history-runtime/projectHistoryRuntimeContractTypes";
+
+import type {
   GitHubSnapshot,
 } from "../../types/githubSnapshot";
 
 import type {
   RuntimeProjectHistory,
 } from "../../types/runtimeContractV2";
+
 
 function createProject() {
   return {
@@ -33,6 +38,7 @@ function createProject() {
   };
 }
 
+
 function createRepository() {
   return {
     owner:
@@ -45,6 +51,7 @@ function createRepository() {
       "main",
   };
 }
+
 
 function createSnapshot(): GitHubSnapshot {
   return {
@@ -67,6 +74,7 @@ function createSnapshot(): GitHubSnapshot {
       "2026-08-08T00:00:00.000Z",
   };
 }
+
 
 function createRecommendationInput():
   RuntimeProjectRecommendationInput {
@@ -106,17 +114,96 @@ function createRecommendationInput():
   };
 }
 
+
+function createCanonicalProjectHistory():
+  RuntimeProjectHistoryInputV1 {
+  return {
+    contractVersion:
+      "v1",
+
+    project: {
+      projectId:
+        "375880f2-5a87-4f60-8144-e91ea469ef04",
+
+      repositoryId:
+        "123456789",
+    },
+
+    events: [
+      {
+        eventId:
+          "project-start-event-1",
+
+        eventType:
+          "project-started",
+
+        focus:
+          "Class abstraction",
+
+        occurredAt:
+          "2026-08-12T00:50:58.000Z",
+      },
+
+      {
+        eventId:
+          "focus-update-event-1",
+
+        eventType:
+          "focus-updated",
+
+        previousFocus:
+          "Class abstraction",
+
+        nextFocus:
+          "Class relationships",
+
+        occurredAt:
+          "2026-08-12T00:53:21.000Z",
+      },
+
+      {
+        eventId:
+          "reflection-1",
+
+        eventType:
+          "reflection",
+
+        content:
+          "I am beginning to understand how class relationships organize state and behavior.",
+
+        source:
+          "landing",
+
+        occurredAt:
+          "2026-08-12T01:00:00.000Z",
+      },
+    ],
+
+    eventCount:
+      3,
+
+    timeRange: {
+      startedAt:
+        "2026-08-12T00:50:58.000Z",
+
+      endedAt:
+        "2026-08-12T01:00:00.000Z",
+    },
+
+    snapshotCreatedAt:
+      "2026-08-12T01:05:00.000Z",
+  };
+}
+
+
 describe(
   "createRuntimeContractV2Payload",
   () => {
-
     it(
       "creates a payload with reflection",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             reflectionText:
               " Reflection ",
 
@@ -133,24 +220,21 @@ describe(
         expect(
           payload.reflection
         ).toEqual({
-
           text:
             "Reflection",
 
           createdAt:
             "2026-08-08T00:00:00.000Z",
         });
-
       }
     );
+
 
     it(
       "omits reflection when text is empty",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             reflectionText:
               "   ",
 
@@ -164,20 +248,18 @@ describe(
         expect(
           payload.reflection
         ).toBeUndefined();
-
       }
     );
+
 
     it(
       "copies project",
       () => {
-
         const project =
           createProject();
 
         const payload =
           createRuntimeContractV2Payload({
-
             project,
 
             repository:
@@ -189,20 +271,18 @@ describe(
         ).toEqual(
           project
         );
-
       }
     );
+
 
     it(
       "copies repository",
       () => {
-
         const repository =
           createRepository();
 
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -214,20 +294,18 @@ describe(
         ).toEqual(
           repository
         );
-
       }
     );
+
 
     it(
       "includes GitHub Snapshot",
       () => {
-
         const snapshot =
           createSnapshot();
 
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -243,20 +321,18 @@ describe(
         ).toEqual(
           snapshot
         );
-
       }
     );
+
 
     it(
       "includes Project Recommendation Input",
       () => {
-
         const recommendation =
           createRecommendationInput();
 
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -272,17 +348,15 @@ describe(
         ).toEqual(
           recommendation
         );
-
       }
     );
+
 
     it(
       "supports reflection and project recommendation together",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             reflectionText:
               "Reflection",
 
@@ -303,17 +377,15 @@ describe(
         expect(
           payload.projectRecommendationInput
         ).toBeDefined();
-
       }
     );
+
 
     it(
       "supports github snapshot and project recommendation together",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -334,17 +406,15 @@ describe(
         expect(
           payload.projectRecommendationInput
         ).toBeDefined();
-
       }
     );
+
 
     it(
       "supports reflection github snapshot and recommendation together",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             reflectionText:
               "Reflection",
 
@@ -381,17 +451,15 @@ describe(
         ).toBe(
           "combined"
         );
-
       }
     );
+
 
     it(
       "inherits currentStep into learningContext",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -404,17 +472,15 @@ describe(
         ).toBe(
           "Runtime Metadata UI"
         );
-
       }
     );
+
 
     it(
       "defaults learner level to junior",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -427,9 +493,9 @@ describe(
         ).toBe(
           "junior"
         );
-
       }
     );
+
 
     it(
       "preserves project history",
@@ -438,19 +504,19 @@ describe(
           RuntimeProjectHistory = {
           events: [
             {
-            source:
-              "project",
+              source:
+                "project",
 
-            title:
-              "Analyze",
+              title:
+                "Analyze",
 
-            summary:
-              "Runtime",
+              summary:
+                "Runtime",
 
-            tags: [],
+              tags: [],
 
-            createdAt:
-              "2026-08-08T00:00:00.000Z",
+              createdAt:
+                "2026-08-08T00:00:00.000Z",
             },
           ],
         };
@@ -475,10 +541,56 @@ describe(
       }
     );
 
+
+    it(
+      "preserves canonical project history",
+      () => {
+        const canonicalHistory =
+          createCanonicalProjectHistory();
+
+        const payload =
+          createRuntimeContractV2Payload({
+            project:
+              createProject(),
+
+            repository:
+              createRepository(),
+
+            canonicalProjectHistory:
+              canonicalHistory,
+          });
+
+        expect(
+          payload.canonicalProjectHistory
+        ).toEqual(
+          canonicalHistory
+        );
+      }
+    );
+
+
+    it(
+      "omits canonical project history when it is not provided",
+      () => {
+        const payload =
+          createRuntimeContractV2Payload({
+            project:
+              createProject(),
+
+            repository:
+              createRepository(),
+          });
+
+        expect(
+          payload.canonicalProjectHistory
+        ).toBeUndefined();
+      }
+    );
+
+
     it(
       "does not mutate source objects",
       () => {
-
         const recommendation =
           createRecommendationInput();
 
@@ -491,6 +603,9 @@ describe(
         const repository =
           createRepository();
 
+        const canonicalHistory =
+          createCanonicalProjectHistory();
+
         const recommendationCopy =
           structuredClone(
             recommendation
@@ -501,8 +616,22 @@ describe(
             snapshot
           );
 
-        createRuntimeContractV2Payload({
+        const projectCopy =
+          structuredClone(
+            project
+          );
 
+        const repositoryCopy =
+          structuredClone(
+            repository
+          );
+
+        const canonicalHistoryCopy =
+          structuredClone(
+            canonicalHistory
+          );
+
+        createRuntimeContractV2Payload({
           project,
 
           repository,
@@ -512,6 +641,9 @@ describe(
 
           projectRecommendationInput:
             recommendation,
+
+          canonicalProjectHistory:
+            canonicalHistory,
         });
 
         expect(
@@ -526,16 +658,32 @@ describe(
           snapshotCopy
         );
 
+        expect(
+          project
+        ).toEqual(
+          projectCopy
+        );
+
+        expect(
+          repository
+        ).toEqual(
+          repositoryCopy
+        );
+
+        expect(
+          canonicalHistory
+        ).toEqual(
+          canonicalHistoryCopy
+        );
       }
     );
+
 
     it(
       "preserves PBL metadata in the Runtime V2 project recommendation input",
       () => {
-
         const recommendation:
           RuntimeProjectRecommendationInput = {
-
           adapterVersion:
             "v1",
 
@@ -572,7 +720,6 @@ describe(
 
         const payload =
           createRuntimeContractV2Payload({
-
             project: {
               projectId:
                 "github:fribot-labs:class-concept-robot",
@@ -676,17 +823,15 @@ describe(
         ).toBe(
           "github-snapshot"
         );
-
       }
     );
+
 
     it(
       "creates a new payload object",
       () => {
-
         const payload =
           createRuntimeContractV2Payload({
-
             project:
               createProject(),
 
@@ -699,7 +844,6 @@ describe(
         ).not.toBe(
           createProject()
         );
-
       }
     );
   }

@@ -11,6 +11,10 @@ import type {
   RuntimeProjectRecommendationInput,
 } from "../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
 
+import type {
+  RuntimeProjectHistoryInputV1,
+} from "../project-history-runtime/projectHistoryRuntimeContractTypes";
+
 /**
  * Runtime Contract V2
  *
@@ -90,6 +94,9 @@ export type RuntimeContractV2Input = {
 
   projectHistory?:
     RuntimeProjectHistory;
+
+  canonicalProjectHistory?:
+    RuntimeProjectHistoryInputV1;
 
   trigger?:
     RuntimeExecutionTrigger;
