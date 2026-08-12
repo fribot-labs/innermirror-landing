@@ -1,5 +1,5 @@
 import type {
-    ProjectActionGuidance,
+  ProjectActionGuidance,
 } from "./projectActionGuidanceTypes";
 
 type ResolveProjectActionGuidanceParams = {
@@ -34,10 +34,14 @@ export function resolveProjectActionGuidance({
   if (!hasProject) {
     return {
       startProject: {
+        action:
+          "start-project",
+
         availability:
           hasCurrentFocus
             ? "recommended"
             : "disabled",
+
         reason:
           hasCurrentFocus
             ? "Start the selected repository as a learning project."
@@ -45,24 +49,45 @@ export function resolveProjectActionGuidance({
       },
 
       updateProjectFocus: {
-        availability: "disabled",
-        reason: "Start the project first.",
+        action:
+          "update-project-focus",
+
+        availability:
+          "disabled",
+
+        reason:
+          "Start the project first.",
       },
 
       analyzeGitHubProject: {
-        availability: "disabled",
+        action:
+          "analyze-github-project",
+
+        availability:
+          "disabled",
+
         reason:
           "Start the project before analyzing GitHub activity.",
       },
 
       saveThought: {
-        availability: "disabled",
+        action:
+          "save-thought",
+
+        availability:
+          "disabled",
+
         reason:
           "Start the project before saving a Reflection.",
       },
 
       thoughtProjectAnalyze: {
-        availability: "disabled",
+        action:
+          "thought-project-analyze",
+
+        availability:
+          "disabled",
+
         reason:
           "Start the project before running combined analysis.",
       },
@@ -71,15 +96,25 @@ export function resolveProjectActionGuidance({
 
   return {
     startProject: {
-      availability: "disabled",
-      reason: "The project has already been started.",
+      action:
+        "start-project",
+
+      availability:
+        "disabled",
+
+      reason:
+        "The project has already been started.",
     },
 
     updateProjectFocus: {
+      action:
+        "update-project-focus",
+
       availability:
         hasCurrentFocus
           ? "available"
           : "disabled",
+
       reason:
         hasCurrentFocus
           ? "Update the current project focus."
@@ -87,10 +122,14 @@ export function resolveProjectActionGuidance({
     },
 
     analyzeGitHubProject: {
+      action:
+        "analyze-github-project",
+
       availability:
         hasReflectionDraft
           ? "available"
           : "recommended",
+
       reason:
         hasProjectSnapshot
           ? "Refresh recent GitHub activity without saving a Reflection."
@@ -98,6 +137,9 @@ export function resolveProjectActionGuidance({
     },
 
     saveThought: {
+      action:
+        "save-thought",
+
       availability:
         hasReflectionDraft
           ? "available"
@@ -110,6 +152,9 @@ export function resolveProjectActionGuidance({
     },
 
     thoughtProjectAnalyze: {
+      action:
+        "thought-project-analyze",
+
       availability:
         hasReflectionDraft
           ? "recommended"
@@ -128,27 +173,52 @@ function createAllDisabledGuidance(
 ): ProjectActionGuidance {
   return {
     startProject: {
-      availability: "disabled",
+      action:
+        "start-project",
+
+      availability:
+        "disabled",
+
       reason,
     },
 
     updateProjectFocus: {
-      availability: "disabled",
+      action:
+        "update-project-focus",
+
+      availability:
+        "disabled",
+
       reason,
     },
 
     analyzeGitHubProject: {
-      availability: "disabled",
+      action:
+        "analyze-github-project",
+
+      availability:
+        "disabled",
+
       reason,
     },
 
     saveThought: {
-      availability: "disabled",
+      action:
+        "save-thought",
+
+      availability:
+        "disabled",
+
       reason,
     },
 
     thoughtProjectAnalyze: {
-      availability: "disabled",
+      action:
+        "thought-project-analyze",
+
+      availability:
+        "disabled",
+
       reason,
     },
   };

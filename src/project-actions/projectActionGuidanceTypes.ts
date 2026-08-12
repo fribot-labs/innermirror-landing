@@ -11,6 +11,7 @@ export type GuidedProjectAction =
   | "thought-project-analyze";
 
 export type GuidedActionPresentation = {
+  action: GuidedProjectAction;
   availability: ActionAvailability;
   reason: string;
 };

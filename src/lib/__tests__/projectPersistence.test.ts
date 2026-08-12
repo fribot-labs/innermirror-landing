@@ -1,22 +1,24 @@
 import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 import {
-    ensureProjectForRepository,
-    findProjectByRepositoryId,
+  ensureProjectForRepository,
+  findProjectByRepositoryId,
+  markProjectStarted,
+  updateProjectCurrentFocus,
 } from "../projectPersistence";
 
 import {
-    supabaseClient,
+  supabaseClient,
 } from "../supabaseClient";
 
 import type {
-    GitHubRepositorySummary,
+  GitHubRepositorySummary,
 } from "../../types/githubLearningEntry";
 
 
@@ -196,6 +198,101 @@ function createInsertQueryMock({
 
   return {
     insert,
+    select,
+    single,
+  };
+}
+
+
+function createStartProjectUpdateQueryMock({
+  data,
+  error = null,
+}: {
+  data: unknown;
+  error?: unknown;
+}) {
+  const maybeSingle =
+    vi.fn().mockResolvedValue({
+      data,
+      error,
+    });
+
+  const select =
+    vi.fn().mockReturnValue({
+      maybeSingle,
+    });
+
+  const is =
+    vi.fn().mockReturnValue({
+      select,
+    });
+
+  const secondEq =
+    vi.fn().mockReturnValue({
+      is,
+    });
+
+  const firstEq =
+    vi.fn().mockReturnValue({
+      eq:
+        secondEq,
+    });
+
+  const update =
+    vi.fn().mockReturnValue({
+      eq:
+        firstEq,
+    });
+
+  return {
+    update,
+    firstEq,
+    secondEq,
+    is,
+    select,
+    maybeSingle,
+  };
+}
+
+function createProjectFocusUpdateQueryMock({
+  data,
+  error = null,
+}: {
+  data: unknown;
+  error?: unknown;
+}) {
+  const single =
+    vi.fn().mockResolvedValue({
+      data,
+      error,
+    });
+
+  const select =
+    vi.fn().mockReturnValue({
+      single,
+    });
+
+  const secondEq =
+    vi.fn().mockReturnValue({
+      select,
+    });
+
+  const firstEq =
+    vi.fn().mockReturnValue({
+      eq:
+        secondEq,
+    });
+
+  const update =
+    vi.fn().mockReturnValue({
+      eq:
+        firstEq,
+    });
+
+  return {
+    update,
+    firstEq,
+    secondEq,
     select,
     single,
   };
@@ -390,6 +487,9 @@ describe(
           createProjectRow({
             id:
               "33333333-3333-4333-8333-333333333333",
+
+            started_at:
+              null,
           });
 
         const insertQuery =
@@ -430,6 +530,10 @@ describe(
         );
 
         expect(
+          result.startedAt
+        ).toBeNull();
+
+        expect(
           fromSpy
         ).toHaveBeenCalledTimes(
           2
@@ -456,6 +560,15 @@ describe(
 
             status:
               "active",
+          })
+        );
+
+        expect(
+          insertQuery.insert
+        ).toHaveBeenCalledWith(
+          expect.not.objectContaining({
+            started_at:
+              expect.anything(),
           })
         );
       }
@@ -882,6 +995,931 @@ describe(
           )
         ).rejects.toBe(
           lookupError
+        );
+      }
+    );
+
+    it(
+      "marks an unstarted canonical project as started",
+      async () => {
+        mockAuthenticatedUser();
+
+        const startedRow =
+          createProjectRow({
+            started_at:
+              "2026-08-11T13:00:00.000Z",
+
+            updated_at:
+              "2026-08-11T13:00:00.000Z",
+          });
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              startedRow,
+          });
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          ).mockReturnValue({
+            update:
+              updateQuery.update,
+          } as never);
+
+        const result =
+          await markProjectStarted(
+            PROJECT_ID
+          );
+
+        expect(
+          result.didStart
+        ).toBe(
+          true
+        );
+
+        expect(
+          result.project.id
+        ).toBe(
+          PROJECT_ID
+        );
+
+        expect(
+          result.project.startedAt
+        ).toBe(
+          "2026-08-11T13:00:00.000Z"
+        );
+
+        expect(
+          fromSpy
+        ).toHaveBeenCalledWith(
+          "projects"
+        );
+      }
+    );
+
+    it(
+      "normalizes the canonical project identity before starting the project",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              createProjectRow(),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await markProjectStarted(
+          `  ${PROJECT_ID}  `
+        );
+
+        expect(
+          updateQuery.firstEq
+        ).toHaveBeenCalledWith(
+          "id",
+          PROJECT_ID
+        );
+      }
+    );
+
+    it(
+      "scopes the Project start transition to the authenticated user",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              createProjectRow(),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await markProjectStarted(
+          PROJECT_ID
+        );
+
+        expect(
+          updateQuery.secondEq
+        ).toHaveBeenCalledWith(
+          "user_id",
+          USER_ID
+        );
+      }
+    );
+
+    it(
+      "starts only a canonical project whose started_at is null",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              createProjectRow(),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await markProjectStarted(
+          PROJECT_ID
+        );
+
+        expect(
+          updateQuery.is
+        ).toHaveBeenCalledWith(
+          "started_at",
+          null
+        );
+      }
+    );
+
+    it(
+      "updates started_at and updated_at with the same timestamp",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              createProjectRow(),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await markProjectStarted(
+          PROJECT_ID
+        );
+
+        expect(
+          updateQuery.update
+        ).toHaveBeenCalledTimes(
+          1
+        );
+
+        const updatePayload =
+          updateQuery.update.mock.calls[0]?.[0];
+
+        expect(
+          updatePayload.started_at
+        ).toEqual(
+          expect.any(
+            String
+          )
+        );
+
+        expect(
+          updatePayload.updated_at
+        ).toBe(
+          updatePayload.started_at
+        );
+      }
+    );
+
+    it(
+      "returns didStart false without overwriting an already-started project",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              null,
+          });
+
+        const existingStartedAt =
+          "2026-08-10T01:00:00.000Z";
+
+        const existingLookup =
+          createLookupQueryMock({
+            data:
+              createProjectRow({
+                started_at:
+                  existingStartedAt,
+              }),
+          });
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          )
+            .mockReturnValueOnce({
+              update:
+                updateQuery.update,
+            } as never)
+            .mockReturnValueOnce({
+              select:
+                existingLookup.select,
+            } as never);
+
+        const result =
+          await markProjectStarted(
+            PROJECT_ID
+          );
+
+        expect(
+          result.didStart
+        ).toBe(
+          false
+        );
+
+        expect(
+          result.project.startedAt
+        ).toBe(
+          existingStartedAt
+        );
+
+        expect(
+          fromSpy
+        ).toHaveBeenCalledTimes(
+          2
+        );
+      }
+    );
+
+    it(
+      "rejects an empty canonical project identity before accessing Supabase",
+      async () => {
+        const getUserSpy =
+          vi.spyOn(
+            supabaseClient.auth,
+            "getUser"
+          );
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          markProjectStarted(
+            "   "
+          )
+        ).rejects.toThrow(
+          "A canonical project identity is required to start an InnerMirror project."
+        );
+
+        expect(
+          getUserSpy
+        ).not.toHaveBeenCalled();
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects an unauthenticated user when starting a project",
+      async () => {
+        vi.spyOn(
+          supabaseClient.auth,
+          "getUser"
+        ).mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            null,
+        } as never);
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          markProjectStarted(
+            PROJECT_ID
+          )
+        ).rejects.toThrow(
+          "An authenticated user is required to persist projects."
+        );
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "propagates authentication errors when starting a project",
+      async () => {
+        const authError =
+          new Error(
+            "Authentication failed."
+          );
+
+        vi.spyOn(
+          supabaseClient.auth,
+          "getUser"
+        ).mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            authError,
+        } as Awaited<
+          ReturnType<
+            typeof supabaseClient.auth.getUser
+          >
+        >);
+
+        await expect(
+          markProjectStarted(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          authError
+        );
+      }
+    );
+
+    it(
+      "propagates Project start update errors",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateError =
+          new Error(
+            "Project start update failed."
+          );
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              null,
+
+            error:
+              updateError,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await expect(
+          markProjectStarted(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          updateError
+        );
+      }
+    );
+
+    it(
+      "propagates existing Project lookup errors after a no-op start update",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createStartProjectUpdateQueryMock({
+            data:
+              null,
+          });
+
+        const lookupError =
+          new Error(
+            "Existing Project lookup failed."
+          );
+
+        const existingLookup =
+          createLookupQueryMock({
+            data:
+              null,
+
+            error:
+              lookupError,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        )
+          .mockReturnValueOnce({
+            update:
+              updateQuery.update,
+          } as never)
+          .mockReturnValueOnce({
+            select:
+              existingLookup.select,
+          } as never);
+
+        await expect(
+          markProjectStarted(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          lookupError
+        );
+      }
+    );
+
+    it(
+      "updates the canonical Project current focus",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updatedRow =
+          createProjectRow({
+            current_focus:
+              "class relationships",
+
+            updated_at:
+              "2026-08-12T00:00:00.000Z",
+          });
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              updatedRow,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        const result =
+          await updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "class relationships",
+          });
+
+        expect(
+          result.currentFocus
+        ).toBe(
+          "class relationships"
+        );
+
+        expect(
+          result.id
+        ).toBe(
+          PROJECT_ID
+        );
+      }
+    );
+
+    it(
+      "normalizes the canonical project identity before updating focus",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              createProjectRow({
+                current_focus:
+                  "class relationships",
+              }),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await updateProjectCurrentFocus({
+          projectId:
+            `  ${PROJECT_ID}  `,
+
+          currentFocus:
+            "class relationships",
+        });
+
+        expect(
+          updateQuery.firstEq
+        ).toHaveBeenCalledWith(
+          "id",
+          PROJECT_ID
+        );
+      }
+    );
+
+    it(
+      "normalizes the Project focus before persistence",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              createProjectRow({
+                current_focus:
+                  "class relationships",
+              }),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await updateProjectCurrentFocus({
+          projectId:
+            PROJECT_ID,
+
+          currentFocus:
+            "  class relationships  ",
+        });
+
+        expect(
+          updateQuery.update
+        ).toHaveBeenCalledWith(
+          expect.objectContaining({
+            current_focus:
+              "class relationships",
+          })
+        );
+      }
+    );
+
+    it(
+      "scopes the Project focus update to the authenticated user",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              createProjectRow({
+                current_focus:
+                  "class relationships",
+              }),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await updateProjectCurrentFocus({
+          projectId:
+            PROJECT_ID,
+
+          currentFocus:
+            "class relationships",
+        });
+
+        expect(
+          updateQuery.secondEq
+        ).toHaveBeenCalledWith(
+          "user_id",
+          USER_ID
+        );
+      }
+    );
+
+    it(
+      "updates current_focus and updated_at together",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              createProjectRow({
+                current_focus:
+                  "class relationships",
+              }),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await updateProjectCurrentFocus({
+          projectId:
+            PROJECT_ID,
+
+          currentFocus:
+            "class relationships",
+        });
+
+        expect(
+          updateQuery.update
+        ).toHaveBeenCalledTimes(
+          1
+        );
+
+        const updatePayload =
+          updateQuery.update.mock.calls[0]?.[0];
+
+        expect(
+          updatePayload.current_focus
+        ).toBe(
+          "class relationships"
+        );
+
+        expect(
+          updatePayload.updated_at
+        ).toEqual(
+          expect.any(
+            String
+          )
+        );
+
+        expect(
+          updatePayload
+        ).not.toHaveProperty(
+          "started_at"
+        );
+      }
+    );
+
+    it(
+      "rejects an empty canonical project identity before updating focus",
+      async () => {
+        const getUserSpy =
+          vi.spyOn(
+            supabaseClient.auth,
+            "getUser"
+          );
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          updateProjectCurrentFocus({
+            projectId:
+              "   ",
+
+            currentFocus:
+              "class relationships",
+          })
+        ).rejects.toThrow(
+          "A canonical project identity is required to update the InnerMirror project focus."
+        );
+
+        expect(
+          getUserSpy
+        ).not.toHaveBeenCalled();
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects an empty Project focus before accessing Supabase",
+      async () => {
+        const getUserSpy =
+          vi.spyOn(
+            supabaseClient.auth,
+            "getUser"
+          );
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "   ",
+          })
+        ).rejects.toThrow(
+          "A non-empty project focus is required."
+        );
+
+        expect(
+          getUserSpy
+        ).not.toHaveBeenCalled();
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "rejects an unauthenticated user when updating Project focus",
+      async () => {
+        vi.spyOn(
+          supabaseClient.auth,
+          "getUser"
+        ).mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            null,
+        } as never);
+
+        const fromSpy =
+          vi.spyOn(
+            supabaseClient,
+            "from"
+          );
+
+        await expect(
+          updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "class relationships",
+          })
+        ).rejects.toThrow(
+          "An authenticated user is required to persist projects."
+        );
+
+        expect(
+          fromSpy
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+    it(
+      "propagates authentication errors when updating Project focus",
+      async () => {
+        const authError =
+          new Error(
+            "Authentication failed."
+          );
+
+        vi.spyOn(
+          supabaseClient.auth,
+          "getUser"
+        ).mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            authError,
+        } as Awaited<
+          ReturnType<
+            typeof supabaseClient.auth.getUser
+          >
+        >);
+
+        await expect(
+          updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "class relationships",
+          })
+        ).rejects.toBe(
+          authError
+        );
+      }
+    );
+
+    it(
+      "propagates Project focus update errors",
+      async () => {
+        mockAuthenticatedUser();
+
+        const updateError =
+          new Error(
+            "Project focus update failed."
+          );
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              null,
+
+            error:
+              updateError,
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        await expect(
+          updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "class relationships",
+          })
+        ).rejects.toBe(
+          updateError
+        );
+      }
+    );
+
+    it(
+      "preserves the canonical Project startedAt when updating focus",
+      async () => {
+        mockAuthenticatedUser();
+
+        const startedAt =
+          "2026-08-10T01:00:00.000Z";
+
+        const updateQuery =
+          createProjectFocusUpdateQueryMock({
+            data:
+              createProjectRow({
+                current_focus:
+                  "class relationships",
+
+                started_at:
+                  startedAt,
+              }),
+          });
+
+        vi.spyOn(
+          supabaseClient,
+          "from"
+        ).mockReturnValue({
+          update:
+            updateQuery.update,
+        } as never);
+
+        const result =
+          await updateProjectCurrentFocus({
+            projectId:
+              PROJECT_ID,
+
+            currentFocus:
+              "class relationships",
+          });
+
+        expect(
+          result.startedAt
+        ).toBe(
+          startedAt
         );
       }
     );
