@@ -1,4 +1,7 @@
-import type { GitHubSnapshot } from "../types/githubSnapshot";
+import type {
+  GitHubSnapshot,
+} from "../types/githubSnapshot";
+
 import type {
   RuntimeContractV2Input,
   RuntimeExecutionTrigger,
@@ -13,6 +16,7 @@ import type {
   RuntimeProjectRecommendationInput,
 } from "../runtime-project-intelligence/runtimeProjectIntelligenceAdapterTypes";
 
+
 /**
  * Runtime Contract V2 Payload Builder
  *
@@ -23,7 +27,6 @@ import type {
  * This helper converts Landing state into the official
  * Runtime communication model.
  */
-
 export type CreateRuntimeContractV2PayloadOptions = {
   reflectionText?:
     string;
@@ -49,27 +52,37 @@ export type CreateRuntimeContractV2PayloadOptions = {
   projectHistory?:
     RuntimeProjectHistory;
 
+  canonicalProjectHistory?:
+    RuntimeContractV2Input["canonicalProjectHistory"];
+
   trigger?:
     RuntimeExecutionTrigger;
 };
 
+
 export function createRuntimeContractV2Payload(
-  options: CreateRuntimeContractV2PayloadOptions
+  options:
+    CreateRuntimeContractV2PayloadOptions
 ): RuntimeContractV2Input {
   const trimmedReflectionText =
-    options.reflectionText?.trim() ?? "";
+    options.reflectionText?.trim() ??
+    "";
 
-  const reflection: RuntimeReflection | undefined =
+  const reflection:
+    RuntimeReflection | undefined =
     trimmedReflectionText.length > 0
       ? {
-          text: trimmedReflectionText,
+          text:
+            trimmedReflectionText,
+
           createdAt:
             options.reflectionCreatedAt ??
             new Date().toISOString(),
         }
       : undefined;
 
-  const payload: RuntimeContractV2Input = {
+  const payload:
+    RuntimeContractV2Input = {
     ...(reflection
       ? {
           reflection,
@@ -108,14 +121,28 @@ export function createRuntimeContractV2Payload(
         options.learningContext?.knownIssue,
 
       learnerLevel:
-        options.learningContext?.learnerLevel ?? "junior",
+        options.learningContext?.learnerLevel ??
+        "junior",
     },
 
-    trigger: options.trigger,
+    trigger:
+      options.trigger,
   };
 
-  if (options.projectHistory !== undefined) {
-    payload.projectHistory = options.projectHistory;
+  if (
+    options.projectHistory !==
+    undefined
+  ) {
+    payload.projectHistory =
+      options.projectHistory;
+  }
+
+  if (
+    options.canonicalProjectHistory !==
+    undefined
+  ) {
+    payload.canonicalProjectHistory =
+      options.canonicalProjectHistory;
   }
 
   return payload;

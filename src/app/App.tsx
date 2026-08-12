@@ -1961,6 +1961,10 @@ export function App() {
                 runtimeProjectRecommendationInput ??
                 undefined,
 
+              canonicalProjectHistory:
+                runtimeCanonicalProjectHistory ??
+                undefined,
+
               learningContext: {
                 currentStep:
                   resolvedCurrentStep,
@@ -2130,6 +2134,10 @@ export function App() {
 
           projectRecommendationInput:
             runtimeProjectRecommendationInput ??
+            undefined,
+
+          canonicalProjectHistory:
+            runtimeCanonicalProjectHistory ??
             undefined,
 
           learningContext: {
