@@ -1,9 +1,9 @@
 import type {
-    CanonicalProjectHistorySnapshot,
+  CanonicalProjectHistorySnapshot,
 } from "../project-history/canonicalProjectHistoryTypes";
 
 import type {
-    RuntimeProjectHistoryInputV1,
+  RuntimeProjectHistoryInputV1,
 } from "./projectHistoryRuntimeContractTypes";
 
 
@@ -67,7 +67,7 @@ RuntimeProjectHistoryInputV1 {
     snapshot.events.map(
       (event) => {
         const eventId =
-          event.reflectionId.trim();
+          event.eventId.trim();
 
         if (
           eventId.length ===
@@ -80,21 +80,58 @@ RuntimeProjectHistoryInputV1 {
 
         const occurredAt =
           normalizeTimestamp(
-            event.createdAt,
+            event.occurredAt,
             "Project History Runtime Input requires valid event timestamps."
           );
+
+        if (
+          event.eventType ===
+          "reflection"
+        ) {
+          return {
+            eventId,
+
+            eventType:
+              "reflection" as const,
+
+            content:
+              event.content,
+
+            source:
+              event.source,
+
+            occurredAt,
+          };
+        }
+
+        if (
+          event.eventType ===
+          "project-started"
+        ) {
+          return {
+            eventId,
+
+            eventType:
+              "project-started" as const,
+
+            focus:
+              event.focus,
+
+            occurredAt,
+          };
+        }
 
         return {
           eventId,
 
           eventType:
-            "reflection" as const,
+            "focus-updated" as const,
 
-          content:
-            event.content,
+          previousFocus:
+            event.previousFocus,
 
-          source:
-            event.source,
+          nextFocus:
+            event.nextFocus,
 
           occurredAt,
         };
@@ -204,23 +241,23 @@ function validateTimeRange(
     );
   }
 
-  const firstEventCreatedAt =
+  const firstEventOccurredAt =
     normalizeTimestamp(
-      firstEvent.createdAt,
+      firstEvent.occurredAt,
       "Project History Runtime Input requires valid event timestamps."
     );
 
-  const lastEventCreatedAt =
+  const lastEventOccurredAt =
     normalizeTimestamp(
-      lastEvent.createdAt,
+      lastEvent.occurredAt,
       "Project History Runtime Input requires valid event timestamps."
     );
 
   if (
     normalizedStartedAt !==
-      firstEventCreatedAt ||
+    firstEventOccurredAt ||
     normalizedEndedAt !==
-      lastEventCreatedAt
+    lastEventOccurredAt
   ) {
     throw new Error(
       "Project History Runtime Input time range must match the first and last history events."

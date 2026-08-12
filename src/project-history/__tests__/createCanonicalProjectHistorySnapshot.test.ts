@@ -1,19 +1,23 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import type {
-    ProjectRecord,
+  ProjectRecord,
 } from "../../lib/projectPersistence";
 
 import type {
-    ReflectionRecord,
+  ReflectionRecord,
 } from "../../lib/reflectionPersistence";
 
+import type {
+  ProjectLifecycleHistoryEntry,
+} from "../../project-actions/projectLifecycleHistory";
+
 import {
-    createCanonicalProjectHistorySnapshot,
+  createCanonicalProjectHistorySnapshot,
 } from "../createCanonicalProjectHistorySnapshot";
 
 
@@ -44,6 +48,9 @@ describe(
             reflections: [
               createReflection(),
             ],
+
+            lifecycleHistory:
+              [],
 
             createdAt:
               "2026-08-11T03:00:00.000Z",
@@ -103,13 +110,19 @@ describe(
                   "2026-08-11T01:30:00.000Z",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
           snapshot.events
         ).toEqual([
           {
-            reflectionId:
+            eventType:
+              "reflection",
+
+            eventId:
               "reflection-123",
 
             content:
@@ -118,7 +131,7 @@ describe(
             source:
               "landing",
 
-            createdAt:
+            occurredAt:
               "2026-08-11T01:30:00.000Z",
           },
         ]);
@@ -138,6 +151,9 @@ describe(
               }),
 
             reflections:
+              [],
+
+            lifecycleHistory:
               [],
           });
 
@@ -170,6 +186,9 @@ describe(
                   PROJECT_ID,
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
@@ -214,12 +233,15 @@ describe(
                   "2026-08-11T01:00:00.000Z",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
           snapshot.events.map(
             (event) =>
-              event.reflectionId
+              event.eventId
           )
         ).toEqual([
           "oldest",
@@ -256,6 +278,9 @@ describe(
             createProject(),
 
           reflections,
+
+          lifecycleHistory:
+            [],
         });
 
         expect(
@@ -296,6 +321,9 @@ describe(
                   "2026-08-09T08:30:00.000Z",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
@@ -320,6 +348,9 @@ describe(
               createProject(),
 
             reflections:
+              [],
+
+            lifecycleHistory:
               [],
           });
 
@@ -362,6 +393,9 @@ describe(
                   "2026-08-11T01:00:00.000Z",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
@@ -386,6 +420,9 @@ describe(
               createProject(),
 
             reflections:
+              [],
+
+            lifecycleHistory:
               [],
 
             createdAt:
@@ -415,10 +452,13 @@ describe(
                   "2026-08-11T12:30:00+09:00",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           });
 
         expect(
-          snapshot.events[0]?.createdAt
+          snapshot.events[0]?.occurredAt
         ).toBe(
           "2026-08-11T03:30:00.000Z"
         );
@@ -440,6 +480,9 @@ describe(
                   OTHER_PROJECT_ID,
               }),
             ],
+
+            lifecycleHistory:
+              [],
           })
         ).toThrow(
           "Canonical Project History Snapshot cannot include a Reflection from another project."
@@ -462,6 +505,9 @@ describe(
                   null,
               }),
             ],
+
+            lifecycleHistory:
+              [],
           })
         ).toThrow(
           "Canonical Project History Snapshot cannot include a Reflection from another project."
@@ -482,6 +528,9 @@ describe(
               }),
 
             reflections:
+              [],
+
+            lifecycleHistory:
               [],
           })
         ).toThrow(
@@ -504,6 +553,9 @@ describe(
 
             reflections:
               [],
+
+            lifecycleHistory:
+              [],
           })
         ).toThrow(
           "Canonical Project History Snapshot requires a stable repository identity."
@@ -525,6 +577,9 @@ describe(
 
             reflections:
               [],
+
+            lifecycleHistory:
+              [],
           })
         ).toThrow(
           "Canonical Project History Snapshot requires a stable repository identity."
@@ -542,6 +597,9 @@ describe(
               createProject(),
 
             reflections:
+              [],
+
+            lifecycleHistory:
               [],
 
             createdAt:
@@ -568,9 +626,232 @@ describe(
                   "invalid-reflection-date",
               }),
             ],
+
+            lifecycleHistory:
+              [],
           })
         ).toThrow(
           "Canonical Project History Snapshot requires valid Reflection timestamps."
+        );
+      }
+    );
+
+
+    it(
+      "maps project-started lifecycle entries into canonical history events",
+      () => {
+        const snapshot =
+          createCanonicalProjectHistorySnapshot({
+            project:
+              createProject(),
+
+            reflections:
+              [],
+
+            lifecycleHistory: [
+              createProjectStartedLifecycleEntry({
+                eventId:
+                  "project-event-started",
+
+                focus:
+                  "class abstraction",
+
+                occurredAt:
+                  "2026-08-11T00:30:00.000Z",
+              }),
+            ],
+          });
+
+        expect(
+          snapshot.events
+        ).toEqual([
+          {
+            eventType:
+              "project-started",
+
+            eventId:
+              "project-event-started",
+
+            focus:
+              "class abstraction",
+
+            occurredAt:
+              "2026-08-11T00:30:00.000Z",
+          },
+        ]);
+      }
+    );
+
+
+    it(
+      "maps focus-updated lifecycle entries into canonical history events",
+      () => {
+        const snapshot =
+          createCanonicalProjectHistorySnapshot({
+            project:
+              createProject(),
+
+            reflections:
+              [],
+
+            lifecycleHistory: [
+              createFocusUpdatedLifecycleEntry({
+                eventId:
+                  "project-event-focus",
+
+                previousFocus:
+                  "class abstraction",
+
+                nextFocus:
+                  "class relationships",
+
+                occurredAt:
+                  "2026-08-11T02:00:00.000Z",
+              }),
+            ],
+          });
+
+        expect(
+          snapshot.events
+        ).toEqual([
+          {
+            eventType:
+              "focus-updated",
+
+            eventId:
+              "project-event-focus",
+
+            previousFocus:
+              "class abstraction",
+
+            nextFocus:
+              "class relationships",
+
+            occurredAt:
+              "2026-08-11T02:00:00.000Z",
+          },
+        ]);
+      }
+    );
+
+
+    it(
+      "merges Reflection and lifecycle events into chronological order",
+      () => {
+        const snapshot =
+          createCanonicalProjectHistorySnapshot({
+            project:
+              createProject(),
+
+            reflections: [
+              createReflection({
+                id:
+                  "reflection-middle",
+
+                createdAt:
+                  "2026-08-11T02:00:00.000Z",
+              }),
+            ],
+
+            lifecycleHistory: [
+              createProjectStartedLifecycleEntry({
+                eventId:
+                  "project-started-first",
+
+                occurredAt:
+                  "2026-08-11T01:00:00.000Z",
+              }),
+
+              createFocusUpdatedLifecycleEntry({
+                eventId:
+                  "focus-updated-last",
+
+                occurredAt:
+                  "2026-08-11T03:00:00.000Z",
+              }),
+            ],
+          });
+
+        expect(
+          snapshot.events.map(
+            (event) =>
+              event.eventId
+          )
+        ).toEqual([
+          "project-started-first",
+          "reflection-middle",
+          "focus-updated-last",
+        ]);
+
+        expect(
+          snapshot.events.map(
+            (event) =>
+              event.eventType
+          )
+        ).toEqual([
+          "project-started",
+          "reflection",
+          "focus-updated",
+        ]);
+
+        expect(
+          snapshot.timeRange
+        ).toEqual({
+          startedAt:
+            "2026-08-11T01:00:00.000Z",
+
+          endedAt:
+            "2026-08-11T03:00:00.000Z",
+        });
+      }
+    );
+
+
+    it(
+      "rejects a lifecycle event belonging to another canonical project",
+      () => {
+        expect(() =>
+          createCanonicalProjectHistorySnapshot({
+            project:
+              createProject(),
+
+            reflections:
+              [],
+
+            lifecycleHistory: [
+              createProjectStartedLifecycleEntry({
+                projectId:
+                  OTHER_PROJECT_ID,
+              }),
+            ],
+          })
+        ).toThrow(
+          "Canonical Project History Snapshot cannot include a lifecycle event from another project."
+        );
+      }
+    );
+
+
+    it(
+      "rejects invalid lifecycle event timestamps",
+      () => {
+        expect(() =>
+          createCanonicalProjectHistorySnapshot({
+            project:
+              createProject(),
+
+            reflections:
+              [],
+
+            lifecycleHistory: [
+              createProjectStartedLifecycleEntry({
+                occurredAt:
+                  "invalid-lifecycle-date",
+              }),
+            ],
+          })
+        ).toThrow(
+          "Canonical Project History Snapshot requires valid lifecycle event timestamps."
         );
       }
     );
@@ -654,5 +935,92 @@ function createReflection(
       "2026-08-11T01:00:00.000Z",
 
     ...overrides,
+  };
+}
+
+
+function createProjectStartedLifecycleEntry(
+  overrides: {
+    eventId?:
+      string;
+
+    projectId?:
+      string;
+
+    focus?:
+      string | null;
+
+    occurredAt?:
+      string;
+  } = {}
+): ProjectLifecycleHistoryEntry {
+  return {
+    type:
+      "project-started",
+
+    eventId:
+      overrides.eventId ??
+      "project-event-started-1",
+
+    projectId:
+      overrides.projectId ??
+      PROJECT_ID,
+
+    focus:
+      overrides.focus ===
+      undefined
+        ? "class concept"
+        : overrides.focus,
+
+    occurredAt:
+      overrides.occurredAt ??
+      "2026-08-11T00:30:00.000Z",
+  };
+}
+
+
+function createFocusUpdatedLifecycleEntry(
+  overrides: {
+    eventId?:
+      string;
+
+    projectId?:
+      string;
+
+    previousFocus?:
+      string | null;
+
+    nextFocus?:
+      string;
+
+    occurredAt?:
+      string;
+  } = {}
+): ProjectLifecycleHistoryEntry {
+  return {
+    type:
+      "focus-updated",
+
+    eventId:
+      overrides.eventId ??
+      "project-event-focus-1",
+
+    projectId:
+      overrides.projectId ??
+      PROJECT_ID,
+
+    previousFocus:
+      overrides.previousFocus ===
+      undefined
+        ? "class concept"
+        : overrides.previousFocus,
+
+    nextFocus:
+      overrides.nextFocus ??
+      "class relationships",
+
+    occurredAt:
+      overrides.occurredAt ??
+      "2026-08-11T02:00:00.000Z",
   };
 }

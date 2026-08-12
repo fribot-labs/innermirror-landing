@@ -95,6 +95,13 @@ import {
 } from "../project-actions/projectLifecycleHistory";
 
 import {
+  createCanonicalProjectHistorySnapshot,
+} from "../project-history/createCanonicalProjectHistorySnapshot";
+
+import {
+  createProjectHistoryRuntimeInput,
+} from "../project-history-runtime/createProjectHistoryRuntimeInput";
+import {
   createRuntimeProjectIntelligence,
 } from "../project-intelligence/createRuntimeProjectIntelligence";
 import {
@@ -347,11 +354,18 @@ export function App() {
   >("idle");
 
   const [
-    ,
+    projectLifecycleHistory,
     setProjectLifecycleHistory,
   ] = useState<
     ProjectLifecycleHistoryEntry[]
   >([]);
+
+  const [
+    canonicalProjectRecord,
+    setCanonicalProjectRecord,
+  ] = useState<ProjectRecord | null>(
+    null
+  );
 
   const runtimeProjectIntelligence =
     useMemo(
@@ -407,6 +421,56 @@ export function App() {
       },
       [
         runtimeProjectIntelligence,
+      ]
+    );
+
+  const runtimeCanonicalProjectHistory =
+    useMemo(
+      () => {
+        if (
+          canonicalProjectRecord ===
+          null
+        ) {
+          return null;
+        }
+
+        const canonicalProjectId =
+          canonicalProjectRecord.id.trim();
+
+        const canonicalReflections =
+          persistedReflections.filter(
+            (reflection) =>
+              reflection.projectId ===
+              canonicalProjectId
+          );
+
+        const canonicalLifecycleHistory =
+          projectLifecycleHistory.filter(
+            (entry) =>
+              entry.projectId ===
+              canonicalProjectId
+          );
+
+        const snapshot =
+          createCanonicalProjectHistorySnapshot({
+            project:
+              canonicalProjectRecord,
+
+            reflections:
+              canonicalReflections,
+
+            lifecycleHistory:
+              canonicalLifecycleHistory,
+          });
+
+        return createProjectHistoryRuntimeInput({
+          snapshot,
+        });
+      },
+      [
+        canonicalProjectRecord,
+        persistedReflections,
+        projectLifecycleHistory,
       ]
     );
 
@@ -486,6 +550,10 @@ export function App() {
         createCanonicalProjectState(
           project
         );
+
+      setCanonicalProjectRecord(
+        project
+      );
 
       setIsCanonicalProjectStarted(
         canonicalState.isStarted
@@ -966,6 +1034,7 @@ export function App() {
     setSelectedRepository(null);
     setProjectPersistenceError(null);
     setActiveProject(null);
+    setCanonicalProjectRecord(null);
     setIsCanonicalProjectStarted(false);
 
     setProjectLifecycleHistory([]);
@@ -1219,6 +1288,7 @@ export function App() {
       );
 
       setActiveProject(null);
+      setCanonicalProjectRecord(null);
       setIsCanonicalProjectStarted(false);
 
       setProjectLifecycleHistory([]);
@@ -1258,6 +1328,14 @@ export function App() {
     setPersistedReflections([]);
 
     setProjectLifecycleHistory([]);
+
+    setCanonicalProjectRecord(
+      null
+    );
+
+    setIsCanonicalProjectStarted(
+      false
+    );
 
     setProjectPersistenceError(
       null
@@ -2186,6 +2264,7 @@ export function App() {
         setSelectedRepository(null);
         setProjectPersistenceError(null);
         setActiveProject(null);
+        setCanonicalProjectRecord(null);
         setIsCanonicalProjectStarted(false);
 
         setProjectLifecycleHistory([]);

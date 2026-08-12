@@ -1,15 +1,20 @@
 import type {
-    ProjectRecord,
+  ProjectRecord,
 } from "../lib/projectPersistence";
 
 import type {
-    ReflectionRecord,
+  ReflectionRecord,
 } from "../lib/reflectionPersistence";
 
 import type {
-    CanonicalProjectHistoryEvent,
-    CanonicalProjectHistorySnapshot,
+  ProjectLifecycleHistoryEntry,
+} from "../project-actions/projectLifecycleHistory";
+
+import type {
+  CanonicalProjectHistoryEvent,
+  CanonicalProjectHistorySnapshot,
 } from "./canonicalProjectHistoryTypes";
+
 
 export type CreateCanonicalProjectHistorySnapshotInput = {
   project:
@@ -18,13 +23,18 @@ export type CreateCanonicalProjectHistorySnapshotInput = {
   reflections:
     ReflectionRecord[];
 
+  lifecycleHistory:
+    ProjectLifecycleHistoryEntry[];
+
   createdAt?:
     string;
 };
 
+
 export function createCanonicalProjectHistorySnapshot({
   project,
   reflections,
+  lifecycleHistory,
   createdAt =
     new Date().toISOString(),
 }: CreateCanonicalProjectHistorySnapshotInput):
@@ -33,7 +43,8 @@ CanonicalProjectHistorySnapshot {
     project.id.trim();
 
   if (
-    projectId.length === 0
+    projectId.length ===
+    0
   ) {
     throw new Error(
       "Canonical Project History Snapshot requires a canonical project identity."
@@ -45,7 +56,8 @@ CanonicalProjectHistorySnapshot {
     "";
 
   if (
-    repositoryId.length === 0
+    repositoryId.length ===
+    0
   ) {
     throw new Error(
       "Canonical Project History Snapshot requires a stable repository identity."
@@ -67,67 +79,36 @@ CanonicalProjectHistorySnapshot {
     );
   }
 
-  for (
-    const reflection of
-    reflections
-  ) {
-    if (
-      reflection.projectId !==
-      projectId
-    ) {
-      throw new Error(
-        "Canonical Project History Snapshot cannot include a Reflection from another project."
-      );
-    }
 
-    const reflectionTimestamp =
-      Date.parse(
-        reflection.createdAt
-      );
+  const reflectionEvents =
+    createReflectionEvents({
+      projectId,
+      reflections,
+    });
 
-    if (
-      Number.isNaN(
-        reflectionTimestamp
-      )
-    ) {
-      throw new Error(
-        "Canonical Project History Snapshot requires valid Reflection timestamps."
-      );
-    }
-  }
 
-  const orderedReflections =
-    [
-      ...reflections,
-    ].sort(
-      (a, b) =>
-        Date.parse(
-          a.createdAt
-        ) -
-        Date.parse(
-          b.createdAt
-        )
-    );
+  const lifecycleEvents =
+    createLifecycleEvents({
+      projectId,
+      lifecycleHistory,
+    });
+
 
   const events:
     CanonicalProjectHistoryEvent[] =
-    orderedReflections.map(
-      (reflection) => ({
-        reflectionId:
-          reflection.id,
-
-        content:
-          reflection.content,
-
-        source:
-          reflection.source,
-
-        createdAt:
-          new Date(
-            reflection.createdAt
-          ).toISOString(),
-      })
+    [
+      ...reflectionEvents,
+      ...lifecycleEvents,
+    ].sort(
+      (a, b) =>
+        Date.parse(
+          a.occurredAt
+        ) -
+        Date.parse(
+          b.occurredAt
+        )
     );
+
 
   const firstEvent =
     events[0] ??
@@ -138,6 +119,7 @@ CanonicalProjectHistorySnapshot {
       events.length - 1
     ] ??
     null;
+
 
   return {
     snapshotVersion:
@@ -155,15 +137,209 @@ CanonicalProjectHistorySnapshot {
 
     timeRange: {
       startedAt:
-        firstEvent?.createdAt ??
+        firstEvent?.occurredAt ??
         null,
 
       endedAt:
-        lastEvent?.createdAt ??
+        lastEvent?.occurredAt ??
         null,
     },
 
     createdAt:
       normalizedCreatedAt.toISOString(),
   };
+}
+
+
+function createReflectionEvents({
+  projectId,
+  reflections,
+}: {
+  projectId:
+    string;
+
+  reflections:
+    ReflectionRecord[];
+}): CanonicalProjectHistoryEvent[] {
+  return reflections.map(
+    (reflection) => {
+      if (
+        reflection.projectId !==
+        projectId
+      ) {
+        throw new Error(
+          "Canonical Project History Snapshot cannot include a Reflection from another project."
+        );
+      }
+
+      const occurredAt =
+        normalizeTimestamp(
+          reflection.createdAt,
+          "Canonical Project History Snapshot requires valid Reflection timestamps."
+        );
+
+      const eventId =
+        reflection.id.trim();
+
+      if (
+        eventId.length ===
+        0
+      ) {
+        throw new Error(
+          "Canonical Project History Snapshot requires every Reflection to have a stable identity."
+        );
+      }
+
+      return {
+        eventType:
+          "reflection",
+
+        eventId,
+
+        content:
+          reflection.content,
+
+        source:
+          reflection.source,
+
+        occurredAt,
+      };
+    }
+  );
+}
+
+
+function createLifecycleEvents({
+  projectId,
+  lifecycleHistory,
+}: {
+  projectId:
+    string;
+
+  lifecycleHistory:
+    ProjectLifecycleHistoryEntry[];
+}): CanonicalProjectHistoryEvent[] {
+  return lifecycleHistory.map(
+    (entry) => {
+      if (
+        entry.projectId !==
+        projectId
+      ) {
+        throw new Error(
+          "Canonical Project History Snapshot cannot include a lifecycle event from another project."
+        );
+      }
+
+      const eventId =
+        entry.eventId.trim();
+
+      if (
+        eventId.length ===
+        0
+      ) {
+        throw new Error(
+          "Canonical Project History Snapshot requires every lifecycle event to have a stable event identity."
+        );
+      }
+
+      const occurredAt =
+        normalizeTimestamp(
+          entry.occurredAt,
+          "Canonical Project History Snapshot requires valid lifecycle event timestamps."
+        );
+
+      if (
+        entry.type ===
+        "project-started"
+      ) {
+        return {
+          eventType:
+            "project-started",
+
+          eventId,
+
+          focus:
+            normalizeOptionalString(
+              entry.focus
+            ),
+
+          occurredAt,
+        };
+      }
+
+      const nextFocus =
+        entry.nextFocus.trim();
+
+      if (
+        nextFocus.length ===
+        0
+      ) {
+        throw new Error(
+          "Canonical Project History Snapshot requires focus-updated lifecycle events to have a next focus."
+        );
+      }
+
+      return {
+        eventType:
+          "focus-updated",
+
+        eventId,
+
+        previousFocus:
+          normalizeOptionalString(
+            entry.previousFocus
+          ),
+
+        nextFocus,
+
+        occurredAt,
+      };
+    }
+  );
+}
+
+
+function normalizeOptionalString(
+  value:
+    string | null
+): string | null {
+  if (
+    value ===
+    null
+  ) {
+    return null;
+  }
+
+  const normalizedValue =
+    value.trim();
+
+  return normalizedValue.length ===
+    0
+    ? null
+    : normalizedValue;
+}
+
+
+function normalizeTimestamp(
+  value:
+    string,
+  errorMessage:
+    string
+): string {
+  const timestamp =
+    new Date(
+      value
+    );
+
+  if (
+    Number.isNaN(
+      timestamp.getTime()
+    )
+  ) {
+    throw new Error(
+      errorMessage
+    );
+  }
+
+  return timestamp.toISOString();
 }
