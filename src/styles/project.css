@@ -116,6 +116,13 @@
   line-height: 1.5;
 }
 
+.project-action-success {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
 /* -------------------------------------------------------
    Project field headings and requirement labels
    ------------------------------------------------------- */

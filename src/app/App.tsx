@@ -82,6 +82,10 @@ import {
 } from "../project-metadata/createRepositoryDerivedMetadata";
 
 import {
+  recordProjectFocusUpdatedEvent,
+  recordProjectStartedEvent,
+} from "../project-actions/projectLifecycleEvents";
+import {
   createRuntimeProjectIntelligence,
 } from "../project-intelligence/createRuntimeProjectIntelligence";
 import {
@@ -114,6 +118,8 @@ import {
 } from "../components/trust/TrustLayer";
 import {
   ensureProjectForRepository,
+  markProjectStarted,
+  updateProjectCurrentFocus,
 } from "../lib/projectPersistence";
 import {
   createReflection,
@@ -318,6 +324,14 @@ export function App() {
 
   const [currentStep, setCurrentStep] = useState("");
 
+  const [
+    projectFocusSaveStatus,
+    setProjectFocusSaveStatus,
+  ] = useState<
+    "idle" |
+    "saved"
+  >("idle");
+
   const runtimeProjectIntelligence =
     useMemo(
       () => {
@@ -378,6 +392,13 @@ export function App() {
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
 
+  const [
+    isCanonicalProjectStarted,
+    setIsCanonicalProjectStarted,
+  ] = useState(
+    false
+  );
+
   const [runtimeV2Response, setRuntimeV2Response] =
     useState<RuntimeContractV2Response | null>(null);
 
@@ -420,7 +441,7 @@ export function App() {
         selectedRepository !== null,
 
       hasProject:
-        activeProject !== null,
+        isCanonicalProjectStarted,
 
       hasCurrentFocus:
         currentStep.trim().length > 0,
@@ -489,9 +510,51 @@ export function App() {
       return;
     }
 
-    setSelectedRepository(
-      restoredRepository
-    );
+    let isCancelled =
+      false;
+
+    const restoreRepository =
+      async () => {
+        try {
+          const canonicalProject =
+            await ensureProjectForRepository(
+              restoredRepository
+            );
+
+          if (isCancelled) {
+            return;
+          }
+
+          setIsCanonicalProjectStarted(
+            canonicalProject.startedAt !==
+              null
+          );
+
+          setSelectedRepository(
+            restoredRepository
+          );
+        } catch (error) {
+          if (isCancelled) {
+            return;
+          }
+
+          console.error(
+            "Unable to restore canonical Project lifecycle state.",
+            error
+          );
+
+          setProjectPersistenceError(
+            "Unable to restore the InnerMirror project record."
+          );
+        }
+      };
+
+    void restoreRepository();
+
+    return () => {
+      isCancelled =
+        true;
+    };
   }, [
     runtimeProjectIdentity,
     selectedRepository,
@@ -826,6 +889,7 @@ export function App() {
     setSelectedRepository(null);
     setProjectPersistenceError(null);
     setActiveProject(null);
+    setIsCanonicalProjectStarted(false);
     setLatestCapturedSnapshot(null);
     resetSnapshot();
   }, [repositoryError, resetSnapshot]);
@@ -1075,6 +1139,7 @@ export function App() {
       );
 
       setActiveProject(null);
+      setIsCanonicalProjectStarted(false);
       setCurrentStep("");
       setLatestCapturedSnapshot(null);
       setRuntimeV2Response(null);
@@ -1114,8 +1179,14 @@ export function App() {
     );
 
     try {
-      await ensureProjectForRepository(
-        repository
+      const canonicalProject =
+        await ensureProjectForRepository(
+          repository
+        );
+
+      setIsCanonicalProjectStarted(
+        canonicalProject.startedAt !==
+          null
       );
     } catch (error) {
       console.error(
@@ -1129,6 +1200,7 @@ export function App() {
 
       return;
     }
+
     const nextRuntimeProjectIdentity =
       createRuntimeProjectIdentity({
         repository,
@@ -1222,48 +1294,283 @@ export function App() {
     resetMerge();
   };
 
+  const handleChangeCurrentStep = (
+    value: string
+  ) => {
+    setCurrentStep(
+      value
+    );
+
+    setProjectFocusSaveStatus(
+      "idle"
+    );
+  };
+
   const resolvedCurrentStep =
     currentStep.trim().length > 0
       ? currentStep.trim()
       : "Explore this project";
 
-  const handleApplyProjectFocus = () => {
+  const handleApplyProjectFocus = async () => {
     if (selectedRepository === null) {
       return;
     }
 
-    const trimmedCurrentStep = currentStep.trim();
+    const trimmedCurrentStep =
+      currentStep.trim();
 
     if (trimmedCurrentStep.length === 0) {
       return;
     }
 
-    if (activeProject === null) {
-      const nextProject = createPblProject({
-        name: selectedRepository.name,
-        repository: {
-          provider: "github",
-          owner: selectedRepository.owner,
-          name: selectedRepository.name,
-          defaultBranch: selectedRepository.defaultBranch,
-        },
-        currentStep: trimmedCurrentStep,
-      });
+    setProjectPersistenceError(null);
 
-      setActiveProject(nextProject);
-      resetSnapshot();
-      setLatestCapturedSnapshot(null);
-      setRuntimeV2Response(null);
+    setProjectFocusSaveStatus(
+      "idle"
+    );
+
+    let canonicalProject;
+
+    try {
+      canonicalProject =
+        await ensureProjectForRepository(
+          selectedRepository
+        );
+    } catch (error) {
+      console.error(
+        "Unable to resolve canonical Project for lifecycle event.",
+        error
+      );
+
+      setProjectPersistenceError(
+        "Unable to establish the InnerMirror project record."
+      );
 
       return;
     }
 
-    const updatedProject = updatePblProjectFocus({
-      project: activeProject,
-      currentStep: trimmedCurrentStep,
-    });
+    const previousFocus =
+      canonicalProject.currentFocus;
 
-    setActiveProject(updatedProject);
+    const wasLocalProjectMissing =
+      activeProject === null;
+
+    const workingProject =
+      activeProject ??
+      createPblProject({
+        name:
+          selectedRepository.name,
+
+        repository: {
+          provider:
+            "github",
+
+          owner:
+            selectedRepository.owner,
+
+          name:
+            selectedRepository.name,
+
+          defaultBranch:
+            selectedRepository.defaultBranch,
+        },
+
+        currentStep:
+          trimmedCurrentStep,
+      });
+
+    let startResult;
+
+    try {
+      startResult =
+        await markProjectStarted(
+          canonicalProject.id
+        );
+    } catch (error) {
+      console.error(
+        "Unable to persist canonical Project start state.",
+        error
+      );
+
+      setProjectPersistenceError(
+        "Unable to persist the InnerMirror project start state."
+      );
+
+      return;
+    }
+
+    if (startResult.didStart) {
+      let focusedProject;
+
+      try {
+        focusedProject =
+          await updateProjectCurrentFocus({
+            projectId:
+              startResult.project.id,
+
+            currentFocus:
+              trimmedCurrentStep,
+          });
+      } catch (error) {
+        console.error(
+          "Unable to persist the initial canonical Project focus.",
+          error
+        );
+
+        setProjectPersistenceError(
+          "Unable to persist the InnerMirror project focus."
+        );
+
+        return;
+      }
+
+      setIsCanonicalProjectStarted(
+        true
+      );
+
+      if (wasLocalProjectMissing) {
+        setActiveProject(
+          workingProject
+        );
+
+        resetSnapshot();
+
+        setLatestCapturedSnapshot(
+          null
+        );
+
+        setRuntimeV2Response(
+          null
+        );
+      } else {
+        const updatedProject =
+          updatePblProjectFocus({
+            project:
+              workingProject,
+
+            currentStep:
+              trimmedCurrentStep,
+          });
+
+        setActiveProject(
+          updatedProject
+        );
+      }
+
+      try {
+        await recordProjectStartedEvent({
+          projectId:
+            focusedProject.id,
+
+          wasAlreadyStarted:
+            false,
+
+          focus:
+            focusedProject.currentFocus,
+        });
+      } catch (error) {
+        console.error(
+          "Unable to persist project_started lifecycle event.",
+          error
+        );
+      }
+
+      return;
+    }
+
+    const normalizedPreviousFocus =
+      previousFocus?.trim() ??
+      null;
+
+    if (
+      normalizedPreviousFocus ===
+      trimmedCurrentStep
+    ) {
+      if (wasLocalProjectMissing) {
+        setActiveProject(
+          workingProject
+        );
+
+        resetSnapshot();
+
+        setLatestCapturedSnapshot(
+          null
+        );
+
+        setRuntimeV2Response(
+          null
+        );
+      }
+
+      return;
+    }
+
+    let focusedProject;
+
+    try {
+      focusedProject =
+        await updateProjectCurrentFocus({
+          projectId:
+            canonicalProject.id,
+
+          currentFocus:
+            trimmedCurrentStep,
+        });
+    } catch (error) {
+      console.error(
+        "Unable to persist canonical Project focus update.",
+        error
+      );
+
+      setProjectPersistenceError(
+        "Unable to persist the InnerMirror project focus."
+      );
+
+      return;
+    }
+
+    const updatedProject =
+      updatePblProjectFocus({
+        project:
+          workingProject,
+
+        currentStep:
+          trimmedCurrentStep,
+      });
+
+    setActiveProject(
+      updatedProject
+    );
+
+    try {
+      await recordProjectFocusUpdatedEvent({
+        projectId:
+          focusedProject.id,
+
+        previousFocus,
+
+        nextFocus:
+          focusedProject.currentFocus ??
+          trimmedCurrentStep,
+      });
+    } catch (error) {
+      console.error(
+        "Unable to persist focus_updated lifecycle event.",
+        error
+      );
+
+      return;
+    }
+
+    setProjectFocusSaveStatus(
+      "saved"
+    );
+
+    window.setTimeout(() => {
+      setProjectFocusSaveStatus(
+        "idle"
+      );
+    }, 2500);
   };
 
   const persistReflectionBeforeRuntime =
@@ -1780,6 +2087,7 @@ export function App() {
         setSelectedRepository(null);
         setProjectPersistenceError(null);
         setActiveProject(null);
+        setIsCanonicalProjectStarted(false);
         resetSnapshot();
         setLatestCapturedSnapshot(
           null
@@ -2148,19 +2456,21 @@ export function App() {
         <div ref={projectFocusSectionRef}>
           <ProjectStartPanel
             selectedRepository={selectedRepository}
-            project={activeProject}
             currentStep={currentStep}
-            onChangeCurrentStep={setCurrentStep}
+            onChangeCurrentStep={handleChangeCurrentStep}
             onApplyProjectFocus={handleApplyProjectFocus}
             onAnalyzeGitHubProject={handleAnalyzeGitHubProject}
             isGitHubAnalyzing={isGitHubAnalyzing}
             isActionLocked={
               isSavingThought || isCombinedAnalyzing
             }
+            projectFocusSaveStatus={
+              projectFocusSaveStatus
+            }
             startAction={
-              activeProject === null
-                ? projectActionGuidance.startProject
-                : projectActionGuidance.updateProjectFocus
+              isCanonicalProjectStarted
+                ? projectActionGuidance.updateProjectFocus
+                : projectActionGuidance.startProject
             }
             analyzeAction={
               projectActionGuidance.analyzeGitHubProject

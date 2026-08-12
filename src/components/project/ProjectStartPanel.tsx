@@ -1,19 +1,15 @@
 import type {
   ActionAvailability,
   GuidedActionPresentation,
+  GuidedProjectAction,
 } from "../../project-actions/projectActionGuidanceTypes";
 
 import type {
   GitHubRepositorySummary,
 } from "../../types/githubLearningEntry";
 
-import type {
-  PblProject,
-} from "../../types/pblProject";
-
 type ProjectStartPanelProps = {
   selectedRepository: GitHubRepositorySummary | null;
-  project: PblProject | null;
   currentStep: string;
 
   onChangeCurrentStep: (value: string) => void;
@@ -24,13 +20,16 @@ type ProjectStartPanelProps = {
   isGitHubAnalyzing?: boolean;
   isActionLocked?: boolean;
 
+  projectFocusSaveStatus?:
+    | "idle"
+    | "saved";
+
   startAction: GuidedActionPresentation;
   analyzeAction: GuidedActionPresentation;
 };
 
 export function ProjectStartPanel({
   selectedRepository,
-  project,
   currentStep,
   onChangeCurrentStep,
   onApplyProjectFocus,
@@ -38,6 +37,7 @@ export function ProjectStartPanel({
   isProjectSubmitting = false,
   isGitHubAnalyzing = false,
   isActionLocked = false,
+  projectFocusSaveStatus = "idle",
   startAction,
   analyzeAction,
 }: ProjectStartPanelProps) {
@@ -53,11 +53,6 @@ export function ProjectStartPanel({
   const isAnalyzeActionDisabled =
     analyzeAction.availability === "disabled" ||
     isAnyProjectActionRunning;
-
-  const startActionLabel =
-    project === null
-      ? "Start Project"
-      : "Update Project Focus";
 
   return (
     <section
@@ -148,7 +143,9 @@ export function ProjectStartPanel({
               >
                 {isProjectSubmitting
                   ? "Saving Project..."
-                  : startActionLabel}
+                  : getGuidedActionLabel(
+                      startAction.action
+                    )}
               </button>
 
               <small
@@ -157,6 +154,17 @@ export function ProjectStartPanel({
               >
                 {startAction.reason}
               </small>
+
+              {projectFocusSaveStatus ===
+                "saved" && (
+                <small
+                  className="project-action-success"
+                  role="status"
+                  aria-live="polite"
+                >
+                  ✓ Project focus updated
+                </small>
+              )}
             </div>
 
             <div
@@ -232,4 +240,33 @@ function ActionAvailabilityLabel({
   }
 
   return null;
+}
+
+function getGuidedActionLabel(
+  action: GuidedProjectAction
+): string {
+  switch (action) {
+    case "start-project":
+      return "Start Project";
+
+    case "update-project-focus":
+      return "Update Project Focus";
+
+    case "analyze-github-project":
+      return "Analyze GitHub Project";
+
+    case "save-thought":
+      return "Save Thought";
+
+    case "thought-project-analyze":
+      return "Reflection + GitHub";
+
+    default: {
+      const exhaustiveCheck:
+        never =
+        action;
+
+      return exhaustiveCheck;
+    }
+  }
 }

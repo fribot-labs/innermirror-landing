@@ -1,9 +1,9 @@
 import type {
-    GitHubRepositorySummary,
+  GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
 
 import {
-    supabaseClient,
+  supabaseClient,
 } from "./supabaseClient";
 
 export type ProjectStatus =
@@ -47,6 +47,21 @@ export type ProjectRecord = {
     string;
 };
 
+export type MarkProjectStartedResult = {
+  project:
+    ProjectRecord;
+
+  didStart:
+    boolean;
+};
+
+export type UpdateProjectCurrentFocusInput = {
+  projectId:
+    string;
+
+  currentFocus:
+    string;
+};
 
 type ProjectRow = {
   id: string;
@@ -181,9 +196,6 @@ export async function ensureProjectForRepository(
     return existingProject;
   }
 
-  const timestamp =
-    new Date().toISOString();
-
   const {
     data,
     error,
@@ -208,9 +220,6 @@ export async function ensureProjectForRepository(
 
         status:
           "active",
-
-        started_at:
-          timestamp,
       })
       .select(
         PROJECT_SELECT
@@ -235,6 +244,186 @@ export async function ensureProjectForRepository(
       }
     }
 
+    throw error;
+  }
+
+  return toProjectRecord(
+    data as ProjectRow
+  );
+}
+
+export async function markProjectStarted(
+  projectId:
+    string
+): Promise<MarkProjectStartedResult> {
+  const normalizedProjectId =
+    projectId.trim();
+
+  if (
+    normalizedProjectId.length ===
+    0
+  ) {
+    throw new Error(
+      "A canonical project identity is required to start an InnerMirror project."
+    );
+  }
+
+  const userId =
+    await requireAuthenticatedUserId();
+
+  const timestamp =
+    new Date().toISOString();
+
+  const {
+    data,
+    error,
+  } =
+    await supabaseClient
+      .from("projects")
+      .update({
+        started_at:
+          timestamp,
+
+        updated_at:
+          timestamp,
+      })
+      .eq(
+        "id",
+        normalizedProjectId
+      )
+      .eq(
+        "user_id",
+        userId
+      )
+      .is(
+        "started_at",
+        null
+      )
+      .select(
+        PROJECT_SELECT
+      )
+      .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
+
+  if (data !== null) {
+    return {
+      project:
+        toProjectRecord(
+          data as ProjectRow
+        ),
+
+      didStart:
+        true,
+    };
+  }
+
+  const {
+    data:
+      existingData,
+    error:
+      existingError,
+  } =
+    await supabaseClient
+      .from("projects")
+      .select(
+        PROJECT_SELECT
+      )
+      .eq(
+        "id",
+        normalizedProjectId
+      )
+      .eq(
+        "user_id",
+        userId
+      )
+      .maybeSingle();
+
+  if (existingError) {
+    throw existingError;
+  }
+
+  if (existingData === null) {
+    throw new Error(
+      "The canonical InnerMirror project could not be found."
+    );
+  }
+
+  return {
+    project:
+      toProjectRecord(
+        existingData as ProjectRow
+      ),
+
+    didStart:
+      false,
+  };
+}
+
+export async function updateProjectCurrentFocus({
+  projectId,
+  currentFocus,
+}: UpdateProjectCurrentFocusInput):
+Promise<ProjectRecord> {
+  const normalizedProjectId =
+    projectId.trim();
+
+  const normalizedCurrentFocus =
+    currentFocus.trim();
+
+  if (
+    normalizedProjectId.length ===
+    0
+  ) {
+    throw new Error(
+      "A canonical project identity is required to update the InnerMirror project focus."
+    );
+  }
+
+  if (
+    normalizedCurrentFocus.length ===
+    0
+  ) {
+    throw new Error(
+      "A non-empty project focus is required."
+    );
+  }
+
+  const userId =
+    await requireAuthenticatedUserId();
+
+  const timestamp =
+    new Date().toISOString();
+
+  const {
+    data,
+    error,
+  } =
+    await supabaseClient
+      .from("projects")
+      .update({
+        current_focus:
+          normalizedCurrentFocus,
+
+        updated_at:
+          timestamp,
+      })
+      .eq(
+        "id",
+        normalizedProjectId
+      )
+      .eq(
+        "user_id",
+        userId
+      )
+      .select(
+        PROJECT_SELECT
+      )
+      .single();
+
+  if (error) {
     throw error;
   }
 
