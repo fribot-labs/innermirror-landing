@@ -1,15 +1,15 @@
 import {
-    describe,
-    expect,
-    it,
+  describe,
+  expect,
+  it,
 } from "vitest";
 
 import type {
-    CanonicalProjectHistorySnapshot,
+  CanonicalProjectHistorySnapshot,
 } from "../../project-history/canonicalProjectHistoryTypes";
 
 import {
-    createProjectHistoryRuntimeInput,
+  createProjectHistoryRuntimeInput,
 } from "../createProjectHistoryRuntimeInput";
 
 
@@ -154,7 +154,7 @@ describe(
 
 
     it(
-      "assigns reflection as the Runtime event type",
+      "preserves the Reflection Runtime event type",
       () => {
         const result =
           createProjectHistoryRuntimeInput({
@@ -176,7 +176,7 @@ describe(
 
 
     it(
-      "maps Reflection createdAt to Runtime occurredAt",
+      "normalizes Reflection occurredAt for Runtime",
       () => {
         const result =
           createProjectHistoryRuntimeInput({
@@ -184,7 +184,10 @@ describe(
               createSnapshot({
                 events: [
                   {
-                    reflectionId:
+                    eventType:
+                      "reflection",
+
+                    eventId:
                       "reflection-offset",
 
                     content:
@@ -193,7 +196,7 @@ describe(
                     source:
                       "landing",
 
-                    createdAt:
+                    occurredAt:
                       "2026-08-11T12:30:00+09:00",
                   },
                 ],
@@ -216,6 +219,221 @@ describe(
         ).toBe(
           "2026-08-11T03:30:00.000Z"
         );
+      }
+    );
+
+
+    it(
+      "maps project-started history events into Runtime history events",
+      () => {
+        const result =
+          createProjectHistoryRuntimeInput({
+            snapshot:
+              createSnapshot({
+                events: [
+                  {
+                    eventType:
+                      "project-started",
+
+                    eventId:
+                      "project-event-started",
+
+                    focus:
+                      "class abstraction",
+
+                    occurredAt:
+                      "2026-08-10T00:30:00.000Z",
+                  },
+                ],
+
+                eventCount:
+                  1,
+
+                timeRange: {
+                  startedAt:
+                    "2026-08-10T00:30:00.000Z",
+
+                  endedAt:
+                    "2026-08-10T00:30:00.000Z",
+                },
+              }),
+          });
+
+        expect(
+          result.events
+        ).toEqual([
+          {
+            eventId:
+              "project-event-started",
+
+            eventType:
+              "project-started",
+
+            focus:
+              "class abstraction",
+
+            occurredAt:
+              "2026-08-10T00:30:00.000Z",
+          },
+        ]);
+      }
+    );
+
+
+    it(
+      "maps focus-updated history events into Runtime history events",
+      () => {
+        const result =
+          createProjectHistoryRuntimeInput({
+            snapshot:
+              createSnapshot({
+                events: [
+                  {
+                    eventType:
+                      "focus-updated",
+
+                    eventId:
+                      "project-event-focus",
+
+                    previousFocus:
+                      "class abstraction",
+
+                    nextFocus:
+                      "class relationships",
+
+                    occurredAt:
+                      "2026-08-10T02:00:00.000Z",
+                  },
+                ],
+
+                eventCount:
+                  1,
+
+                timeRange: {
+                  startedAt:
+                    "2026-08-10T02:00:00.000Z",
+
+                  endedAt:
+                    "2026-08-10T02:00:00.000Z",
+                },
+              }),
+          });
+
+        expect(
+          result.events
+        ).toEqual([
+          {
+            eventId:
+              "project-event-focus",
+
+            eventType:
+              "focus-updated",
+
+            previousFocus:
+              "class abstraction",
+
+            nextFocus:
+              "class relationships",
+
+            occurredAt:
+              "2026-08-10T02:00:00.000Z",
+          },
+        ]);
+      }
+    );
+
+
+    it(
+      "preserves mixed canonical history event order",
+      () => {
+        const result =
+          createProjectHistoryRuntimeInput({
+            snapshot:
+              createSnapshot({
+                events: [
+                  {
+                    eventType:
+                      "project-started",
+
+                    eventId:
+                      "project-started-first",
+
+                    focus:
+                      "class abstraction",
+
+                    occurredAt:
+                      "2026-08-10T00:30:00.000Z",
+                  },
+
+                  {
+                    eventType:
+                      "reflection",
+
+                    eventId:
+                      "reflection-middle",
+
+                    content:
+                      "I am beginning to understand class relationships.",
+
+                    source:
+                      "landing",
+
+                    occurredAt:
+                      "2026-08-10T01:00:00.000Z",
+                  },
+
+                  {
+                    eventType:
+                      "focus-updated",
+
+                    eventId:
+                      "focus-updated-last",
+
+                    previousFocus:
+                      "class abstraction",
+
+                    nextFocus:
+                      "class relationships",
+
+                    occurredAt:
+                      "2026-08-10T02:00:00.000Z",
+                  },
+                ],
+
+                eventCount:
+                  3,
+
+                timeRange: {
+                  startedAt:
+                    "2026-08-10T00:30:00.000Z",
+
+                  endedAt:
+                    "2026-08-10T02:00:00.000Z",
+                },
+              }),
+          });
+
+        expect(
+          result.events.map(
+            (event) =>
+              event.eventId
+          )
+        ).toEqual([
+          "project-started-first",
+          "reflection-middle",
+          "focus-updated-last",
+        ]);
+
+        expect(
+          result.events.map(
+            (event) =>
+              event.eventType
+          )
+        ).toEqual([
+          "project-started",
+          "reflection",
+          "focus-updated",
+        ]);
       }
     );
 
@@ -526,7 +744,10 @@ describe(
               createSnapshot({
                 events: [
                   {
-                    reflectionId:
+                    eventType:
+                      "reflection",
+
+                    eventId:
                       "   ",
 
                     content:
@@ -535,7 +756,7 @@ describe(
                     source:
                       "landing",
 
-                    createdAt:
+                    occurredAt:
                       "2026-08-10T01:00:00.000Z",
                   },
                 ],
@@ -568,7 +789,10 @@ describe(
               createSnapshot({
                 events: [
                   {
-                    reflectionId:
+                    eventType:
+                      "reflection",
+
+                    eventId:
                       "reflection-invalid-date",
 
                     content:
@@ -577,7 +801,7 @@ describe(
                     source:
                       "landing",
 
-                    createdAt:
+                    occurredAt:
                       "not-a-date",
                   },
                 ],
@@ -587,15 +811,15 @@ describe(
 
                 timeRange: {
                   startedAt:
-                    "not-a-date",
+                    "2026-08-10T01:00:00.000Z",
 
                   endedAt:
-                    "not-a-date",
+                    "2026-08-10T01:00:00.000Z",
                 },
               }),
           })
         ).toThrow(
-          "Project History Runtime Input requires a valid history start timestamp."
+          "Project History Runtime Input requires valid event timestamps."
         );
       }
     );
@@ -639,7 +863,10 @@ function createSnapshot(
 
     events: [
       {
-        reflectionId:
+        eventType:
+          "reflection",
+
+        eventId:
           "reflection-1",
 
         content:
@@ -648,12 +875,15 @@ function createSnapshot(
         source:
           "landing",
 
-        createdAt:
+        occurredAt:
           "2026-08-10T01:00:00.000Z",
       },
 
       {
-        reflectionId:
+        eventType:
+          "reflection",
+
+        eventId:
           "reflection-2",
 
         content:
@@ -662,7 +892,7 @@ function createSnapshot(
         source:
           "landing",
 
-        createdAt:
+        occurredAt:
           "2026-08-11T02:00:00.000Z",
       },
     ],
