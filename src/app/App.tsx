@@ -86,6 +86,11 @@ import {
   recordProjectStartedEvent,
 } from "../project-actions/projectLifecycleEvents";
 import {
+  createProjectLifecycleHistory,
+  type ProjectLifecycleHistoryEntry,
+} from "../project-actions/projectLifecycleHistory";
+
+import {
   createRuntimeProjectIntelligence,
 } from "../project-intelligence/createRuntimeProjectIntelligence";
 import {
@@ -117,10 +122,14 @@ import {
   TrustLayer,
 } from "../components/trust/TrustLayer";
 import {
+  listProjectEvents,
+} from "../lib/projectEventPersistence";
+import {
   ensureProjectForRepository,
   markProjectStarted,
   updateProjectCurrentFocus,
 } from "../lib/projectPersistence";
+
 import {
   createReflection,
   listReflectionsByProject,
@@ -332,6 +341,13 @@ export function App() {
     "saved"
   >("idle");
 
+  const [
+    ,
+    setProjectLifecycleHistory,
+  ] = useState<
+    ProjectLifecycleHistoryEntry[]
+  >([]);
+
   const runtimeProjectIntelligence =
     useMemo(
       () => {
@@ -456,6 +472,36 @@ export function App() {
         isAnyProjectActionRunning,
     });
 
+  const loadCanonicalProjectLifecycleHistory =
+    async (
+      projectId: string
+    ): Promise<void> => {
+      try {
+        const events =
+          await listProjectEvents(
+            projectId
+          );
+
+        const history =
+          createProjectLifecycleHistory(
+            events
+          );
+
+        setProjectLifecycleHistory(
+          history
+        );
+      } catch (error) {
+        console.error(
+          "Unable to load canonical Project lifecycle history.",
+          error
+        );
+
+        setProjectLifecycleHistory(
+          []
+        );
+      }
+    };
+
   const handleExistingProjectSelect =
     () => {
       githubEntrySectionRef.current
@@ -529,6 +575,14 @@ export function App() {
             canonicalProject.startedAt !==
               null
           );
+
+          await loadCanonicalProjectLifecycleHistory(
+            canonicalProject.id
+          );
+
+          if (isCancelled) {
+            return;
+          }
 
           setSelectedRepository(
             restoredRepository
@@ -890,6 +944,9 @@ export function App() {
     setProjectPersistenceError(null);
     setActiveProject(null);
     setIsCanonicalProjectStarted(false);
+
+    setProjectLifecycleHistory([]);
+
     setLatestCapturedSnapshot(null);
     resetSnapshot();
   }, [repositoryError, resetSnapshot]);
@@ -1140,6 +1197,9 @@ export function App() {
 
       setActiveProject(null);
       setIsCanonicalProjectStarted(false);
+
+      setProjectLifecycleHistory([]);
+
       setCurrentStep("");
       setLatestCapturedSnapshot(null);
       setRuntimeV2Response(null);
@@ -1174,6 +1234,8 @@ export function App() {
 
     setPersistedReflections([]);
 
+    setProjectLifecycleHistory([]);
+
     setProjectPersistenceError(
       null
     );
@@ -1187,6 +1249,10 @@ export function App() {
       setIsCanonicalProjectStarted(
         canonicalProject.startedAt !==
           null
+      );
+
+      await loadCanonicalProjectLifecycleHistory(
+        canonicalProject.id
       );
     } catch (error) {
       console.error(
@@ -1468,6 +1534,10 @@ export function App() {
           focus:
             focusedProject.currentFocus,
         });
+
+        await loadCanonicalProjectLifecycleHistory(
+          focusedProject.id
+        );
       } catch (error) {
         console.error(
           "Unable to persist project_started lifecycle event.",
@@ -1553,6 +1623,10 @@ export function App() {
           focusedProject.currentFocus ??
           trimmedCurrentStep,
       });
+
+      await loadCanonicalProjectLifecycleHistory(
+        focusedProject.id
+      );
     } catch (error) {
       console.error(
         "Unable to persist focus_updated lifecycle event.",
@@ -2088,6 +2162,9 @@ export function App() {
         setProjectPersistenceError(null);
         setActiveProject(null);
         setIsCanonicalProjectStarted(false);
+
+        setProjectLifecycleHistory([]);
+
         resetSnapshot();
         setLatestCapturedSnapshot(
           null

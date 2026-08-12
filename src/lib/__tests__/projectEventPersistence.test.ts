@@ -1,9 +1,9 @@
 import {
-    beforeEach,
-    describe,
-    expect,
-    it,
-    vi,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
 } from "vitest";
 
 
@@ -54,9 +54,10 @@ vi.mock(
 
 
 import {
-    createProjectEvent,
-    listProjectEventsByProject,
-    type ProjectEventRecord,
+  createProjectEvent,
+  listProjectEvents,
+  listProjectEventsByProject,
+  type ProjectEventRecord,
 } from "../projectEventPersistence";
 
 
@@ -240,6 +241,9 @@ describe(
 
         mocks.eq.mockImplementation(
           () => ({
+            eq:
+              mocks.eq,
+
             order:
               mocks.order,
           })
@@ -682,6 +686,289 @@ describe(
           })
         ).rejects.toBe(
           insertError
+        );
+      }
+    );
+
+
+    it(
+      "loads lifecycle events scoped to the authenticated user and canonical Project",
+      async () => {
+        mockAuthenticatedUser();
+        mockReadSuccess();
+
+        const result =
+          await listProjectEvents(
+            PROJECT_ID
+          );
+
+        expect(
+          mocks.from
+        ).toHaveBeenCalledWith(
+          "project_events"
+        );
+
+        expect(
+          mocks.eq
+        ).toHaveBeenNthCalledWith(
+          1,
+          "user_id",
+          USER_ID
+        );
+
+        expect(
+          mocks.eq
+        ).toHaveBeenNthCalledWith(
+          2,
+          "project_id",
+          PROJECT_ID
+        );
+
+        expect(
+          result
+        ).toEqual([
+          EXPECTED_RECORD,
+        ]);
+      }
+    );
+
+
+    it(
+      "normalizes the canonical Project identity before loading lifecycle events",
+      async () => {
+        mockAuthenticatedUser();
+        mockReadSuccess();
+
+        await listProjectEvents(
+          `  ${PROJECT_ID}  `
+        );
+
+        expect(
+          mocks.eq
+        ).toHaveBeenCalledWith(
+          "project_id",
+          PROJECT_ID
+        );
+      }
+    );
+
+
+    it(
+      "loads lifecycle events in ascending occurrence order",
+      async () => {
+        mockAuthenticatedUser();
+        mockReadSuccess();
+
+        await listProjectEvents(
+          PROJECT_ID
+        );
+
+        expect(
+          mocks.order
+        ).toHaveBeenCalledWith(
+          "occurred_at",
+          {
+            ascending:
+              true,
+          }
+        );
+      }
+    );
+
+
+    it(
+      "normalizes lifecycle event rows returned from the database",
+      async () => {
+        mockAuthenticatedUser();
+
+        mockReadSuccess([
+          DATABASE_ROW,
+          {
+            id:
+              "b2690246-91eb-4ddd-8711-55e85e308157",
+
+            user_id:
+              USER_ID,
+
+            project_id:
+              PROJECT_ID,
+
+            event_type:
+              "project_completed",
+
+            event_data:
+              {},
+
+            occurred_at:
+              "2026-08-12T08:00:00.000Z",
+
+            created_at:
+              "2026-08-12T08:00:01.000Z",
+          },
+        ]);
+
+        const result =
+          await listProjectEvents(
+            PROJECT_ID
+          );
+
+        expect(
+          result
+        ).toEqual([
+          EXPECTED_RECORD,
+          {
+            id:
+              "b2690246-91eb-4ddd-8711-55e85e308157",
+
+            userId:
+              USER_ID,
+
+            projectId:
+              PROJECT_ID,
+
+            eventType:
+              "project_completed",
+
+            eventData:
+              {},
+
+            occurredAt:
+              "2026-08-12T08:00:00.000Z",
+
+            createdAt:
+              "2026-08-12T08:00:01.000Z",
+          },
+        ]);
+      }
+    );
+
+
+    it(
+      "returns an empty lifecycle history when no Project Events exist",
+      async () => {
+        mockAuthenticatedUser();
+
+        mockReadSuccess(
+          []
+        );
+
+        const result =
+          await listProjectEvents(
+            PROJECT_ID
+          );
+
+        expect(
+          result
+        ).toEqual(
+          []
+        );
+      }
+    );
+
+
+    it(
+      "rejects an empty canonical Project identity before loading lifecycle events",
+      async () => {
+        await expect(
+          listProjectEvents(
+            "   "
+          )
+        ).rejects.toThrow(
+          "A canonical project identity is required to load project lifecycle events."
+        );
+
+        expect(
+          mocks.getUser
+        ).not.toHaveBeenCalled();
+
+        expect(
+          mocks.from
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+
+    it(
+      "rejects an unauthenticated user before loading lifecycle events",
+      async () => {
+        mocks.getUser.mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            null,
+        });
+
+        await expect(
+          listProjectEvents(
+            PROJECT_ID
+          )
+        ).rejects.toThrow(
+          "An authenticated user is required to load Project lifecycle events."
+        );
+
+        expect(
+          mocks.from
+        ).not.toHaveBeenCalled();
+      }
+    );
+
+
+    it(
+      "propagates authentication errors while loading lifecycle events",
+      async () => {
+        const authError =
+          new Error(
+            "Authentication failed."
+          );
+
+        mocks.getUser.mockResolvedValue({
+          data: {
+            user:
+              null,
+          },
+
+          error:
+            authError,
+        });
+
+        await expect(
+          listProjectEvents(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          authError
+        );
+      }
+    );
+
+
+    it(
+      "propagates lifecycle event query errors",
+      async () => {
+        mockAuthenticatedUser();
+
+        const queryError =
+          new Error(
+            "Project lifecycle query failed."
+          );
+
+        mocks.order.mockResolvedValue({
+          data:
+            null,
+
+          error:
+            queryError,
+        });
+
+        await expect(
+          listProjectEvents(
+            PROJECT_ID
+          )
+        ).rejects.toBe(
+          queryError
         );
       }
     );

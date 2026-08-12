@@ -1,5 +1,5 @@
 import {
-    supabaseClient,
+  supabaseClient,
 } from "./supabaseClient";
 
 
@@ -117,6 +117,90 @@ function toProjectEventRecord(
     createdAt:
       row.created_at,
   };
+}
+
+export async function listProjectEvents(
+  projectId: string
+): Promise<ProjectEventRecord[]> {
+  const normalizedProjectId =
+    projectId.trim();
+
+  if (
+    normalizedProjectId.length ===
+    0
+  ) {
+    throw new Error(
+      "A canonical project identity is required to load project lifecycle events."
+    );
+  }
+
+  const {
+    data:
+      authData,
+    error:
+      authError,
+  } =
+    await supabaseClient.auth.getUser();
+
+  if (authError) {
+    throw authError;
+  }
+
+  if (
+    !authData.user
+  ) {
+    throw new Error(
+      "An authenticated user is required to load Project lifecycle events."
+    );
+  }
+
+  const {
+    data,
+    error,
+  } =
+    await supabaseClient
+      .from(
+        "project_events"
+      )
+      .select(
+        `
+          id,
+          user_id,
+          project_id,
+          event_type,
+          event_data,
+          occurred_at,
+          created_at
+        `
+      )
+      .eq(
+        "user_id",
+        authData.user.id
+      )
+      .eq(
+        "project_id",
+        normalizedProjectId
+      )
+      .order(
+        "occurred_at",
+        {
+          ascending:
+            true,
+        }
+      );
+
+  if (error) {
+    throw error;
+  }
+
+  return (
+    data ?? []
+  ).map(
+    (row) =>
+      toProjectEventRecord(
+        row as ProjectEventRow
+      )
+  );
 }
 
 
