@@ -1,16 +1,30 @@
 import {
-    RuntimeAdapterError,
+  RuntimeAdapterError,
 } from "./runtimeAdapterErrors";
 
 import type {
-    RuntimeBoundaryHealthResponse,
-    RuntimeBoundaryHealthResult,
+  RuntimeBoundaryHealthResult,
 } from "./runtimeBoundaryTypes";
 
 const RUNTIME_BASE_URL =
   getRuntimeBaseUrl();
 
 const REQUEST_TIMEOUT_MS = 5000;
+
+type PublicRuntimeHealthResponse = {
+  ok: boolean;
+  meta?: {
+    generatedAt?: string;
+  };
+  result?: {
+    service?: string;
+    status?: string;
+  };
+  error?: {
+    code?: string;
+    message?: string;
+  };
+};
 
 export async function fetchRuntimeBoundaryHealth():
   Promise<RuntimeBoundaryHealthResult> {
@@ -25,7 +39,7 @@ export async function fetchRuntimeBoundaryHealth():
   try {
     const response =
       await fetch(
-        `${RUNTIME_BASE_URL}/runtime/boundary/health`,
+        `${RUNTIME_BASE_URL}/health`,
         {
           signal:
             controller.signal,
@@ -35,24 +49,63 @@ export async function fetchRuntimeBoundaryHealth():
     if (!response.ok) {
       throw new RuntimeAdapterError(
         "RUNTIME_SERVER_ERROR",
-        `Runtime boundary health returned status ${response.status}`,
+        `Runtime health returned status ${response.status}`,
         response.status >= 500
       );
     }
 
     const data =
-      (await response.json()) as RuntimeBoundaryHealthResponse;
+      (await response.json()) as
+        PublicRuntimeHealthResponse;
 
-    if (!data.ok || !data.result) {
+    if (
+      !data.ok ||
+      data.result?.status !==
+        "private-runtime-ready"
+    ) {
       throw new RuntimeAdapterError(
         "RUNTIME_INVALID_RESPONSE",
         data.error?.message ??
-          "Runtime boundary health response is invalid.",
+          "Runtime health response is invalid.",
         true
       );
     }
 
-    return data.result;
+    const generatedAt =
+      typeof data.meta?.generatedAt ===
+        "string" &&
+      data.meta.generatedAt.trim().length > 0
+        ? data.meta.generatedAt
+        : new Date().toISOString();
+
+    return {
+      status:
+        "healthy",
+
+      checks: [
+        {
+          name:
+            "runtime-service",
+
+          status:
+            "pass",
+
+          message:
+            "Runtime service is ready.",
+
+          details: {
+            service:
+              data.result.service ??
+              "innermirror-runtime-private",
+
+            runtimeStatus:
+              data.result.status,
+          },
+        },
+      ],
+
+      generatedAt,
+    };
   } catch (error) {
     if (
       error instanceof DOMException &&
@@ -60,7 +113,7 @@ export async function fetchRuntimeBoundaryHealth():
     ) {
       throw new RuntimeAdapterError(
         "RUNTIME_TIMEOUT",
-        "Runtime boundary health request timed out.",
+        "Runtime health request timed out.",
         true
       );
     }
@@ -75,7 +128,7 @@ export async function fetchRuntimeBoundaryHealth():
       "RUNTIME_NETWORK_ERROR",
       error instanceof Error
         ? error.message
-        : "Runtime boundary health request failed.",
+        : "Runtime health request failed.",
       true
     );
   } finally {
@@ -91,7 +144,7 @@ function getRuntimeBaseUrl(): string {
     typeof value === "string" &&
     value.trim().length > 0
   ) {
-    return value;
+    return value.trim();
   }
 
   return "http://localhost:4000";
