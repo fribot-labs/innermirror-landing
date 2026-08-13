@@ -16,6 +16,11 @@ import type {
   RuntimeStreamingMergeEvent,
 } from "../types/runtimeStreamingMerge";
 
+import {
+  isRuntimeMemoryTimelineEnabled,
+} from "./runtimeProductionCapabilities";
+
+
 export type RuntimeStreamingMergeState = {
   isMerging: boolean;
   events: RuntimeStreamingMergeEvent[];
@@ -48,6 +53,23 @@ export function useRuntimeStreamingMerge() {
         ],
         latestTimelineItem: null,
       });
+
+      if (
+        !isRuntimeMemoryTimelineEnabled()
+      ) {
+        setState((current) => ({
+          ...current,
+          isMerging: false,
+          events: [
+            ...current.events,
+            createRuntimeStreamingMergeEvent(
+              "completed"
+            ),
+          ],
+        }));
+
+        return;
+      }
 
       window.setTimeout(() => {
         setState((current) => ({
