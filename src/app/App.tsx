@@ -63,6 +63,9 @@ import {
 import { supabaseClient } from "../lib/supabaseClient";
 
 import {
+  deleteMyInnerMirrorData,
+} from "../lib/accountDataDeletion";
+import {
   acceptCurrentPrivacyPolicy,
   CURRENT_PRIVACY_POLICY,
   hasAcceptedCurrentPrivacyPolicy,
@@ -253,6 +256,11 @@ export function App() {
   const [authenticatedUser, setAuthenticatedUser] =
     useState<User | null>(null);
 
+  const [
+    isAuthStateResolved,
+    setIsAuthStateResolved,
+  ] = useState(false);
+
   const [authMessage, setAuthMessage] =
     useState<string | null>(null);
 
@@ -278,6 +286,23 @@ export function App() {
     isAcceptingPolicy,
     setIsAcceptingPolicy,
   ] = useState(false);
+
+  const [
+    deletionConfirmation,
+    setDeletionConfirmation,
+  ] = useState("");
+
+  const [
+    isDeletingAccountData,
+    setIsDeletingAccountData,
+  ] = useState(false);
+
+  const [
+    accountDataDeletionError,
+    setAccountDataDeletionError,
+  ] = useState<string | null>(
+    null
+  );
 
   const [
     githubSessionId,
@@ -989,30 +1014,48 @@ export function App() {
     };
 
     const restoreSession = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabaseClient.auth.getSession();
+      try {
+        const {
+          data: { session },
+          error,
+        } =
+          await supabaseClient.auth.getSession();
 
-      if (error) {
-        console.error(
-          "Unable to restore Supabase session.",
-          error
-        );
-
-        if (isMounted) {
-          clearRuntimeGitHubSession();
-          setGithubConnectionState("error");
-          setAuthenticatedUser(null);
-          setAuthMessage(
-            "Unable to restore the GitHub session."
+        if (error) {
+          console.error(
+            "Unable to restore Supabase session.",
+            error
           );
+
+          if (isMounted) {
+            clearRuntimeGitHubSession();
+
+            setGithubConnectionState(
+              "error"
+            );
+
+            setAuthenticatedUser(
+              null
+            );
+
+            setAuthMessage(
+              "Unable to restore the GitHub session."
+            );
+          }
+
+          return;
         }
 
-        return;
+        await establishGitHubConnection(
+          session
+        );
+      } finally {
+        if (isMounted) {
+          setIsAuthStateResolved(
+            true
+          );
+        }
       }
-
-      await establishGitHubConnection(session);
     };
 
     void restoreSession();
@@ -1021,6 +1064,12 @@ export function App() {
       data: { subscription },
     } = supabaseClient.auth.onAuthStateChange(
       (_event, session) => {
+        if (isMounted) {
+          setIsAuthStateResolved(
+            true
+          );
+        }
+
         void establishGitHubConnection(
           session
         );
@@ -1389,6 +1438,167 @@ export function App() {
 
         setAuthMessage(
           error.message
+        );
+      }
+    };
+
+  const handleDeleteMyInnerMirrorData =
+    async () => {
+      if (
+        authenticatedUser === null ||
+        deletionConfirmation !==
+          "DELETE" ||
+        isDeletingAccountData
+      ) {
+        return;
+      }
+
+      setIsDeletingAccountData(
+        true
+      );
+
+      setAccountDataDeletionError(
+        null
+      );
+
+      try {
+        await deleteMyInnerMirrorData();
+
+        /*
+        * Database deletion succeeded.
+        *
+        * Keep:
+        * - authenticated Supabase user
+        * - GitHub connection
+        * - Runtime GitHub session
+        *
+        * Clear:
+        * - learner-owned InnerMirror state
+        */
+
+        setSelectedRepository(
+          null
+        );
+
+        setProjectPersistenceError(
+          null
+        );
+
+        setPersistedReflections(
+          []
+        );
+
+        setReflectionPersistenceError(
+          null
+        );
+
+        setReflectionHistoryError(
+          null
+        );
+
+        setIsLoadingReflectionHistory(
+          false
+        );
+
+        clearRuntimeProjectIdentity();
+
+        setRuntimeProjectIdentity(
+          null
+        );
+
+        clearRuntimeProjectMetadata();
+
+        setRuntimeProjectMetadata(
+          null
+        );
+
+        clearRuntimeProjectContext();
+
+        setRuntimeProjectContext(
+          null
+        );
+
+        setActiveProject(
+          null
+        );
+
+        setCanonicalProjectRecord(
+          null
+        );
+
+        setIsCanonicalProjectStarted(
+          false
+        );
+
+        setProjectLifecycleHistory(
+          []
+        );
+
+        setCurrentStep(
+          ""
+        );
+
+        setProjectFocusSaveStatus(
+          "idle"
+        );
+
+        setContent(
+          ""
+        );
+
+        setLatestCapturedSnapshot(
+          null
+        );
+
+        setRuntimeV2Response(
+          null
+        );
+
+        setProjectActionState(
+          "idle"
+        );
+
+        resetSnapshot();
+
+        resetMerge();
+
+        projectAnalysisMemory.clearEvents();
+
+        /*
+        * Policy Acceptance was deleted by the RPC.
+        *
+        * Keep the authenticated user, but return the app
+        * to the current Policy Gate.
+        */
+        setPolicyAcceptanceError(
+          null
+        );
+
+        setIsAcceptingPolicy(
+          false
+        );
+
+        setPolicyAcceptanceState(
+          "required"
+        );
+
+        setDeletionConfirmation(
+          ""
+        );
+      } catch (error) {
+        console.error(
+          "Unable to delete InnerMirror data.",
+          error
+        );
+
+        setAccountDataDeletionError(
+          error instanceof Error
+            ? error.message
+            : "Unable to delete InnerMirror data. Please try again."
+        );
+      } finally {
+        setIsDeletingAccountData(
+          false
         );
       }
     };
@@ -2669,7 +2879,11 @@ export function App() {
     }
   };
 
+  const isAuthStatePending =
+    !isAuthStateResolved;
+
   const isPolicyCheckPending =
+    isAuthStateResolved &&
     authenticatedUser !== null &&
     (
       policyAcceptanceState === "idle" ||
@@ -2677,22 +2891,36 @@ export function App() {
     );
 
   const isPolicyAcceptanceRequired =
+    isAuthStateResolved &&
     authenticatedUser !== null &&
     policyAcceptanceState === "required";
 
   const hasPolicyAcceptanceError =
+    isAuthStateResolved &&
     authenticatedUser !== null &&
     policyAcceptanceState === "error";
 
   const canEnterAuthenticatedApp =
-    authenticatedUser === null ||
-    policyAcceptanceState === "accepted";
+    isAuthStateResolved &&
+    (
+      authenticatedUser === null ||
+      policyAcceptanceState === "accepted"
+    );
 
   return (
     <main>
       <InnerMirrorBrand />
 
       <TrustLayer />
+
+      {isAuthStatePending ? (
+        <section
+          className="github-repository-status"
+          aria-live="polite"
+        >
+          Restoring session...
+        </section>
+      ) : null}
 
       {isPolicyCheckPending ? (
         <section
@@ -2822,6 +3050,74 @@ export function App() {
                 )
               }
             />
+
+            {authenticatedUser !== null ? (
+              <section className="github-repository-status">
+                <h3>
+                  Delete InnerMirror Data
+                </h3>
+
+                <p>
+                  Permanently delete your Projects,
+                  Reflections, Project history, and
+                  Policy Acceptance records.
+                </p>
+
+                <p>
+                  Your login account and GitHub
+                  connection will remain available.
+                </p>
+
+                <p>
+                  This action cannot be undone.
+                </p>
+
+                <label>
+                  Type DELETE to confirm.
+                  <input
+                    type="text"
+                    value={
+                      deletionConfirmation
+                    }
+                    disabled={
+                      isDeletingAccountData
+                    }
+                    onChange={(event) => {
+                      setDeletionConfirmation(
+                        event.target.value
+                      );
+
+                      setAccountDataDeletionError(
+                        null
+                      );
+                    }}
+                  />
+                </label>
+
+                {accountDataDeletionError !==
+                null ? (
+                  <p role="alert">
+                    {accountDataDeletionError}
+                  </p>
+                ) : null}
+
+                <button
+                  type="button"
+                  disabled={
+                    deletionConfirmation !==
+                      "DELETE" ||
+                    isDeletingAccountData
+                  }
+                  onClick={() => {
+                    void handleDeleteMyInnerMirrorData();
+                  }}
+                >
+                  {isDeletingAccountData
+                    ? "Deleting..."
+                    : "Delete My Data"}
+                </button>
+              </section>
+            ) : null}
 
             <RepositorySelector
               repositories={
