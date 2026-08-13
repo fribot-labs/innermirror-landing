@@ -9,7 +9,7 @@ import type {
 } from "../types/githubLearningEntry";
 
 const RUNTIME_API_BASE_URL =
-  import.meta.env.VITE_RUNTIME_API_BASE_URL ??
+  import.meta.env.VITE_RUNTIME_API_URL ??
   "http://localhost:4000";
 
 type UseGitHubRepositoriesOptions = {
