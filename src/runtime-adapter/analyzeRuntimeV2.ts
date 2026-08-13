@@ -1,6 +1,6 @@
 import type {
-    RuntimeContractV2Input,
-    RuntimeContractV2Response,
+  RuntimeContractV2Input,
+  RuntimeContractV2Response,
 } from "../types/runtimeContractV2";
 
 /**
@@ -12,10 +12,10 @@ import type {
  *
  * Production can override this value using:
  *
- * VITE_RUNTIME_API_BASE_URL
+ * VITE_RUNTIME_API_URL
  */
 const RUNTIME_API_BASE_URL =
-  import.meta.env.VITE_RUNTIME_API_BASE_URL ??
+  import.meta.env.VITE_RUNTIME_API_URL ??
   "http://localhost:4000";
 
 /**
