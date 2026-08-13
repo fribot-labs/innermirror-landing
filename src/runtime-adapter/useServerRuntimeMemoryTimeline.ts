@@ -1,20 +1,25 @@
 import {
-    useCallback,
-    useEffect,
-    useState,
+  useCallback,
+  useEffect,
+  useState,
 } from "react";
 
 import {
-    fetchRuntimeMemoryTimeline,
+  fetchRuntimeMemoryTimeline,
 } from "./fetchRuntimeMemoryTimeline";
 
 import {
-    RuntimeAdapterError,
+  RuntimeAdapterError,
 } from "./runtimeAdapterErrors";
 
 import type {
-    RuntimeMemoryTimelineResponse,
+  RuntimeMemoryTimelineResponse,
 } from "../types/runtimeStreamingMerge";
+
+import {
+  isRuntimeMemoryTimelineEnabled,
+} from "./runtimeProductionCapabilities";
+
 
 type ServerRuntimeMemoryTimelineResult =
   NonNullable<RuntimeMemoryTimelineResponse["result"]>;
@@ -41,7 +46,17 @@ export function useServerRuntimeMemoryTimeline(params: {
 
   const refresh =
     useCallback(async () => {
-      if (!params.enabled) {
+      if (
+        !params.enabled ||
+        !isRuntimeMemoryTimelineEnabled()
+      ) {
+        setState({
+          isLoading: false,
+          timeline: null,
+          error: null,
+          lastLoadedAt: null,
+        });
+
         return null;
       }
 
@@ -103,9 +118,20 @@ export function useServerRuntimeMemoryTimeline(params: {
     ]);
 
   useEffect(() => {
-    if (params.enabled) {
+    if (
+      params.enabled &&
+      isRuntimeMemoryTimelineEnabled()
+    ) {
       void refresh();
+      return;
     }
+
+    setState({
+      isLoading: false,
+      timeline: null,
+      error: null,
+      lastLoadedAt: null,
+    });
   }, [
     params.enabled,
     refresh,
