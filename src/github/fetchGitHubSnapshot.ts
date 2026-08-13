@@ -1,10 +1,10 @@
 import type {
-    GitHubSnapshot,
-    GitHubSnapshotRepository,
+  GitHubSnapshot,
+  GitHubSnapshotRepository,
 } from "../types/githubSnapshot";
 
 const RUNTIME_API_BASE_URL =
-  import.meta.env.VITE_RUNTIME_API_BASE_URL ?? "http://localhost:4000";
+  import.meta.env.VITE_RUNTIME_API_URL ?? "http://localhost:4000";
 
 type FetchGitHubSnapshotResponse = {
   ok: boolean;
