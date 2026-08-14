@@ -529,6 +529,31 @@ export function App() {
       ]
     );
 
+  const canonicalReflectionCount =
+    useMemo(
+      () => {
+        if (
+          canonicalProjectRecord ===
+          null
+        ) {
+          return null;
+        }
+
+        const canonicalProjectId =
+          canonicalProjectRecord.id.trim();
+
+        return persistedReflections.filter(
+          (reflection) =>
+            reflection.projectId ===
+            canonicalProjectId
+        ).length;
+      },
+      [
+        canonicalProjectRecord,
+        persistedReflections,
+      ]
+    );
+
   const [activeProject, setActiveProject] =
     useState<PblProject | null>(null);
 
@@ -2731,9 +2756,14 @@ export function App() {
       ?.recentPullRequests.length ?? 0;
 
   const reflectionCount =
-    activeProject !== null
-      ? countPblReflections(activeProject)
-      : 0;
+    canonicalReflectionCount ??
+    (
+      activeProject !== null
+        ? countPblReflections(
+            activeProject
+          )
+        : 0
+    );
 
   const connectedEventCount =
     projectAnalysisMemory.events.filter(
@@ -3284,7 +3314,12 @@ export function App() {
               />
             ) : null}
 
-            <ProjectSummaryPanel project={activeProject} />
+            <ProjectSummaryPanel
+              project={activeProject}
+              reflectionCount={
+                reflectionCount
+              }
+            />
 
             {activeProject !== null ? (
               <GitHubSnapshotPanel snapshotState={snapshotState} />
