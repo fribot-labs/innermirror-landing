@@ -718,6 +718,11 @@ export function App() {
             return;
           }
 
+          const canonicalState =
+            createCanonicalProjectState(
+              canonicalProject
+            );
+
           applyCanonicalProjectState(
             canonicalProject
           );
@@ -728,6 +733,44 @@ export function App() {
 
           if (isCancelled) {
             return;
+          }
+
+          if (canonicalState.isStarted) {
+            const restoredCurrentStep =
+              canonicalProject.currentFocus
+                ?.trim() ||
+              "Explore this project";
+
+            const restoredActiveProject =
+              createPblProject({
+                name:
+                  restoredRepository.name,
+
+                repository: {
+                  provider:
+                    "github",
+
+                  owner:
+                    restoredRepository.owner,
+
+                  name:
+                    restoredRepository.name,
+
+                  defaultBranch:
+                    restoredRepository.defaultBranch,
+                },
+
+                currentStep:
+                  restoredCurrentStep,
+              });
+
+            setActiveProject(
+              restoredActiveProject
+            );
+          } else {
+            setActiveProject(
+              null
+            );
           }
 
           setSelectedRepository(
