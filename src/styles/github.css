@@ -539,3 +539,178 @@
 .github-runtime-reconnect-button {
   white-space: nowrap;
 }
+
+/* =======================================================
+   Account Data Deletion
+   ======================================================= */
+
+.account-data-deletion-panel {
+  margin-bottom: 2rem;
+  padding: 1rem;
+
+  border: 1px solid rgba(248, 113, 113, 0.24);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(127, 29, 29, 0.09),
+      rgba(15, 23, 42, 0.72)
+    );
+
+  color: #f8fafc;
+}
+
+.account-data-deletion-header {
+  margin-bottom: 1rem;
+}
+
+.account-data-deletion-eyebrow {
+  display: inline-block;
+
+  color: #fca5a5;
+
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.account-data-deletion-header h2 {
+  margin: 0.45rem 0 0.5rem;
+
+  color: #f8fafc;
+}
+
+.account-data-deletion-header p {
+  margin: 0;
+  max-width: 720px;
+
+  color: #cbd5e1;
+  line-height: 1.6;
+}
+
+.account-data-deletion-boundary {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+
+  margin-top: 1rem;
+}
+
+.account-data-deletion-boundary > div {
+  display: grid;
+  gap: 0.35rem;
+
+  padding: 0.9rem;
+
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 12px;
+
+  background: rgba(15, 23, 42, 0.46);
+}
+
+.account-data-deletion-boundary strong {
+  color: #f8fafc;
+
+  font-size: 0.8rem;
+}
+
+.account-data-deletion-boundary span {
+  color: #cbd5e1;
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.account-data-deletion-warning {
+  margin-top: 0.9rem;
+  padding: 0.75rem 0.85rem;
+
+  border-left: 3px solid #f87171;
+  border-radius: 8px;
+
+  background: rgba(127, 29, 29, 0.14);
+  color: #fecaca;
+
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.account-data-deletion-confirmation {
+  display: grid;
+  gap: 0.5rem;
+
+  margin-top: 1rem;
+}
+
+.account-data-deletion-confirmation > span {
+  color: #cbd5e1;
+
+  font-size: 0.8rem;
+}
+
+.account-data-deletion-confirmation strong {
+  color: #fca5a5;
+}
+
+.account-data-deletion-confirmation input {
+  width: min(320px, 100%);
+
+  padding: 0.7rem 0.8rem;
+
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: 9px;
+
+  background: rgba(2, 6, 23, 0.68);
+  color: #f8fafc;
+
+  font: inherit;
+}
+
+.account-data-deletion-confirmation input:focus {
+  outline: none;
+
+  border-color: #f87171;
+
+  box-shadow:
+    0 0 0 3px rgba(248, 113, 113, 0.1);
+}
+
+.account-data-deletion-error {
+  margin: 0.75rem 0 0;
+
+  color: #fecaca;
+
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.account-data-deletion-button {
+  min-height: 40px;
+  margin-top: 0.9rem;
+  padding: 0.65rem 0.9rem;
+
+  border: 1px solid rgba(248, 113, 113, 0.48);
+  border-radius: 9px;
+
+  background: rgba(185, 28, 28, 0.76);
+  color: #ffffff;
+
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.account-data-deletion-button:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.86);
+}
+
+.account-data-deletion-button:disabled {
+  border-color: rgba(148, 163, 184, 0.18);
+
+  background: rgba(51, 65, 85, 0.52);
+  color: #64748b;
+
+  cursor: not-allowed;
+}

@@ -137,6 +137,19 @@
   .service-provider-footer-copyright {
     grid-column: auto;
   }
+
+  .project-intelligence-header {
+    flex-direction: column;
+  }
+
+  .project-intelligence-readiness {
+    align-self: flex-start;
+  }
+
+  .project-intelligence-grid,
+  .account-data-deletion-boundary {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 900px) {
@@ -296,5 +309,22 @@
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 0.55rem 1rem;
+  }
+
+  .project-intelligence-panel,
+  .account-data-deletion-panel {
+    padding: 0.9rem;
+  }
+
+  .project-intelligence-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .account-data-deletion-confirmation input {
+    width: 100%;
+  }
+
+  .account-data-deletion-button {
+    width: 100%;
   }
 }
