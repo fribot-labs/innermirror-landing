@@ -271,12 +271,10 @@ describe(
         );
 
         expect(
-          url.searchParams.get(
+          url.searchParams.has(
             "sessionId"
           )
-        ).toBe(
-          "session-123"
-        );
+        ).toBe(false);
 
         expect(
           url.searchParams.get(
@@ -327,6 +325,14 @@ describe(
           )
         ).toBe(
           "application/json"
+        );
+
+        expect(
+          headers.get(
+            "X-InnerMirror-Runtime-Session"
+          )
+        ).toBe(
+          "session-123"
         );
       }
     );

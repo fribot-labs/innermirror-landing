@@ -1,18 +1,22 @@
 import type {
-    RuntimeProjectIdentity,
+  RuntimeProjectIdentity,
 } from "../project-identity/runtimeProjectIdentityTypes";
 
 import type {
-    RuntimeProjectMetadata,
+  RuntimeProjectMetadata,
 } from "../project-metadata/runtimeProjectMetadataTypes";
 
 import {
-    normalizeRepositoryMetadata,
+  normalizeRepositoryMetadata,
 } from "./normalizeRepositoryMetadata";
 
 import {
-    parseRepositoryMetadataManifest,
+  parseRepositoryMetadataManifest,
 } from "./parseRepositoryMetadataManifest";
+
+import {
+  RUNTIME_GITHUB_SESSION_HEADER,
+} from "../github/runtimeGitHubSessionTransport";
 
 const DEFAULT_RUNTIME_API_URL =
   "http://localhost:4000";
@@ -199,11 +203,6 @@ export async function loadRepositoryMetadata({
     );
 
   url.searchParams.set(
-    "sessionId",
-    normalizedSessionId
-  );
-
-  url.searchParams.set(
     "owner",
     owner
   );
@@ -237,6 +236,9 @@ export async function loadRepositoryMetadata({
           headers: {
             Accept:
               "application/json",
+
+            [RUNTIME_GITHUB_SESSION_HEADER]:
+              normalizedSessionId,
           },
         }
       );
