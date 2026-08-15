@@ -104,7 +104,7 @@ export function TrustLayer() {
           <div className="trust-layer__links">
 
             <a
-              href="/PRIVACY.md"
+              href="https://github.com/fribot-labs/innermirror-landing/blob/main/PRIVACY_KO.md"
               target="_blank"
               rel="noreferrer"
             >
@@ -112,7 +112,7 @@ export function TrustLayer() {
             </a>
 
             <a
-              href="/docs/DATA_OWNERSHIP.md"
+              href="https://github.com/fribot-labs/innermirror-landing/blob/main/PRIVACY_KO.md"
               target="_blank"
               rel="noreferrer"
             >
