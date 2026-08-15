@@ -1,0 +1,139 @@
+/* =======================================================
+   Service Provider Footer
+   ======================================================= */
+
+.service-provider-footer {
+  margin-top: 3rem;
+
+  border-top: 1px solid rgba(148, 163, 184, 0.18);
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(15, 23, 42, 0.88),
+      rgba(2, 6, 23, 0.96)
+    );
+
+  color: #cbd5e1;
+}
+
+.service-provider-footer-inner {
+  width: min(1120px, calc(100% - 40px));
+
+  margin: 0 auto;
+  padding: 1.4rem 0 1.25rem;
+
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 0.8fr)
+    minmax(260px, 1.2fr)
+    minmax(280px, 1.4fr);
+
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.service-provider-footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  min-width: 0;
+}
+
+.service-provider-footer-logo {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 auto;
+
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.service-provider-footer-brand > div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.service-provider-footer-brand strong {
+  color: #f8fafc;
+
+  font-size: 0.92rem;
+  line-height: 1.2;
+}
+
+.service-provider-footer-brand span {
+  color: #94a3b8;
+
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+
+.service-provider-footer-information {
+  display: grid;
+  gap: 0.25rem;
+
+  min-width: 0;
+}
+
+.service-provider-footer-information strong {
+  color: #e2e8f0;
+
+  font-size: 0.82rem;
+}
+
+.service-provider-footer-information span,
+.service-provider-footer-information a {
+  color: #94a3b8;
+
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.service-provider-footer-information a {
+  width: fit-content;
+}
+
+.service-provider-footer-information a:hover {
+  color: #bfdbfe;
+}
+
+.service-provider-footer-links {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.85rem;
+}
+
+.service-provider-footer-links a {
+  color: #94a3b8;
+
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.service-provider-footer-links a:hover {
+  color: #bfdbfe;
+}
+
+.service-provider-footer-links a:focus-visible,
+.service-provider-footer-information a:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.service-provider-footer-copyright {
+  grid-column: 1 / -1;
+
+  padding-top: 0.9rem;
+  margin-top: 0.1rem;
+
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+
+  color: #64748b;
+
+  font-size: 0.68rem;
+  line-height: 1.4;
+}

@@ -124,6 +124,19 @@
   .runtime-v2-recommendation-meta {
     grid-template-columns: 1fr;
   }
+
+  .service-provider-footer-inner {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .service-provider-footer-links {
+    justify-content: flex-start;
+  }
+
+  .service-provider-footer-copyright {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 900px) {
@@ -250,5 +263,38 @@
   .runtime-v2-recommendation-insight-meta > span,
   .runtime-v2-recommendation-insight-meta > time {
     width: 100%;
+  }
+
+  .reflection-history-panel {
+    padding: 0.9rem;
+  }
+
+  .reflection-history-item {
+    padding: 0.85rem 0.85rem 0.8rem 2.7rem;
+  }
+
+  .reflection-history-item::before {
+    top: 0.85rem;
+    left: 0.85rem;
+  }
+
+  .reflection-history-item p {
+    font-size: 0.9rem;
+  }
+
+  .service-provider-footer-inner {
+    width: min(calc(100% - 28px), 1120px);
+    padding: 1.2rem 0 1.1rem;
+  }
+
+  .service-provider-footer-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .service-provider-footer-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.55rem 1rem;
   }
 }

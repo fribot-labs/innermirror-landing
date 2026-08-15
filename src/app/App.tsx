@@ -137,6 +137,9 @@ import {
   InnerMirrorBrand,
 } from "../components/branding/InnerMirrorBrand";
 import {
+  ServiceProviderFooter,
+} from "../components/branding/ServiceProviderFooter";
+import {
   ServiceEntryNavigation,
 } from "../components/service-entry/ServiceEntryNavigation";
 import {
@@ -3497,6 +3500,8 @@ export function App() {
             ) : null}
         </>
       ) : null}
+
+      <ServiceProviderFooter />
     </main>
   );
 }
