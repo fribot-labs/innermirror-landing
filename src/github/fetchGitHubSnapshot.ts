@@ -3,6 +3,10 @@ import type {
   GitHubSnapshotRepository,
 } from "../types/githubSnapshot";
 
+import {
+  RUNTIME_GITHUB_SESSION_HEADER,
+} from "./runtimeGitHubSessionTransport";
+
 const RUNTIME_API_BASE_URL =
   import.meta.env.VITE_RUNTIME_API_URL ?? "http://localhost:4000";
 
@@ -30,12 +34,20 @@ export async function fetchGitHubSnapshot(
 
   const url = new URL(`${RUNTIME_API_BASE_URL}/github/snapshot`);
 
-  url.searchParams.set("sessionId", githubSessionId);
   url.searchParams.set("owner", repository.owner);
   url.searchParams.set("name", repository.name);
   url.searchParams.set("defaultBranch", repository.defaultBranch ?? "main");
 
-  const response = await fetch(url.toString());
+  const response =
+    await fetch(
+      url.toString(),
+      {
+        headers: {
+          [RUNTIME_GITHUB_SESSION_HEADER]:
+            githubSessionId,
+        },
+      }
+    );
 
   if (response.status === 401) {
     window.localStorage.removeItem("innermirror.githubSessionId");

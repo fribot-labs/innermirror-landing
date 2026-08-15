@@ -8,6 +8,10 @@ import type {
   GitHubRepositorySummary,
 } from "../types/githubLearningEntry";
 
+import {
+  RUNTIME_GITHUB_SESSION_HEADER,
+} from "./runtimeGitHubSessionTransport";
+
 const RUNTIME_API_BASE_URL =
   import.meta.env.VITE_RUNTIME_API_URL ??
   "http://localhost:4000";
@@ -89,14 +93,15 @@ export function useGitHubRepositories({
           `${RUNTIME_API_BASE_URL}/github/repositories`
         );
 
-        url.searchParams.set(
-          "sessionId",
-          normalizedSessionId
-        );
-
         const response =
           await fetch(
-            url.toString()
+            url.toString(),
+            {
+              headers: {
+                [RUNTIME_GITHUB_SESSION_HEADER]:
+                  normalizedSessionId,
+              },
+            }
           );
 
         if (
