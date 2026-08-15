@@ -3128,60 +3128,77 @@ export function App() {
             />
 
             {authenticatedUser !== null ? (
-              <section className="github-repository-status">
-                <h3>
-                  Delete InnerMirror Data
-                </h3>
+              <section className="account-data-deletion-panel">
+                <div className="account-data-deletion-header">
+                  <span className="account-data-deletion-eyebrow">
+                    DATA CONTROL
+                  </span>
 
-                <p>
-                  Permanently delete your Projects,
-                  Reflections, Project history, and
-                  Policy Acceptance records.
-                </p>
+                  <h2>Delete InnerMirror Data</h2>
 
-                <p>
-                  Your login account and GitHub
-                  connection will remain available.
-                </p>
+                  <p>
+                    Permanently delete the InnerMirror
+                    project data associated with your account.
+                  </p>
+                </div>
 
-                <p>
+                <div className="account-data-deletion-boundary">
+                  <div>
+                    <strong>Deleted</strong>
+                    <span>
+                      Projects, Reflections, Project history,
+                      and Policy Acceptance records.
+                    </span>
+                  </div>
+
+                  <div>
+                    <strong>Preserved</strong>
+                    <span>
+                      Your login account and GitHub connection
+                      will remain available.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="account-data-deletion-warning">
                   This action cannot be undone.
-                </p>
+                </div>
 
-                <label>
-                  Type DELETE to confirm.
+                <label className="account-data-deletion-confirmation">
+                  <span>
+                    Type <strong>DELETE</strong> to confirm.
+                  </span>
+
                   <input
                     type="text"
-                    value={
-                      deletionConfirmation
-                    }
-                    disabled={
-                      isDeletingAccountData
-                    }
+                    value={deletionConfirmation}
+                    disabled={isDeletingAccountData}
+                    autoComplete="off"
+                    spellCheck={false}
                     onChange={(event) => {
                       setDeletionConfirmation(
                         event.target.value
                       );
 
-                      setAccountDataDeletionError(
-                        null
-                      );
+                      setAccountDataDeletionError(null);
                     }}
                   />
                 </label>
 
-                {accountDataDeletionError !==
-                null ? (
-                  <p role="alert">
+                {accountDataDeletionError !== null ? (
+                  <p
+                    className="account-data-deletion-error"
+                    role="alert"
+                  >
                     {accountDataDeletionError}
                   </p>
                 ) : null}
 
                 <button
+                  className="account-data-deletion-button"
                   type="button"
                   disabled={
-                    deletionConfirmation !==
-                      "DELETE" ||
+                    deletionConfirmation !== "DELETE" ||
                     isDeletingAccountData
                   }
                   onClick={() => {
