@@ -33,12 +33,15 @@ The Runtime interprets learning.
 ## Data Ownership
 
 > GitHub repositories always remain
+>
 > under the learner's ownership.
-
+>
 > InnerMirror stores only the information
+>
 > required to provide its own service.
-
-> Deleting an InnerMirror account
+>
+> Deleting InnerMirror data
+>
 > never deletes GitHub repositories.
 
 ---
@@ -73,7 +76,7 @@ Any future AI capabilities will continue to follow the same principles:
 - learner ownership
 - explicit user action
 - transparent analysis
-- complete account deletion
+- complete data deletion
 - GitHub independence
 
 ---
@@ -143,29 +146,17 @@ Choose a project from Fribot Learning.
 
 ```text
 Fribot Learning
-
-↓
-
+        ↓
 Choose a Project
-
-↓
-
+        ↓
 Export Repository
-
-↓
-
+        ↓
 Your GitHub Repository
-
-↓
-
+        ↓
 InnerMirror
-
-↓
-
+        ↓
 Project Analyze
-
 Reflect
-
 Reflect + GitHub
 ```
 
@@ -178,13 +169,9 @@ For the MVP:
 
 ```text
 One Fribot Learning Project
-
 =
-
 One Exported Repository
-
 =
-
 One GitHub Project
 ```
 
@@ -209,17 +196,11 @@ InnerMirror.
 
 ```text
 Existing GitHub Repository
-
-↓
-
+        ↓
 InnerMirror
-
-↓
-
+        ↓
 Project Analyze
-
 Reflect
-
 Reflect + GitHub
 ```
 
@@ -237,17 +218,13 @@ The two services have different responsibilities.
 
 ```text
 Fribot Learning
-
-↓
-
+        ↓
 Defines where a project begins.
 
 ────────────────────────────
 
 InnerMirror
-
-↓
-
+        ↓
 Understands where the project chooses to go.
 ```
 
@@ -281,41 +258,23 @@ InnerMirror interprets how the learner grows.
 
 ```text
 Learner
-
-↓
-
+        ↓
 GitHub Learning Entry
-
-↓
-
+        ↓
 Repository Selection
-
-↓
-
+        ↓
 Project
-
-↓
-
+        ↓
 Reflection
-
-↓
-
+        ↓
 Reflect + GitHub Analyze
-
-↓
-
+        ↓
 Runtime API
-
-↓
-
+        ↓
 Private Runtime
-
-↓
-
+        ↓
 Structured Runtime Response
-
-↓
-
+        ↓
 Landing Presentation
 ```
 
@@ -373,33 +332,19 @@ The Landing follows the architecture below.
 
 ```text
 GitHub Learning Entry
-
-↓
-
+        ↓
 Project
-
-↓
-
+        ↓
 Reflection
-
-↓
-
+        ↓
 GitHub Snapshot
-
-↓
-
+        ↓
 Runtime API Adapter
-
-↓
-
+        ↓
 Runtime Response Mapping
-
-↓
-
+        ↓
 Presentation Components
-
-↓
-
+        ↓
 Learner Experience
 ```
 
@@ -419,13 +364,9 @@ Official workflow:
 
 ```text
 Reflect + GitHub Analyze
-
-↓
-
+        ↓
 Capture GitHub Snapshot
-
-↓
-
+        ↓
 Runtime
 ```
 
@@ -455,17 +396,11 @@ Repository visibility policy:
 
 ```text
 Public Repository
-
-↓
-
+        ↓
 Repository Selection
-
-↓
-
+        ↓
 GitHub Snapshot
-
-↓
-
+        ↓
 Runtime Analysis
 ```
 
@@ -513,17 +448,11 @@ Official hierarchy:
 
 ```text
 Project
-
-↓
-
+        ↓
 Milestone
-
-↓
-
+        ↓
 Pull Request
-
-↓
-
+        ↓
 Reflection
 ```
 
@@ -576,6 +505,65 @@ These principles preserve long-term architectural consistency.
 
 ---
 
+## Database Migration Authority
+
+The Landing repository does not own Supabase database migrations.
+
+The authoritative Supabase migration sequence is maintained exclusively in:
+
+```text
+fribot-labs/innermirror-runtime-private
+└─ supabase/
+   └─ migrations/
+```
+
+The private Runtime repository owns the executable migration history for:
+
+- public InnerMirror database schema
+- Row Level Security
+- database functions
+- deletion functions
+- Product Observation schema
+- Product Observation private access
+- Runtime database access
+
+The Landing may use Supabase through approved browser-facing authentication and
+persistence boundaries, but it does not define or version the production
+database schema.
+
+```text
+innermirror-landing
+        ↓
+browser application
+        ↓
+learner experience
+        ↓
+authenticated public Supabase access
+        ↓
+Runtime communication
+        ↓
+no migration authority
+
+
+innermirror-runtime-private
+        ↓
+private Runtime
+        ↓
+authoritative Supabase migrations
+        ↓
+database access governance
+```
+
+Do not add new Supabase migration files to this repository.
+
+Any future database migration must be introduced through:
+
+```text
+fribot-labs/innermirror-runtime-private/supabase/migrations/
+```
+
+---
+
 ## Architecture Documents
 
 Detailed documentation is available under:
@@ -584,23 +572,14 @@ Detailed documentation is available under:
 docs/architecture/
 
 README.md
-
 ARCHITECTURE_GOVERNANCE.md
-
 PBL_PROJECT_DOMAIN_MODEL.md
-
 GITHUB_SNAPSHOT_INTEGRATION.md
-
 LANDING_RESPONSIBILITY_AUDIT.md
-
 LANDING_RESPONSIBILITY_MATRIX.md
-
 PERSISTENCE_DOMAIN_MODEL.md
-
 DATABASE_SCHEMA.md
-
 RLS_SECURITY_MODEL.md
-
 SUPABASE_MIGRATION_PLAN.md
 ```
 
@@ -616,13 +595,9 @@ Legal architecture is maintained separately from implementation.
 docs/legal/
 
 README.md
-
 LEGAL_FOUNDATION.md
-
 LEGAL_READINESS.md
-
 DATA_OWNERSHIP.md
-
 PERSONAL_DATA_INVENTORY.md
 ```
 
@@ -646,21 +621,13 @@ Current Phase
 Phase 1
 
 ✓ GitHub Learning Entry
-
-↓
-
+        ↓
 ✓ Repository Selection
-
-↓
-
+        ↓
 ✓ Project Domain
-
-↓
-
+        ↓
 ✓ Manual GitHub Snapshot
-
-↓
-
+        ↓
 Runtime Contract V2 Ready
 ```
 
@@ -670,17 +637,11 @@ Next Phase
 Phase 2
 
 Landing
-
-↓
-
+        ↓
 Runtime Contract V2
-
-↓
-
+        ↓
 Runtime V2 Pipeline
-
-↓
-
+        ↓
 Project-based Runtime Intelligence
 ```
 
@@ -712,8 +673,11 @@ The InnerMirror Landing application is built with Vite.
 
 ```bash
 npm install
+
 npm run dev
+
 npm run build
+
 npm run preview
 ```
 
@@ -721,6 +685,7 @@ npm run preview
 
 ```text
 Build Command: npm run build
+
 Output Directory: dist
 ```
 
@@ -730,7 +695,9 @@ The current Landing application uses:
 
 ```text
 VITE_RUNTIME_API_URL
+
 VITE_RUNTIME_REQUEST_TIMEOUT_MS
+
 VITE_RUNTIME_RETRY_COUNT
 ```
 
@@ -753,23 +720,20 @@ bundle and must not contain private credentials or server-only secrets.
 
 The current production deployment target is Vercel.
 
-GitHub OAuth, Supabase authentication, and authenticated Reflection
-persistence will be configured in separate Pull Requests after the public
-Landing URL has been established.
+GitHub OAuth, Supabase authentication, authenticated Reflection persistence,
+and private Runtime integration are maintained according to the current
+Landing / Runtime architecture boundaries.
+
+Executable Supabase database migrations are maintained exclusively in
+`innermirror-runtime-private`.
 
 ```text
 Supabase Foundation
-
-↓
-
+        ↓
 Environment
-
-↓
-
+        ↓
 Client
-
-↓
-
+        ↓
 Authentication
 ```
 
