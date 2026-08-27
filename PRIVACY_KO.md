@@ -106,6 +106,68 @@ Reflection은 이용자가 자유롭게 입력하는 정보입니다. 서비스�
 
 회사는 현재 MVP에서 광고 또는 행동기반 마케팅을 위한 별도 분석 도구를 운영하지 않습니다. Web Analytics Plus, Speed Insights 및 Observability Plus는 현재 Vercel production에서 사용하지 않습니다.
 
+### 4.6 Product Observation 관련 내부 파생정보
+
+회사는 InnerMirror 서비스의 품질과 구조가 의도한 방식으로 작동하는지
+검토하기 위해 제한된 범위의 내부 Product Observation 정보를 처리할 수
+있습니다.
+
+Product Observation은 이용자를 평가하거나 순위를 매기기 위한 기능이
+아니며, 현재 MVP에서는 다음과 같은 목적으로 사용됩니다.
+
+```text
+서비스 구조 검토
+
+프로젝트 및 Reflection 흐름의 연속성 확인
+
+반복적으로 나타나는 서비스 수준의 단절 또는 문제 패턴 확인
+
+내부 서비스 개선 검토
+```
+
+Product Observation 처리 과정에서는 직접적인 이용자 계정정보 대신
+가명 처리된 내부 참조값인 `subjectRef`를 사용할 수 있습니다.
+
+현재 Product Observation에 포함될 수 있는 내부 파생정보에는 다음이
+포함될 수 있습니다.
+
+```text
+Derived Observations
+
+evidence references
+
+Growth Trace recomputation 결과
+
+Cohort recomputation 결과
+
+Service Review Signals
+```
+
+Product Observation은 다음 목적으로 사용하지 않습니다.
+
+```text
+이용자 점수화
+
+이용자 순위화
+
+Growth Score 산출
+
+학습능력 또는 성취도 평가
+
+위험도 평가
+
+성격 또는 심리상태 추론
+```
+
+Product Observation Admin은 현재 내부의 제한된 읽기 전용 관리 기능이며,
+Raw Reflection 및 Raw Question을 기본적으로 노출하지 않도록 설계됩니다.
+
+이용자와 연결 가능한 Product Observation 정보는 해당 이용자의
+InnerMirror 서비스 데이터 삭제와 함께 삭제되는 것을 원칙으로 합니다.
+
+이용자의 InnerMirror 데이터가 삭제된 이후 새로운 Product Observation
+처리가 시작되는 경우 새로운 `subjectRef`가 생성될 수 있습니다.
+
 ---
 
 ## 5. 개인정보의 처리 목적
@@ -122,6 +184,7 @@ Reflection은 이용자가 자유롭게 입력하는 정보입니다. 서비스�
 - 개인정보 처리방침 동의 기록 관리
 - 이용자가 요청한 InnerMirror 데이터 삭제
 - 서비스 보안, 오류 대응 및 정상적인 서비스 운영
+- 서비스 품질 및 구조 검토를 위한 제한된 내부 Product Observation 처리
 
 개인정보는 위 목적과 무관한 목적으로 이용하지 않는 것을 원칙으로 합니다.
 
@@ -171,6 +234,10 @@ GitHub 서비스 자체의 개인정보 처리는 GitHub의 정책에 따릅니�
 - Reflections
 - Project Events
 - Policy Acceptance records
+
+또한 이용자와 연결 가능한 Product Observation 내부 파생정보 및 해당
+`subjectRef` 연결정보도 InnerMirror 서비스 데이터 삭제와 함께 삭제되는
+것을 원칙으로 합니다.
 
 현재 MVP의 **Delete InnerMirror Data** 기능은 InnerMirror 서비스 데이터 삭제 기능이며 로그인 계정 자체를 삭제하는 기능은 아닙니다.
 

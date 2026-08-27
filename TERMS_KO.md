@@ -107,6 +107,34 @@ Reflection은 이용자가 자유롭게 작성하는 입력란입니다.
 
 ---
 
+## 9.1 내부 Product Observation
+
+회사는 InnerMirror 서비스의 품질과 구조를 검토하고 개선하기 위해 현재 MVP에서 제한된 범위의 내부 Product Observation 정보를 처리할 수 있습니다.
+
+Product Observation은 이용자를 평가하거나 순위를 매기기 위한 기능이 아니며, 서비스 구조와 프로젝트·Reflection 흐름의 연속성을 내부적으로 검토하기 위한 목적으로 사용됩니다.
+
+현재 Product Observation은 다음 목적으로 사용하지 않습니다.
+
+```text
+이용자 점수화
+
+이용자 순위화
+
+Growth Score 산출
+
+학습능력 또는 성취도 평가
+
+위험도 평가
+
+성격 또는 심리상태 추론
+```
+
+Product Observation Admin은 현재 내부의 제한된 읽기 전용 관리 기능이며, Raw Reflection 및 Raw Question을 기본적으로 노출하지 않도록 설계됩니다.
+
+이용자와 연결 가능한 Product Observation 정보의 보유 및 삭제는 개인정보 처리방침과 현재 InnerMirror 데이터 삭제 구조에 따릅니다.
+
+---
+
 ## 10. 서비스 데이터와 GitHub 원본 데이터의 구분
 
 InnerMirror에 저장되는 Projects, Reflections, Project Events 및 Policy Acceptance records는 InnerMirror 서비스 데이터입니다.
@@ -149,6 +177,8 @@ InnerMirror는 현재 MVP 단계의 서비스입니다.
 ## 13. 서비스 결과와 책임의 범위
 
 서비스가 제공하는 분석, 추천, 요약 및 기타 결과는 프로젝트와 Reflection을 이해하기 위한 보조 정보입니다.
+
+내부 Product Observation 정보 역시 이용자 개인의 능력, 성취도, 위험도 또는 가치를 평가하기 위한 결과로 사용되지 않습니다.
 
 회사는 서비스 결과가 모든 상황에서 정확하거나 완전하거나 특정 목적에 적합함을 보장하지 않습니다.
 
