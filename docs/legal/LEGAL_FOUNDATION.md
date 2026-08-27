@@ -139,6 +139,122 @@ The public Terms grant the company only the service-operation processing permiss
 
 ---
 
+## 5.1 Product Observation production boundary
+
+The current production service includes an internal Product Observation
+capability used to review whether the InnerMirror service structure and learning
+continuity experience are functioning coherently.
+
+Product Observation remains:
+
+```text
+internal
+
+service-oriented
+
+pseudonymous
+
+read-only at the Admin surface
+```
+
+It is not a learner evaluation system.
+
+The current production Product Observation architecture must not introduce:
+
+```text
+learner scoring
+
+learner ranking
+
+Growth Score
+
+mastery score
+
+risk score
+
+ability score
+
+performance score
+
+behavior score
+
+psychological inference
+```
+
+The Product Observation layer may maintain or recompute approved internal
+representations including:
+
+```text
+pseudonymous subjectRef
+
+evidence references
+
+Derived Observations
+
+Observation ↔ Evidence relationships
+
+Growth Trace recomputation
+
+Cohort recomputation
+
+Service Review Signals
+
+Signal ↔ Evidence relationships
+```
+
+The private Product Observation Admin remains a restricted read-only surface.
+
+Current Admin reads include:
+
+```text
+Growth Trace
+
+Cohort
+
+Service Review Signal
+```
+
+Admin access remains Runtime-authorized and requires:
+
+```text
+valid Runtime GitHub session
+
+trusted GitHub organization
+
+active organization membership
+
+organization role === admin
+```
+
+The Admin frontend must not become an independent authentication,
+authorization, or Product Observation persistence authority.
+
+Direct browser access to privileged Product Observation persistence remains
+prohibited.
+
+Raw Reflection and Raw Question are not exposed by default through the Product
+Observation Admin surface.
+
+Product Observation uses the pseudonymous internal reference:
+
+```text
+subjectRef
+```
+
+rather than requiring direct learner account identity on the normal Admin read
+surface.
+
+The Product Observation purpose remains:
+
+```text
+internal product/service observation
+```
+
+and must not be silently expanded into learner surveillance, human evaluation,
+behavioral scoring, psychological profiling, or performance ranking.
+
+---
+
 ## 6. Minimum deletion boundary
 
 `Delete InnerMirror Data` currently deletes:
@@ -147,6 +263,20 @@ The public Terms grant the company only the service-operation processing permiss
 - Reflections
 - Project Events
 - Policy Acceptance records
+
+The current deletion architecture also removes user-linkable Product Observation
+state associated with the deleted InnerMirror service data, including the
+subject mapping and linked Product Observation history.
+
+After deletion of the Product Observation subject mapping, a future new
+observation lifecycle receives a new:
+
+```text
+subjectRef
+```
+
+Product Observation data must not survive merely because it is internal
+administrative data.
 
 It preserves:
 
@@ -281,6 +411,11 @@ The current production security/privacy boundary includes:
 - no custom external Google Cloud log sink
 - no Vercel external drain
 - Vercel optional analytics/observability add-ons disabled
+- Product Observation persistence remains Runtime-authoritative and server-side.
+- Direct browser Product Observation database access is prohibited.
+- Product Observation Admin authorization requires active trusted-organization membership and role `admin`.
+- Product Observation Admin sessions remain opaque Runtime sessions and are not persisted in browser storage.
+- Raw Reflection and Raw Question are not exposed by default through the Admin surface.
 
 ---
 
@@ -294,6 +429,8 @@ The current production security/privacy boundary includes:
 - Google Cloud Secret Manager replication is automatic rather than Seoul-only.
 - Google Cloud Logging is global for the current buckets.
 - External AI/LLM is not part of the current analysis path; adding one requires privacy/terms review before production use.
+- Product Observation production deployment has passed technical validation, but production activation remains a separate explicit decision.
+- External analytics or external AI/LLM processing of Product Observation data requires a separate privacy, security, vendor and retention review before production use.
 
 ---
 

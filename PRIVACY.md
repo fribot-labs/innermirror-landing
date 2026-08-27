@@ -167,6 +167,69 @@ This information is used to understand the starting context of the learner's pro
 
 ---
 
+## 3.5 Internal Product Observation Derived Information
+
+InnerMirror may process a limited set of internal Product Observation information
+to review whether the service structure and continuity experience are functioning
+as intended.
+
+Product Observation is used for internal product and service review.
+
+It is not a learner evaluation or ranking system.
+
+Product Observation may include internal representations such as:
+
+```text
+pseudonymous subjectRef
+
+evidence references
+
+Derived Observations
+
+Growth Trace recomputation results
+
+Cohort recomputation results
+
+Service Review Signals
+```
+
+Where practical for the approved Product Observation purpose, InnerMirror uses
+the pseudonymous internal reference `subjectRef` rather than requiring direct
+learner account identity on the normal internal Admin read surface.
+
+Product Observation is not used in the current MVP to create:
+
+```text
+learner scores
+
+learner rankings
+
+Growth Scores
+
+mastery scores
+
+risk scores
+
+ability scores
+
+performance scores
+
+behavior scores
+
+personality or psychological inferences
+```
+
+The current Product Observation Admin is an internal restricted read-only
+surface.
+
+Raw Reflection and Raw Question are not exposed by default through that Admin
+surface.
+
+User-linkable Product Observation information follows the InnerMirror
+service-data deletion lifecycle described in this Privacy Policy.
+
+---
+
 # 4. Purpose of Processing
 
 InnerMirror processes personal information for the following purposes:
@@ -179,7 +242,8 @@ InnerMirror processes personal information for the following purposes:
 - learning journey continuity,
 - learner-requested analysis,
 - service security,
-- account deletion and privacy-right handling.
+- account deletion and privacy-right handling,
+- limited internal Product Observation for service quality and structural review.
 
 Personal information is not used beyond the purposes reasonably necessary to provide the service unless a separate lawful basis exists.
 
@@ -244,29 +308,66 @@ The three-year period is an InnerMirror service policy and is not represented as
 
 # 8. User-Requested Deletion
 
-A learner may request complete deletion of their InnerMirror data.
+A learner may use the current:
 
-The current MVP policy treats the learner's InnerMirror history as one continuous ownership domain.
+```text
+Delete InnerMirror Data
+```
 
-A complete deletion request is intended to remove InnerMirror-held records including:
+function to delete the InnerMirror service data covered by the current MVP
+deletion contract.
 
-- learner identity records maintained by InnerMirror,
-- Reflection,
-- Project records,
-- Learning Journey,
-- Project History,
-- GitHub connection metadata retained by InnerMirror,
-- Runtime-derived learner records that are retained by InnerMirror.
+The current operation deletes:
 
-The current MVP does not intend to provide selective deletion by:
+```text
+Projects
 
-- individual Reflection,
-- project,
-- repository,
-- date range,
-- or analysis type.
+Reflections
 
-Where deletion is required, InnerMirror will use deletion procedures designed so that information is not ordinarily recoverable or reproducible through the service.
+Project Events
+
+Policy Acceptance records
+```
+
+User-linkable Product Observation derived information and the associated
+Product Observation subject mapping are also removed according to the current
+service-data deletion architecture.
+
+The current `Delete InnerMirror Data` function is not full login-account
+deletion.
+
+The following may remain after the service-data deletion operation:
+
+```text
+Supabase Auth user
+
+InnerMirror Profile
+
+GitHub account
+```
+
+If deletion of the login account itself is required, the learner may contact
+InnerMirror through the service contact channel.
+
+The current MVP does not provide selective deletion by:
+
+```text
+individual Reflection
+
+project
+
+repository
+
+date range
+
+analysis type
+```
+
+Deleting InnerMirror service data does not delete data independently held by
+GitHub.
+
+After deletion of the Product Observation subject mapping, a future new
+Product Observation lifecycle may receive a new `subjectRef`.
 
 ---
 
@@ -332,54 +433,81 @@ InnerMirror will update this Privacy Policy to reflect the actual production arc
 
 # 13. International Data Transfers
 
-The final international-transfer configuration has not yet been completed.
+The current production architecture has been reviewed for its principal
+processing locations and external infrastructure relationships.
 
-Current status:
+The canonical learner database and primary Runtime workloads are configured in
+Seoul, Republic of Korea.
+
+However, some processing or technical information may be handled internationally
+through services including:
 
 ```text
-UNDER REVIEW
+GitHub
+
+Vercel
+
+some Google Cloud management services
+
+provider and subprocessor support operations
 ```
 
-Before production storage of long-term learner records is enabled,
-InnerMirror will review:
+The service must not be represented as if all information remains exclusively
+within the Republic of Korea.
 
-- Supabase production region,
-- hosting region,
-- Runtime hosting location,
-- GitHub-related processing,
-- other infrastructure providers,
-- and whether personal information is transferred, stored, or processed outside the Republic of Korea.
-
-Where required, the Privacy Policy and user notices will be updated before such processing is activated.
+Where required, international processing and transfer information is disclosed
+through the applicable production privacy notice and related service-provider
+information.
 
 ---
 
 # 14. Current Supabase Status
 
-The current MVP uses Supabase for authentication.
+The current production MVP uses Supabase for authentication and canonical
+InnerMirror application persistence.
 
-Long-term application database persistence is not yet considered production-ready.
-
-Current status:
+Current production status:
 
 ```text
 Supabase Auth
 IMPLEMENTED
 
-Long-Term Learner Database
-NOT YET PRODUCTION READY
+Production Learner Database
+IMPLEMENTED
 
 Production RLS
-NOT YET VERIFIED
+VERIFIED
 
-Production Retention Automation
-NOT YET IMPLEMENTED
+Production Reflection Persistence
+IMPLEMENTED
 
-Production Account Deletion
-NOT YET IMPLEMENTED
+Production Service Data Deletion
+IMPLEMENTED
+
+Production Product Observation Persistence
+IMPLEMENTED
 ```
 
-Legacy or experimental Supabase data created before the InnerMirror production service is treated as test data and may be deleted during production initialization.
+The canonical production project is separate from development and integration
+projects.
+
+The current `Delete InnerMirror Data` operation deletes the InnerMirror service
+data described in this policy.
+
+It does not itself delete:
+
+```text
+Supabase Auth user
+
+InnerMirror Profile
+
+GitHub account
+```
+
+Account deletion remains a separate request process where required.
+
+Production learner persistence must not silently fall back to local JSONL,
+temporary browser storage, or non-canonical development persistence.
 
 ---
 
